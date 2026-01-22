@@ -1,0 +1,3 @@
+{
+  "extends": "@medi-order/config/tsconfig.base.json"
+}
