@@ -14,6 +14,16 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import {
+  Page,
+  PageHeader,
+  PageHeaderTrigger,
+  PageHeaderContent,
+  PageHeaderTitle,
+  PageHeaderDescription,
+  PageContent,
+  PageContentInner,
+} from "@/components/ui/page";
+import {
   Empty,
   EmptyHeader,
   EmptyMedia,
@@ -140,18 +150,18 @@ function ReportsPage() {
 
   if (orders.length === 0) {
     return (
-      <div className="flex flex-col h-full w-full" dir="rtl">
-        <div className="flex-1 flex flex-col min-h-0 container mx-auto px-4 py-8 max-w-7xl">
-          <div className="mb-8 shrink-0">
-            <h1 className="text-4xl font-bold text-foreground mb-2">
-              التقارير والإحصائيات
-            </h1>
-            <p className="text-muted-foreground">
+      <Page>
+        <PageHeader>
+          <PageHeaderTrigger />
+          <PageHeaderContent>
+            <PageHeaderTitle>التقارير والإحصائيات</PageHeaderTitle>
+            <PageHeaderDescription>
               تحليل شامل لأداء الطلبات الخاصة
-            </p>
-          </div>
-
-          <div className="flex-1 flex items-center justify-center">
+            </PageHeaderDescription>
+          </PageHeaderContent>
+        </PageHeader>
+        <PageContent>
+          <PageContentInner className="flex-1 flex items-center justify-center">
             <Empty className="border-2 border-dashed rounded-lg p-8">
               <EmptyHeader>
                 <EmptyMedia variant="icon">
@@ -163,26 +173,26 @@ function ReportsPage() {
                 </EmptyDescription>
               </EmptyHeader>
             </Empty>
-          </div>
-        </div>
-      </div>
+          </PageContentInner>
+        </PageContent>
+      </Page>
     );
   }
 
   return (
-    <div className="flex flex-col h-full w-full" dir="rtl">
-      <div className="flex-1 flex flex-col min-h-0 overflow-y-auto">
-        <div className="container mx-auto px-4 py-8 max-w-7xl">
-          {/* الرأس */}
-          <div className="mb-8 border-b-2 border-dashed pb-6">
-            <h1 className="text-4xl font-bold text-foreground mb-2">
-              التقارير والإحصائيات
-            </h1>
-            <p className="text-muted-foreground">
-              تحليل شامل لأداء الطلبات الخاصة
-            </p>
-          </div>
+    <Page>
+      <PageHeader>
+        <PageHeaderTrigger />
+        <PageHeaderContent>
+          <PageHeaderTitle>التقارير والإحصائيات</PageHeaderTitle>
+          <PageHeaderDescription>
+            تحليل شامل لأداء الطلبات الخاصة
+          </PageHeaderDescription>
+        </PageHeaderContent>
+      </PageHeader>
 
+      <PageContent>
+        <PageContentInner>
           {/* الإحصائيات الرئيسية */}
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4 mb-8">
             <Card>
@@ -480,9 +490,9 @@ function ReportsPage() {
               </div>
             </CardContent>
           </Card>
-        </div>
-      </div>
-    </div>
+        </PageContentInner>
+      </PageContent>
+    </Page>
   );
 }
 
