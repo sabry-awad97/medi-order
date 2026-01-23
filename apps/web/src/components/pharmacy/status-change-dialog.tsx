@@ -53,7 +53,7 @@ export function StatusChangeDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-md">
+      <DialogContent className="max-w-2xl">
         <DialogHeader>
           <DialogTitle className="text-xl">تغيير حالة الطلب</DialogTitle>
           <DialogDescription>
@@ -75,6 +75,12 @@ export function StatusChangeDialog({
           <div className="space-y-2">
             <Label htmlFor="newStatus">الحالة الجديدة *</Label>
             <Select
+              items={Object.entries(ORDER_STATUS_CONFIG).map(
+                ([status, config]) => ({
+                  value: status,
+                  label: config.label,
+                }),
+              )}
               value={selectedStatus}
               onValueChange={(value) => setSelectedStatus(value as OrderStatus)}
             >
