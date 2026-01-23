@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { renderWithRouter } from "@/test/utils";
+import { render } from "@/test/utils";
 import { mockOrders, mockSettings } from "@/test/mockData";
 import type { UseMutationResult, UseQueryResult } from "@tanstack/react-query";
 import type { Order, OrderFormData } from "@/lib/types";
@@ -20,7 +20,16 @@ vi.mock("@/hooks", () => ({
 }));
 
 // Import after mocking
-import { useOrders, useCreateOrder, useSettings } from "@/hooks";
+import {
+  useOrders,
+  useCreateOrder,
+  useSettings,
+  useSeedData,
+  useClearData,
+  useOrderAlerts,
+} from "@/hooks";
+
+// Import the component function directly
 import { Route } from "@/routes/pharmacy";
 
 const PharmacyComponent = Route.options.component!;
@@ -31,8 +40,21 @@ describe("Pharmacy Page", () => {
     isPending: false,
   } as unknown as UseMutationResult<Order, Error, OrderFormData>;
 
+  const mockSeedData = {
+    mutate: vi.fn(),
+    isPending: false,
+  } as any;
+
+  const mockClearData = {
+    mutate: vi.fn(),
+    isPending: false,
+  } as any;
+
   beforeEach(() => {
     vi.clearAllMocks();
+
+    // Mock useOrderAlerts to do nothing
+    vi.mocked(useOrderAlerts).mockReturnValue(undefined);
 
     vi.mocked(useSettings).mockReturnValue({
       data: mockSettings,
@@ -40,6 +62,8 @@ describe("Pharmacy Page", () => {
     } as unknown as UseQueryResult<Settings, Error>);
 
     vi.mocked(useCreateOrder).mockReturnValue(mockCreateOrder);
+    vi.mocked(useSeedData).mockReturnValue(mockSeedData);
+    vi.mocked(useClearData).mockReturnValue(mockClearData);
   });
 
   it("should display loading state", () => {
@@ -48,12 +72,18 @@ describe("Pharmacy Page", () => {
       isLoading: true,
     } as unknown as UseQueryResult<Order[], Error>);
 
-    renderWithRouter(<PharmacyComponent />);
+    render(<PharmacyComponent />);
 
     expect(screen.getByText(/جاري تحميل الطلبات/)).toBeInTheDocument();
   });
 
   it("should display orders list", async () => {
+    // Override settings to not filter by default
+    vi.mocked(useSettings).mockReturnValue({
+      data: { ...mockSettings, defaultOrderStatus: null },
+      isLoading: false,
+    } as unknown as UseQueryResult<Settings, Error>);
+
     vi.mocked(useOrders).mockReturnValue({
       data: mockOrders,
       isLoading: false,
@@ -63,7 +93,7 @@ describe("Pharmacy Page", () => {
       refetch: vi.fn(),
     } as unknown as UseQueryResult<Order[], Error>);
 
-    renderWithRouter(<PharmacyComponent />);
+    render(<PharmacyComponent />);
 
     await waitFor(() => {
       expect(screen.getByText("أحمد محمد")).toBeInTheDocument();
@@ -72,6 +102,12 @@ describe("Pharmacy Page", () => {
   });
 
   it("should display empty state when no orders", () => {
+    // Override settings to not filter by default
+    vi.mocked(useSettings).mockReturnValue({
+      data: { ...mockSettings, defaultOrderStatus: null },
+      isLoading: false,
+    } as unknown as UseQueryResult<Settings, Error>);
+
     vi.mocked(useOrders).mockReturnValue({
       data: [],
       isLoading: false,
@@ -81,7 +117,7 @@ describe("Pharmacy Page", () => {
       refetch: vi.fn(),
     } as unknown as UseQueryResult<Order[], Error>);
 
-    renderWithRouter(<PharmacyComponent />);
+    render(<PharmacyComponent />);
 
     expect(screen.getByText(/لا توجد طلبات/)).toBeInTheDocument();
     expect(screen.getByText(/ابدأ بإضافة طلب جديد/)).toBeInTheDocument();
@@ -97,7 +133,7 @@ describe("Pharmacy Page", () => {
       refetch: vi.fn(),
     } as unknown as UseQueryResult<Order[], Error>);
 
-    renderWithRouter(<PharmacyComponent />);
+    render(<PharmacyComponent />);
 
     await waitFor(() => {
       expect(screen.getByText("إجمالي الطلبات")).toBeInTheDocument();
@@ -119,7 +155,7 @@ describe("Pharmacy Page", () => {
       refetch: vi.fn(),
     } as unknown as UseQueryResult<Order[], Error>);
 
-    renderWithRouter(<PharmacyComponent />);
+    render(<PharmacyComponent />);
 
     const addButton = screen.getByText("إضافة طلب جديد");
     await user.click(addButton);
@@ -142,7 +178,7 @@ describe("Pharmacy Page", () => {
       refetch: vi.fn(),
     } as unknown as UseQueryResult<Order[], Error>);
 
-    renderWithRouter(<PharmacyComponent />);
+    render(<PharmacyComponent />);
 
     const searchInput = screen.getByPlaceholderText(
       /ابحث باسم العميل أو الدواء/,
@@ -158,6 +194,12 @@ describe("Pharmacy Page", () => {
   it("should filter orders by status", async () => {
     const user = userEvent.setup();
 
+    // Override settings to not filter by default
+    vi.mocked(useSettings).mockReturnValue({
+      data: { ...mockSettings, defaultOrderStatus: null },
+      isLoading: false,
+    } as unknown as UseQueryResult<Settings, Error>);
+
     vi.mocked(useOrders).mockReturnValue({
       data: mockOrders,
       isLoading: false,
@@ -167,7 +209,7 @@ describe("Pharmacy Page", () => {
       refetch: vi.fn(),
     } as unknown as UseQueryResult<Order[], Error>);
 
-    renderWithRouter(<PharmacyComponent />);
+    render(<PharmacyComponent />);
 
     // Find the select trigger button
     const selectTrigger = screen.getByText("تصفية حسب الحالة");
@@ -212,7 +254,7 @@ describe("Pharmacy Page", () => {
       refetch: vi.fn(),
     } as unknown as UseQueryResult<Order[], Error>);
 
-    renderWithRouter(<PharmacyComponent />);
+    render(<PharmacyComponent />);
 
     expect(screen.getByText(/بيانات تجريبية/)).toBeInTheDocument();
     expect(screen.getByText(/حذف الكل/)).toBeInTheDocument();
@@ -237,7 +279,7 @@ describe("Pharmacy Page", () => {
       refetch: vi.fn(),
     } as unknown as UseQueryResult<Order[], Error>);
 
-    renderWithRouter(<PharmacyComponent />);
+    render(<PharmacyComponent />);
 
     expect(screen.queryByText(/بيانات تجريبية/)).not.toBeInTheDocument();
   });

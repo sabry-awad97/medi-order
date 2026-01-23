@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { renderWithRouter } from "@/test/utils";
+import { render } from "@/test/utils";
 import { mockSuppliers, mockSettings } from "@/test/mockData";
 import type { UseQueryResult } from "@tanstack/react-query";
 import type { Supplier } from "@/lib/types";
@@ -49,7 +49,7 @@ describe("Suppliers Page", () => {
       isLoading: true,
     } as unknown as UseQueryResult<Supplier[], Error>);
 
-    renderWithRouter(<SuppliersPage />);
+    render(<SuppliersPage />);
 
     expect(screen.getByText(/جاري تحميل الموردين/)).toBeInTheDocument();
   });
@@ -60,7 +60,7 @@ describe("Suppliers Page", () => {
       isLoading: false,
     } as unknown as UseQueryResult<Supplier[], Error>);
 
-    renderWithRouter(<SuppliersPage />);
+    render(<SuppliersPage />);
 
     await waitFor(() => {
       expect(screen.getByText("شركة الدواء المتحدة")).toBeInTheDocument();
@@ -74,7 +74,7 @@ describe("Suppliers Page", () => {
       isLoading: false,
     } as unknown as UseQueryResult<Supplier[], Error>);
 
-    renderWithRouter(<SuppliersPage />);
+    render(<SuppliersPage />);
 
     expect(screen.getByText(/لا يوجد موردين/)).toBeInTheDocument();
   });
@@ -85,7 +85,7 @@ describe("Suppliers Page", () => {
       isLoading: false,
     } as unknown as UseQueryResult<Supplier[], Error>);
 
-    renderWithRouter(<SuppliersPage />);
+    render(<SuppliersPage />);
 
     await waitFor(() => {
       expect(screen.getByText("إجمالي الموردين")).toBeInTheDocument();
@@ -101,7 +101,7 @@ describe("Suppliers Page", () => {
       isLoading: false,
     } as unknown as UseQueryResult<Supplier[], Error>);
 
-    renderWithRouter(<SuppliersPage />);
+    render(<SuppliersPage />);
 
     const searchInput = screen.getByPlaceholderText(
       /ابحث باسم المورد أو رقم الهاتف أو الدواء/,

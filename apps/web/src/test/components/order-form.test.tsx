@@ -61,7 +61,7 @@ describe("OrderForm", () => {
     await user.type(concentrationInputs[0], "500mg");
 
     // Submit form - find by text instead of role
-    const submitButton = screen.getByText(/إضافة الطلب/);
+    const submitButton = screen.getByText(/حفظ الطلب/);
     await user.click(submitButton);
 
     await waitFor(() => {
@@ -126,10 +126,26 @@ describe("OrderForm", () => {
 
   it("should show validation errors for required fields", async () => {
     const user = userEvent.setup();
-    render(<OrderForm {...defaultProps} />);
+    const mockOnSubmit = vi.fn();
+    const mockOnOpenChange = vi.fn();
+
+    render(
+      <OrderForm
+        open={true}
+        onOpenChange={mockOnOpenChange}
+        onSubmit={mockOnSubmit}
+        mode="create"
+      />,
+    );
+
+    // Clear any pre-filled values
+    const nameInput = screen.getByLabelText(/اسم العميل/);
+    const phoneInput = screen.getByLabelText(/رقم الهاتف/);
+    await user.clear(nameInput);
+    await user.clear(phoneInput);
 
     // Try to submit without filling required fields - find by text
-    const submitButton = screen.getByText(/إضافة الطلب/);
+    const submitButton = screen.getByText(/حفظ الطلب/);
     await user.click(submitButton);
 
     // Form should not be submitted
