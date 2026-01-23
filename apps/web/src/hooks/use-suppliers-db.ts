@@ -17,6 +17,7 @@ import {
   type SupplierFormData,
 } from "@/lib/types";
 import { queryClient } from "@/lib/query-client";
+import { logger } from "@/lib/logger";
 
 // ============================================================================
 // QUERY KEYS
@@ -223,7 +224,7 @@ export function useCreateSupplier() {
         suppliersCollection.insert(newSupplier);
         options?.onSuccess?.();
       } catch (error) {
-        console.error("Error creating supplier:", error);
+        logger.error("Error creating supplier:", error);
         if (error instanceof z.ZodError) {
           const firstError = error.issues[0];
           toast.error(`خطأ في التحقق: ${firstError.message}`);
@@ -269,7 +270,7 @@ export function useUpdateSupplier() {
 
         options?.onSuccess?.();
       } catch (error) {
-        console.error("Error updating supplier:", error);
+        logger.error("Error updating supplier:", error);
         if (error instanceof z.ZodError) {
           const firstError = error.issues[0];
           toast.error(`خطأ في التحقق: ${firstError.message}`);
@@ -292,7 +293,7 @@ export function useDeleteSupplier() {
         suppliersCollection.delete(id);
         options?.onSuccess?.();
       } catch (error) {
-        console.error("Error deleting supplier:", error);
+        logger.error("Error deleting supplier:", error);
         toast.error("فشل في حذف المورد");
         throw error;
       }

@@ -21,6 +21,7 @@ import {
   type Settings,
   type PartialSettings,
 } from "@/lib/types-settings";
+import { logger } from "@/lib/logger";
 
 // ============================================================================
 // TYPES
@@ -51,7 +52,7 @@ async function fetchSettings(): Promise<SettingItem[]> {
 
     return settings;
   } catch (error) {
-    console.error("Error fetching settings:", error);
+    logger.error("Error fetching settings:", error);
     return [];
   }
 }
@@ -144,7 +145,7 @@ export function useSettings() {
     try {
       return SettingsSchema.parse(merged);
     } catch (error) {
-      console.error("Settings validation error:", error);
+      logger.error("Settings validation error:", error);
       // إرجاع القيم الافتراضية في حالة فشل التحقق
       return SettingsSchema.parse(defaults);
     }
@@ -221,7 +222,7 @@ export function useUpdateSetting() {
         toast.success("تم حفظ الإعداد بنجاح");
         options?.onSuccess?.();
       } catch (error) {
-        console.error("Error updating setting:", error);
+        logger.error("Error updating setting:", error);
         toast.error(
           error instanceof Error ? error.message : "فشل في حفظ الإعداد",
         );
@@ -259,7 +260,7 @@ export function useUpdateSettings() {
         toast.success("تم حفظ الإعدادات بنجاح");
         options?.onSuccess?.();
       } catch (error) {
-        console.error("Error updating settings:", error);
+        logger.error("Error updating settings:", error);
         if (error instanceof z.ZodError) {
           const firstError = error.issues[0];
           toast.error(`خطأ في التحقق: ${firstError.message}`);
@@ -302,7 +303,7 @@ export function useResetSettings() {
         toast.success("تم إعادة تعيين الإعدادات إلى القيم الافتراضية");
         options?.onSuccess?.();
       } catch (error) {
-        console.error("Error resetting settings:", error);
+        logger.error("Error resetting settings:", error);
         toast.error("فشل في إعادة تعيين الإعدادات");
         options?.onError?.(error as Error);
       }
@@ -333,7 +334,7 @@ export function useExportSettings() {
         toast.success("تم تصدير الإعدادات بنجاح");
         options?.onSuccess?.();
       } catch (error) {
-        console.error("Error exporting settings:", error);
+        logger.error("Error exporting settings:", error);
         toast.error("فشل في تصدير الإعدادات");
         options?.onError?.(error as Error);
       }
@@ -384,7 +385,7 @@ export function useImportSettings() {
         toast.success("تم استيراد الإعدادات بنجاح");
         options?.onSuccess?.();
       } catch (error) {
-        console.error("Error importing settings:", error);
+        logger.error("Error importing settings:", error);
         if (error instanceof z.ZodError) {
           const firstError = error.issues[0];
           toast.error(`خطأ في التحقق: ${firstError.message}`);

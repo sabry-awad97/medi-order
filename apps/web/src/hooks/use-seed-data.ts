@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { toast } from "sonner";
+import { logger } from "@/lib/logger";
 import { generateSeedOrders, generateSeedSuppliers } from "@/lib/seed-data";
 import { ordersCollection } from "./use-orders-db";
 import { suppliersCollection } from "./use-suppliers-db";
@@ -35,7 +36,7 @@ export function useSeedData() {
         );
         options?.onSuccess?.();
       } catch (error) {
-        console.error("Error seeding data:", error);
+        logger.error("Error seeding data:", error);
         toast.error("فشل في إضافة البيانات التجريبية");
         options?.onError?.(error as Error);
       } finally {
@@ -94,7 +95,7 @@ export function useClearData() {
         );
         options?.onSuccess?.();
       } catch (error) {
-        console.error("Error clearing data:", error);
+        logger.error("Error clearing data:", error);
         toast.error("فشل في حذف البيانات");
         options?.onError?.(error as Error);
       } finally {

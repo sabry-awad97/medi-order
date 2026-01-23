@@ -17,6 +17,7 @@ import { createCollection, eq, useLiveQuery } from "@tanstack/react-db";
 import { useMemo } from "react";
 import { toast } from "sonner";
 import { z } from "zod";
+import { logger } from "@/lib/logger";
 
 // ============================================================================
 // API FUNCTIONS
@@ -42,7 +43,7 @@ async function fetchOrders(): Promise<Order[]> {
 
     return orders.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
   } catch (error) {
-    console.error("Error fetching orders:", error);
+    logger.error("Error fetching orders:", error);
     return [];
   }
 }
@@ -298,7 +299,7 @@ export function useCreateOrder() {
         options?.onSuccess?.(validatedOrder);
         return validatedOrder;
       } catch (error) {
-        console.error("Error creating order:", error);
+        logger.error("Error creating order:", error);
         if (error instanceof z.ZodError) {
           const firstError = error.issues[0];
           toast.error(`خطأ في التحقق: ${firstError.message}`);
@@ -341,7 +342,7 @@ export function useUpdateOrder() {
         queryClient.invalidateQueries({ queryKey: ["orders", id] });
         options?.onSuccess?.();
       } catch (error) {
-        console.error("Error updating order:", error);
+        logger.error("Error updating order:", error);
         if (error instanceof z.ZodError) {
           const firstError = error.issues[0];
           toast.error(`خطأ في التحقق: ${firstError.message}`);
@@ -377,7 +378,7 @@ export function useUpdateOrderStatus() {
         queryClient.invalidateQueries({ queryKey: ["orders", id] });
         options?.onSuccess?.();
       } catch (error) {
-        console.error("Error updating order status:", error);
+        logger.error("Error updating order status:", error);
         if (error instanceof z.ZodError) {
           const firstError = error.issues[0];
           toast.error(`خطأ في التحقق: ${firstError.message}`);
@@ -400,7 +401,7 @@ export function useDeleteOrder() {
         ordersCollection.delete(id);
         options?.onSuccess?.();
       } catch (error) {
-        console.error("Error deleting order:", error);
+        logger.error("Error deleting order:", error);
         toast.error("فشل في حذف الطلب");
         throw error;
       }

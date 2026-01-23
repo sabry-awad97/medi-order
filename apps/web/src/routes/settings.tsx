@@ -368,7 +368,7 @@ function SettingField({ setting, value, onChange }: SettingFieldProps) {
         );
 
       case "multiselect":
-        // TODO: Implement multiselect component
+        // Multiselect component - قيد التطوير
         return (
           <div className="text-sm text-muted-foreground">
             متعدد الاختيار (قيد التطوير)

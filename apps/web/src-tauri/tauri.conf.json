@@ -1,8 +1,8 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
   "productName": "medi-order",
-  "version": "0.1.0",
-  "identifier": "com.tauri.dev",
+  "version": "1.0.0",
+  "identifier": "com.pharmacy.mediorder",
   "build": {
     "frontendDist": "../dist",
     "devUrl": "http://localhost:3001",
@@ -12,11 +12,14 @@
   "app": {
     "windows": [
       {
-        "title": "medi-order",
-        "width": 800,
-        "height": 600,
+        "title": "نظام إدارة الطلبات الخاصة",
+        "width": 1280,
+        "height": 800,
+        "minWidth": 1024,
+        "minHeight": 600,
         "resizable": true,
-        "fullscreen": false
+        "fullscreen": false,
+        "center": true
       }
     ],
     "security": {
