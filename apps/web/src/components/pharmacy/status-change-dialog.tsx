@@ -53,15 +53,17 @@ export function StatusChangeDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl">
-        <DialogHeader>
-          <DialogTitle className="text-xl">تغيير حالة الطلب</DialogTitle>
-          <DialogDescription>
-            اختر الحالة الجديدة للطلب الخاص بـ {order.customerName}
-          </DialogDescription>
-        </DialogHeader>
+      <DialogContent className="sm:max-w-3xl h-[90vh] flex flex-col p-0">
+        <div className="p-4 border-b shrink-0">
+          <DialogHeader>
+            <DialogTitle className="text-2xl">تغيير حالة الطلب</DialogTitle>
+            <DialogDescription>
+              اختر الحالة الجديدة للطلب الخاص بـ {order.customerName}
+            </DialogDescription>
+          </DialogHeader>
+        </div>
 
-        <div className="space-y-4 py-4">
+        <div className="flex-1 overflow-y-auto p-6 space-y-4">
           <div className="space-y-2">
             <Label>الحالة الحالية</Label>
             <div className="p-3 rounded-lg bg-muted/50 flex items-center justify-between">
@@ -109,19 +111,21 @@ export function StatusChangeDialog({
           </div>
         </div>
 
-        <DialogFooter className="gap-2">
-          <Button variant="outline" onClick={handleClose}>
-            إلغاء
-          </Button>
-          <Button
-            onClick={handleConfirm}
-            disabled={!selectedStatus}
-            className="gap-2"
-          >
-            <CheckCircle2 className="h-4 w-4" />
-            تأكيد التغيير
-          </Button>
-        </DialogFooter>
+        <div className="p-4 border-t shrink-0">
+          <DialogFooter className="gap-2">
+            <Button variant="outline" onClick={handleClose}>
+              إلغاء
+            </Button>
+            <Button
+              onClick={handleConfirm}
+              disabled={!selectedStatus}
+              className="gap-2"
+            >
+              <CheckCircle2 className="h-4 w-4" />
+              تأكيد التغيير
+            </Button>
+          </DialogFooter>
+        </div>
       </DialogContent>
     </Dialog>
   );

@@ -501,48 +501,84 @@ function SupplierFormDialog({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent
-        className="max-w-2xl max-h-[90vh] overflow-y-auto"
+        className="sm:max-w-3xl h-[90vh] flex flex-col p-0"
         dir="rtl"
       >
-        <DialogHeader>
-          <DialogTitle className="text-2xl">
-            {mode === "create" ? "إضافة مورد جديد" : "تعديل المورد"}
-          </DialogTitle>
-        </DialogHeader>
+        <div className="p-4 border-b shrink-0">
+          <DialogHeader>
+            <DialogTitle className="text-2xl">
+              {mode === "create" ? "إضافة مورد جديد" : "تعديل المورد"}
+            </DialogTitle>
+          </DialogHeader>
+        </div>
 
-        <form onSubmit={handleSubmit} className="space-y-6">
-          {/* معلومات أساسية */}
-          <div className="space-y-4">
-            <h3 className="font-semibold text-lg">المعلومات الأساسية</h3>
+        <form onSubmit={handleSubmit} className="flex-1 flex flex-col min-h-0">
+          <div className="flex-1 overflow-y-auto p-6 space-y-6">
+            {/* معلومات أساسية */}
+            <div className="space-y-4">
+              <h3 className="font-semibold text-lg">المعلومات الأساسية</h3>
 
-            <div>
-              <label className="block text-sm font-medium mb-2">
-                اسم المورد <span className="text-destructive">*</span>
-              </label>
-              <Input
-                required
-                value={formData.name}
-                onChange={(e) =>
-                  setFormData({ ...formData, name: e.target.value })
-                }
-                placeholder="مثال: شركة الدواء المتحدة"
-                className="text-right"
-              />
-            </div>
-
-            <div className="grid grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium mb-2">
-                  رقم الهاتف <span className="text-destructive">*</span>
+                  اسم المورد <span className="text-destructive">*</span>
                 </label>
                 <Input
                   required
-                  type="tel"
-                  value={formData.phone}
+                  value={formData.name}
                   onChange={(e) =>
-                    setFormData({ ...formData, phone: e.target.value })
+                    setFormData({ ...formData, name: e.target.value })
                   }
-                  placeholder="05xxxxxxxx"
+                  placeholder="مثال: شركة الدواء المتحدة"
+                  className="text-right"
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium mb-2">
+                    رقم الهاتف <span className="text-destructive">*</span>
+                  </label>
+                  <Input
+                    required
+                    type="tel"
+                    value={formData.phone}
+                    onChange={(e) =>
+                      setFormData({ ...formData, phone: e.target.value })
+                    }
+                    placeholder="05xxxxxxxx"
+                    className="text-right"
+                    dir="ltr"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium mb-2">
+                    واتساب (اختياري)
+                  </label>
+                  <Input
+                    type="tel"
+                    value={formData.whatsapp}
+                    onChange={(e) =>
+                      setFormData({ ...formData, whatsapp: e.target.value })
+                    }
+                    placeholder="05xxxxxxxx"
+                    className="text-right"
+                    dir="ltr"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium mb-2">
+                  البريد الإلكتروني (اختياري)
+                </label>
+                <Input
+                  type="email"
+                  value={formData.email}
+                  onChange={(e) =>
+                    setFormData({ ...formData, email: e.target.value })
+                  }
+                  placeholder="example@company.com"
                   className="text-right"
                   dir="ltr"
                 />
@@ -550,124 +586,94 @@ function SupplierFormDialog({
 
               <div>
                 <label className="block text-sm font-medium mb-2">
-                  واتساب (اختياري)
+                  العنوان (اختياري)
                 </label>
                 <Input
-                  type="tel"
-                  value={formData.whatsapp}
+                  value={formData.address}
                   onChange={(e) =>
-                    setFormData({ ...formData, whatsapp: e.target.value })
+                    setFormData({ ...formData, address: e.target.value })
                   }
-                  placeholder="05xxxxxxxx"
+                  placeholder="الرياض، حي النخيل"
                   className="text-right"
-                  dir="ltr"
                 />
               </div>
             </div>
 
-            <div>
-              <label className="block text-sm font-medium mb-2">
-                البريد الإلكتروني (اختياري)
-              </label>
-              <Input
-                type="email"
-                value={formData.email}
-                onChange={(e) =>
-                  setFormData({ ...formData, email: e.target.value })
-                }
-                placeholder="example@company.com"
-                className="text-right"
-                dir="ltr"
-              />
-            </div>
+            {/* الأدوية المتوفرة */}
+            <div className="space-y-4">
+              <h3 className="font-semibold text-lg">الأدوية المتوفرة</h3>
 
-            <div>
-              <label className="block text-sm font-medium mb-2">
-                العنوان (اختياري)
-              </label>
-              <Input
-                value={formData.address}
-                onChange={(e) =>
-                  setFormData({ ...formData, address: e.target.value })
-                }
-                placeholder="الرياض، حي النخيل"
-                className="text-right"
-              />
-            </div>
-          </div>
-
-          {/* الأدوية المتوفرة */}
-          <div className="space-y-4">
-            <h3 className="font-semibold text-lg">الأدوية المتوفرة</h3>
-
-            <div className="flex gap-2">
-              <Input
-                value={medicineInput}
-                onChange={(e) => setMedicineInput(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter") {
-                    e.preventDefault();
-                    handleAddMedicine();
-                  }
-                }}
-                placeholder="اسم الدواء"
-                className="text-right flex-1"
-              />
-              <Button
-                type="button"
-                onClick={handleAddMedicine}
-                variant="outline"
-              >
-                <Plus className="h-4 w-4" />
-              </Button>
-            </div>
-
-            {formData.commonMedicines.length > 0 && (
-              <div className="flex flex-wrap gap-2">
-                {formData.commonMedicines.map((med, index) => (
-                  <Badge
-                    key={index}
-                    variant="secondary"
-                    className="gap-2 cursor-pointer hover:bg-destructive/10"
-                    onClick={() => handleRemoveMedicine(index)}
-                  >
-                    {med}
-                    <span className="text-destructive">×</span>
-                  </Badge>
-                ))}
+              <div className="flex gap-2">
+                <Input
+                  value={medicineInput}
+                  onChange={(e) => setMedicineInput(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") {
+                      e.preventDefault();
+                      handleAddMedicine();
+                    }
+                  }}
+                  placeholder="اسم الدواء"
+                  className="text-right flex-1"
+                />
+                <Button
+                  type="button"
+                  onClick={handleAddMedicine}
+                  variant="outline"
+                >
+                  <Plus className="h-4 w-4" />
+                </Button>
               </div>
-            )}
-          </div>
 
-          {/* ملاحظات */}
-          <div>
-            <label className="block text-sm font-medium mb-2">
-              ملاحظات (اختياري)
-            </label>
-            <textarea
-              value={formData.notes}
-              onChange={(e) =>
-                setFormData({ ...formData, notes: e.target.value })
-              }
-              placeholder="أي ملاحظات إضافية عن المورد..."
-              className="w-full min-h-[100px] px-3 py-2 text-sm rounded-md border border-input bg-background text-right resize-none"
-              dir="rtl"
-            />
+              {formData.commonMedicines.length > 0 && (
+                <div className="flex flex-wrap gap-2">
+                  {formData.commonMedicines.map((med, index) => (
+                    <Badge
+                      key={index}
+                      variant="secondary"
+                      className="gap-2 cursor-pointer hover:bg-destructive/10"
+                      onClick={() => handleRemoveMedicine(index)}
+                    >
+                      {med}
+                      <span className="text-destructive">×</span>
+                    </Badge>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* ملاحظات */}
+            <div>
+              <label className="block text-sm font-medium mb-2">
+                ملاحظات (اختياري)
+              </label>
+              <textarea
+                value={formData.notes}
+                onChange={(e) =>
+                  setFormData({ ...formData, notes: e.target.value })
+                }
+                placeholder="أي ملاحظات إضافية عن المورد..."
+                className="w-full min-h-[100px] px-3 py-2 text-sm rounded-md border border-input bg-background text-right resize-none"
+                dir="rtl"
+              />
+            </div>
           </div>
 
           {/* الأزرار */}
-          <div className="flex gap-3 pt-4">
-            <Button type="submit" className="flex-1">
-              {mode === "create" ? "إضافة المورد" : "حفظ التعديلات"}
-            </Button>
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => onOpenChange(false)}
-              className="flex-1"
-            >
-              إلغاء
-            </Button>
+          <div className="p-4 border-t shrink-0">
+            <div className="flex gap-3">
+              <Button type="submit" className="flex-1">
+                {mode === "create" ? "إضافة المورد" : "حفظ التعديلات"}
+              </Button>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => onOpenChange(false)}
+                className="flex-1"
+              >
+                إلغاء
+              </Button>
+            </div>
           </div>
         </form>
       </DialogContent>

@@ -29,13 +29,15 @@ export function OrderViewDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-4xl">
-        <DialogHeader>
-          <DialogTitle className="text-2xl">تفاصيل الطلب</DialogTitle>
-          <DialogDescription>معلومات كاملة عن الطلب</DialogDescription>
-        </DialogHeader>
+      <DialogContent className="sm:max-w-3xl h-[90vh] flex flex-col p-0">
+        <div className="p-4 border-b shrink-0">
+          <DialogHeader>
+            <DialogTitle className="text-2xl">تفاصيل الطلب</DialogTitle>
+            <DialogDescription>معلومات كاملة عن الطلب</DialogDescription>
+          </DialogHeader>
+        </div>
 
-        <div className="space-y-6">
+        <div className="flex-1 overflow-y-auto p-6 space-y-6">
           {/* معلومات العميل */}
           <div className="space-y-3">
             <h3 className="font-semibold text-lg flex items-center gap-2">
