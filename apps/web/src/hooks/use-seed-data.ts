@@ -1,75 +1,105 @@
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useState } from "react";
 import { toast } from "sonner";
-import db from "@/lib/db";
 import { generateSeedOrders, generateSeedSuppliers } from "@/lib/seed-data";
+import { ordersCollection } from "./use-orders-db";
+import { suppliersCollection } from "./use-suppliers-db";
 
 // Hook لإضافة بيانات تجريبية
 export function useSeedData() {
-  const queryClient = useQueryClient();
+  const [isPending, setIsPending] = useState(false);
 
-  return useMutation({
-    mutationFn: async () => {
-      // توليد البيانات
-      const orders = generateSeedOrders(15);
-      const suppliers = generateSeedSuppliers(8);
+  return {
+    isPending,
+    mutate: async (
+      _?: void,
+      options?: { onSuccess?: () => void; onError?: (error: Error) => void },
+    ) => {
+      setIsPending(true);
+      try {
+        // توليد البيانات
+        const orders = generateSeedOrders(15);
+        const suppliers = generateSeedSuppliers(8);
 
-      // إضافة الطلبات
-      for (const order of orders) {
-        await db.orders.create(order);
+        // إضافة الطلبات
+        for (const order of orders) {
+          ordersCollection.insert(order);
+        }
+
+        // إضافة الموردين
+        for (const supplier of suppliers) {
+          suppliersCollection.insert(supplier);
+        }
+
+        toast.success(
+          `تم إضافة ${orders.length} طلب و ${suppliers.length} مورد بنجاح`,
+        );
+        options?.onSuccess?.();
+      } catch (error) {
+        console.error("Error seeding data:", error);
+        toast.error("فشل في إضافة البيانات التجريبية");
+        options?.onError?.(error as Error);
+      } finally {
+        setIsPending(false);
       }
-
-      // إضافة الموردين
-      for (const supplier of suppliers) {
-        await db.suppliers.create(supplier);
-      }
-
-      return { ordersCount: orders.length, suppliersCount: suppliers.length };
     },
-    onSuccess: (data) => {
-      queryClient.invalidateQueries({ queryKey: ["orders"] });
-      queryClient.invalidateQueries({ queryKey: ["suppliers"] });
-      toast.success(
-        `تم إضافة ${data.ordersCount} طلب و ${data.suppliersCount} مورد بنجاح`,
-      );
-    },
-    onError: (error) => {
-      console.error("Error seeding data:", error);
-      toast.error("فشل في إضافة البيانات التجريبية");
-    },
-  });
+  };
 }
 
 // Hook لحذف جميع البيانات
 export function useClearData() {
-  const queryClient = useQueryClient();
+  const [isPending, setIsPending] = useState(false);
 
-  return useMutation({
-    mutationFn: async () => {
-      const orders = await db.orders.getAll();
-      const suppliers = await db.suppliers.getAll();
+  return {
+    isPending,
+    mutate: async (
+      _?: void,
+      options?: { onSuccess?: () => void; onError?: (error: Error) => void },
+    ) => {
+      setIsPending(true);
+      try {
+        // Get all data from IndexedDB
+        const { default: localforage } = await import("localforage");
 
-      // حذف جميع الطلبات
-      for (const order of orders) {
-        await db.orders.delete(order.id);
+        const ordersDB = localforage.createInstance({
+          name: "pharmacy-special-orders",
+          storeName: "orders",
+        });
+
+        const suppliersDB = localforage.createInstance({
+          name: "pharmacy-special-orders",
+          storeName: "suppliers",
+        });
+
+        // Count items before clearing
+        let ordersCount = 0;
+        let suppliersCount = 0;
+
+        await ordersDB.iterate(() => {
+          ordersCount++;
+        });
+
+        await suppliersDB.iterate(() => {
+          suppliersCount++;
+        });
+
+        // Clear all data
+        await ordersDB.clear();
+        await suppliersDB.clear();
+
+        // Note: Collections will automatically update when they detect the data is gone
+        // We could also manually delete from collections, but clearing IndexedDB is cleaner
+
+        toast.success(
+          `تم حذف ${ordersCount} طلب و ${suppliersCount} مورد بنجاح`,
+        );
+        options?.onSuccess?.();
+      } catch (error) {
+        console.error("Error clearing data:", error);
+        toast.error("فشل في حذف البيانات");
+        options?.onError?.(error as Error);
+      } finally {
+        setIsPending(false);
       }
-
-      // حذف جميع الموردين
-      for (const supplier of suppliers) {
-        await db.suppliers.delete(supplier.id);
-      }
-
-      return { ordersCount: orders.length, suppliersCount: suppliers.length };
     },
-    onSuccess: (data) => {
-      queryClient.invalidateQueries({ queryKey: ["orders"] });
-      queryClient.invalidateQueries({ queryKey: ["suppliers"] });
-      toast.success(
-        `تم حذف ${data.ordersCount} طلب و ${data.suppliersCount} مورد بنجاح`,
-      );
-    },
-    onError: (error) => {
-      console.error("Error clearing data:", error);
-      toast.error("فشل في حذف البيانات");
-    },
-  });
+  };
 }

@@ -159,24 +159,22 @@ function SuppliersPage() {
             <>
               <Button
                 onClick={() => seedData.mutate()}
-                disabled={seedData.isPending}
                 variant="outline"
                 size="lg"
                 className="gap-2"
               >
                 <Database className="h-5 w-5" />
-                {seedData.isPending ? "جاري الإضافة..." : "بيانات تجريبية"}
+                بيانات تجريبية
               </Button>
               {suppliers.length > 0 && (
                 <Button
                   onClick={() => clearData.mutate()}
-                  disabled={clearData.isPending}
                   variant="outline"
                   size="lg"
                   className="gap-2 text-destructive hover:text-destructive"
                 >
                   <Trash2 className="h-5 w-5" />
-                  {clearData.isPending ? "جاري الحذف..." : "حذف الكل"}
+                  حذف الكل
                 </Button>
               )}
             </>
