@@ -1,5 +1,6 @@
 import localforage from "localforage";
 import type { Order, Supplier } from "./types";
+import type { Setting } from "./types-settings";
 
 // إعداد قاعدة البيانات المحلية للطلبات
 const ordersDB = localforage.createInstance({
@@ -13,6 +14,13 @@ const suppliersDB = localforage.createInstance({
   name: "pharmacy-special-orders",
   storeName: "suppliers",
   description: "قاعدة بيانات الموردين",
+});
+
+// إعداد قاعدة البيانات المحلية للإعدادات
+const settingsDB = localforage.createInstance({
+  name: "pharmacy-special-orders",
+  storeName: "settings",
+  description: "قاعدة بيانات الإعدادات",
 });
 
 // دوال إدارة الطلبات
@@ -147,6 +155,56 @@ export const db = {
     // مسح جميع الموردين
     async clear(): Promise<void> {
       await suppliersDB.clear();
+    },
+  },
+
+  settings: {
+    // جلب جميع الإعدادات
+    async getAll(): Promise<Setting[]> {
+      const settings: Setting[] = [];
+      await settingsDB.iterate<Setting, void>((setting) => {
+        settings.push({
+          ...setting,
+          updatedAt: new Date(setting.updatedAt),
+        });
+      });
+      return settings;
+    },
+
+    // جلب قيمة إعداد واحد
+    async get(key: string): Promise<any | null> {
+      const setting = await settingsDB.getItem<Setting>(key);
+      return setting?.value ?? null;
+    },
+
+    // حفظ أو تحديث إعداد
+    async set(key: string, value: any): Promise<Setting> {
+      const setting: Setting = {
+        id: key,
+        key,
+        value,
+        updatedAt: new Date(),
+      };
+      await settingsDB.setItem(key, setting);
+      return setting;
+    },
+
+    // حفظ عدة إعدادات دفعة واحدة
+    async setMany(settings: Record<string, any>): Promise<void> {
+      const promises = Object.entries(settings).map(([key, value]) =>
+        this.set(key, value),
+      );
+      await Promise.all(promises);
+    },
+
+    // حذف إعداد
+    async delete(key: string): Promise<void> {
+      await settingsDB.removeItem(key);
+    },
+
+    // مسح جميع الإعدادات
+    async clear(): Promise<void> {
+      await settingsDB.clear();
     },
   },
 };

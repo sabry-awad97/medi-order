@@ -23,3 +23,14 @@ export { useOrderAlerts, useAlertStats } from "./use-order-alerts";
 
 // Hooks للبيانات التجريبية
 export { useSeedData, useClearData } from "./use-seed-data";
+
+// Hooks للإعدادات
+export {
+  useSettings,
+  useSetting,
+  useUpdateSetting,
+  useUpdateSettings,
+  useResetSettings,
+  useExportSettings,
+  useImportSettings,
+} from "./use-settings";
