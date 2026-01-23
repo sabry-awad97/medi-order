@@ -94,16 +94,16 @@ export function AppSidebar() {
       <SidebarHeader>
         <SidebarMenu>
           <SidebarMenuItem>
-            <div className="flex items-center gap-2 px-2 py-2">
-              <div className="bg-sidebar-primary text-sidebar-primary-foreground flex aspect-square size-8 items-center justify-center rounded-lg shrink-0">
+            <div className="flex items-center gap-3 py-3">
+              <div className="bg-primary text-primary-foreground flex aspect-square size-8 items-center justify-center rounded-lg shrink-0">
                 <Pill className="size-4" />
               </div>
               <div className="grid flex-1 text-right text-sm leading-tight min-w-0 group-data-[collapsible=icon]:hidden">
-                <span className="truncate font-semibold">
+                <span className="truncate font-bold text-base">
                   نظام الطلبات الخاصة
                 </span>
                 <span className="truncate text-xs text-muted-foreground">
-                  إدارة الصيدلية
+                  إدارة الصيدلية الاحترافية
                 </span>
               </div>
             </div>
@@ -123,7 +123,6 @@ export function AppSidebar() {
                 return (
                   <SidebarMenuItem key={item.title}>
                     <SidebarMenuButton
-                      asChild
                       isActive={isActive}
                       tooltip={state === "collapsed" ? item.title : undefined}
                     >
@@ -154,7 +153,6 @@ export function AppSidebar() {
                 return (
                   <SidebarMenuItem key={item.title}>
                     <SidebarMenuButton
-                      asChild
                       isActive={isActive}
                       tooltip={state === "collapsed" ? item.title : undefined}
                     >
@@ -206,8 +204,8 @@ export function AppSidebar() {
       <SidebarFooter>
         <SidebarMenu>
           <SidebarMenuItem>
-            <DropdownMenu dir="rtl">
-              <DropdownMenuTrigger asChild>
+            <DropdownMenu>
+              <DropdownMenuTrigger>
                 <SidebarMenuButton
                   size="lg"
                   className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"

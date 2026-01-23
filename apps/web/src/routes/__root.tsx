@@ -4,6 +4,7 @@ import {
   createRootRouteWithContext,
 } from "@tanstack/react-router";
 import { TanStackRouterDevtools } from "@tanstack/react-router-devtools";
+import { createContext, useContext, type ReactNode } from "react";
 
 import { AppSidebar } from "@/components/app-sidebar";
 import {
@@ -14,6 +15,17 @@ import {
 import "../index.css";
 
 export interface RouterAppContext {}
+
+// Context للعنوان والعنوان الفرعي
+interface PageHeaderContextType {
+  title?: string;
+  subtitle?: string;
+  actions?: ReactNode;
+}
+
+const PageHeaderContext = createContext<PageHeaderContextType>({});
+
+export const usePageHeader = () => useContext(PageHeaderContext);
 
 export const Route = createRootRouteWithContext<RouterAppContext>()({
   component: RootComponent,
@@ -44,13 +56,6 @@ function RootComponent() {
         <div className="flex h-screen w-full overflow-hidden">
           <AppSidebar />
           <SidebarInset className="flex flex-col flex-1 min-w-0">
-            <header
-              className="sticky top-0 z-10 flex h-14 shrink-0 items-center gap-2 border-b border-dashed bg-background/95 backdrop-blur supports-backdrop-filter:bg-background/60 px-4"
-              dir="rtl"
-            >
-              <SidebarTrigger className="ml-2" />
-              <div className="flex-1" />
-            </header>
             <main className="flex-1 overflow-y-auto overflow-x-hidden">
               <Outlet />
             </main>

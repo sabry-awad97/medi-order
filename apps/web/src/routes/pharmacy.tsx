@@ -19,6 +19,20 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  Page,
+  PageHeader,
+  PageHeaderTrigger,
+  PageHeaderContent,
+  PageHeaderTitle,
+  PageHeaderDescription,
+  PageHeaderActions,
+  PageContent,
+  PageContentInner,
+  PageSection,
+  PageSectionHeader,
+  PageSectionContent,
+} from "@/components/ui/page";
 import { OrderCard } from "@/components/pharmacy/order-card";
 import { OrderForm } from "@/components/pharmacy/order-form";
 import { OrderViewDialog } from "@/components/pharmacy/order-view-dialog";
@@ -144,31 +158,31 @@ function PharmacyComponent() {
   }
 
   return (
-    <div className="flex flex-col h-full w-full" dir="rtl">
-      <div className="flex-1 flex flex-col min-h-0">
-        <div className="container mx-auto px-4 py-6 max-w-7xl flex-1 flex flex-col min-h-0">
-          {/* الرأس */}
-          <div className="mb-6 border-b border-dashed pb-6 shrink-0">
-            <div className="flex items-center justify-between mb-6">
-              <div>
-                <h1 className="text-4xl font-bold text-foreground mb-2">
-                  الطلبات الخاصة
-                </h1>
-                <p className="text-muted-foreground">
-                  إدارة طلبات الأدوية الخاصة للصيدلية
-                </p>
-              </div>
-              <Button
-                onClick={handleOpenCreateForm}
-                size="lg"
-                className="gap-2 rounded-md"
-              >
-                <Plus className="h-5 w-5" />
-                إضافة طلب جديد
-              </Button>
-            </div>
+    <Page>
+      <PageHeader>
+        <PageHeaderTrigger />
+        <PageHeaderContent>
+          <PageHeaderTitle>الطلبات الخاصة</PageHeaderTitle>
+          <PageHeaderDescription>
+            إدارة طلبات الأدوية الخاصة للصيدلية
+          </PageHeaderDescription>
+        </PageHeaderContent>
+        <PageHeaderActions>
+          <Button
+            onClick={handleOpenCreateForm}
+            size="lg"
+            className="gap-2 rounded-md"
+          >
+            <Plus className="h-5 w-5" />
+            إضافة طلب جديد
+          </Button>
+        </PageHeaderActions>
+      </PageHeader>
 
-            {/* الإحصائيات */}
+      <PageContent>
+        <PageContentInner className="flex-1 flex flex-col min-h-0">
+          {/* الإحصائيات */}
+          <PageSection className="mb-6 border-b-2 border-dashed pb-6 shrink-0">
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-5">
               <StatsCard
                 title="إجمالي الطلبات"
@@ -201,7 +215,7 @@ function PharmacyComponent() {
                 color="bg-gray-500"
               />
             </div>
-          </div>
+          </PageSection>
 
           {/* البحث والتصفية */}
           <div className="mb-6 flex flex-col sm:flex-row gap-4 shrink-0">
@@ -277,8 +291,8 @@ function PharmacyComponent() {
               </div>
             )}
           </div>
-        </div>
-      </div>
+        </PageContentInner>
+      </PageContent>
 
       {/* النوافذ المنبثقة */}
       <OrderForm
@@ -303,6 +317,6 @@ function PharmacyComponent() {
         order={selectedOrder}
         onConfirm={handleStatusChange}
       />
-    </div>
+    </Page>
   );
 }

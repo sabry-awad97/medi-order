@@ -17,6 +17,17 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import {
+  Page,
+  PageHeader,
+  PageHeaderTrigger,
+  PageHeaderContent,
+  PageHeaderTitle,
+  PageHeaderDescription,
+  PageHeaderActions,
+  PageContent,
+  PageContentInner,
+} from "@/components/ui/page";
+import {
   Empty,
   EmptyHeader,
   EmptyMedia,
@@ -132,28 +143,28 @@ function SuppliersPage() {
   }
 
   return (
-    <div className="flex flex-col h-full w-full" dir="rtl">
-      <div className="flex-1 flex flex-col min-h-0 container mx-auto px-4 py-8 max-w-7xl">
-        {/* الرأس */}
-        <div className="shrink-0 mb-8 border-b-2 border-dashed pb-6">
-          <div className="flex items-center justify-between mb-6">
-            <div>
-              <h1 className="text-4xl font-bold text-foreground mb-2">
-                الموردين
-              </h1>
-              <p className="text-muted-foreground">
-                إدارة قائمة الموردين والتواصل معهم
-              </p>
-            </div>
-            <Button onClick={handleOpenCreateForm} size="lg" className="gap-2">
-              <Plus className="h-5 w-5" />
-              إضافة مورد جديد
-            </Button>
-          </div>
+    <Page>
+      <PageHeader>
+        <PageHeaderTrigger />
+        <PageHeaderContent>
+          <PageHeaderTitle>الموردين</PageHeaderTitle>
+          <PageHeaderDescription>
+            إدارة قائمة الموردين والتواصل معهم
+          </PageHeaderDescription>
+        </PageHeaderContent>
+        <PageHeaderActions>
+          <Button onClick={handleOpenCreateForm} size="lg" className="gap-2">
+            <Plus className="h-5 w-5" />
+            إضافة مورد جديد
+          </Button>
+        </PageHeaderActions>
+      </PageHeader>
 
+      <PageContent>
+        <PageContentInner className="flex-1 flex flex-col min-h-0">
           {/* الإحصائيات */}
           {suppliers.length > 0 && (
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4 mb-6">
+            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4 mb-6 shrink-0">
               <Card className="border-2 border-dashed hover:border-solid transition-all">
                 <CardHeader className="flex flex-row items-center justify-between pb-2">
                   <CardTitle className="text-sm font-medium">
@@ -210,7 +221,7 @@ function SuppliersPage() {
 
           {/* البحث */}
           {suppliers.length > 0 && (
-            <div className="relative">
+            <div className="relative mb-6 shrink-0">
               <Search className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
                 placeholder="ابحث باسم المورد أو رقم الهاتف أو الدواء..."
@@ -220,50 +231,52 @@ function SuppliersPage() {
               />
             </div>
           )}
-        </div>
 
-        {/* قائمة الموردين */}
-        {filteredSuppliers.length === 0 ? (
-          <div className="flex-1 flex items-center justify-center">
-            <Empty className="border-2 border-dashed rounded-lg p-8">
-              <EmptyHeader>
-                <EmptyMedia variant="icon">
-                  <Package className="h-8 w-8" />
-                </EmptyMedia>
-                <EmptyTitle>
-                  {searchQuery ? "لم يتم العثور على موردين" : "لا يوجد موردين"}
-                </EmptyTitle>
-                <EmptyDescription>
-                  {searchQuery
-                    ? "جرب البحث بكلمات مختلفة"
-                    : "ابدأ بإضافة مورد جديد لإدارة الطلبات الخاصة"}
-                </EmptyDescription>
-              </EmptyHeader>
-              {!searchQuery && (
-                <EmptyContent>
-                  <Button onClick={handleOpenCreateForm} className="gap-2">
-                    <Plus className="h-4 w-4" />
-                    إضافة مورد جديد
-                  </Button>
-                </EmptyContent>
-              )}
-            </Empty>
-          </div>
-        ) : (
-          <div className="flex-1 min-h-0 overflow-y-auto">
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 pb-4">
-              {filteredSuppliers.map((supplier) => (
-                <SupplierCard
-                  key={supplier.id}
-                  supplier={supplier}
-                  onEdit={handleOpenEditForm}
-                  onDelete={handleOpenDelete}
-                />
-              ))}
+          {/* قائمة الموردين */}
+          {filteredSuppliers.length === 0 ? (
+            <div className="flex-1 flex items-center justify-center">
+              <Empty className="border-2 border-dashed rounded-lg p-8">
+                <EmptyHeader>
+                  <EmptyMedia variant="icon">
+                    <Package className="h-8 w-8" />
+                  </EmptyMedia>
+                  <EmptyTitle>
+                    {searchQuery
+                      ? "لم يتم العثور على موردين"
+                      : "لا يوجد موردين"}
+                  </EmptyTitle>
+                  <EmptyDescription>
+                    {searchQuery
+                      ? "جرب البحث بكلمات مختلفة"
+                      : "ابدأ بإضافة مورد جديد لإدارة الطلبات الخاصة"}
+                  </EmptyDescription>
+                </EmptyHeader>
+                {!searchQuery && (
+                  <EmptyContent>
+                    <Button onClick={handleOpenCreateForm} className="gap-2">
+                      <Plus className="h-4 w-4" />
+                      إضافة مورد جديد
+                    </Button>
+                  </EmptyContent>
+                )}
+              </Empty>
             </div>
-          </div>
-        )}
-      </div>
+          ) : (
+            <div className="flex-1 min-h-0 overflow-y-auto">
+              <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 pb-4">
+                {filteredSuppliers.map((supplier) => (
+                  <SupplierCard
+                    key={supplier.id}
+                    supplier={supplier}
+                    onEdit={handleOpenEditForm}
+                    onDelete={handleOpenDelete}
+                  />
+                ))}
+              </div>
+            </div>
+          )}
+        </PageContentInner>
+      </PageContent>
 
       {/* نموذج إضافة/تعديل */}
       <SupplierFormDialog
@@ -279,7 +292,7 @@ function SuppliersPage() {
         onOpenChange={setIsDeleteOpen}
         supplier={selectedSupplier}
       />
-    </div>
+    </Page>
   );
 }
 
