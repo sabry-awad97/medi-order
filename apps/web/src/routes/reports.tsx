@@ -23,6 +23,7 @@ import {
   PageContent,
   PageContentInner,
 } from "@/components/ui/page";
+import { Loading } from "@/components/ui/loading";
 import {
   Empty,
   EmptyHeader,
@@ -138,14 +139,7 @@ function ReportsPage() {
   }, [orders, suppliers]);
 
   if (ordersLoading || suppliersLoading) {
-    return (
-      <div className="flex items-center justify-center min-h-[calc(100vh-3.5rem)] py-16">
-        <div className="text-center border-2 border-dashed rounded-lg p-12">
-          <BarChart3 className="h-16 w-16 mx-auto text-muted-foreground mb-4 animate-pulse" />
-          <p className="text-muted-foreground">جاري تحميل التقارير...</p>
-        </div>
-      </div>
-    );
+    return <Loading icon={BarChart3} message="جاري تحميل التقارير..." />;
   }
 
   if (orders.length === 0) {
@@ -192,304 +186,306 @@ function ReportsPage() {
       </PageHeader>
 
       <PageContent>
-        <PageContentInner>
-          {/* الإحصائيات الرئيسية */}
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4 mb-8">
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between pb-2">
-                <CardTitle className="text-sm font-medium">
-                  إجمالي الطلبات
-                </CardTitle>
-                <Package className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">{orders.length}</div>
-                <p className="text-xs text-muted-foreground mt-1">
-                  {stats.totalMedicines} دواء إجمالاً
-                </p>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between pb-2">
-                <CardTitle className="text-sm font-medium">
-                  متوسط وقت التسليم
-                </CardTitle>
-                <Clock className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">
-                  {stats.avgDeliveryTime} أيام
-                </div>
-                <p className="text-xs text-muted-foreground mt-1">
-                  للطلبات المكتملة
-                </p>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between pb-2">
-                <CardTitle className="text-sm font-medium">
-                  معدل الإنجاز
-                </CardTitle>
-                <CheckCircle className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">
-                  {stats.completionRate}%
-                </div>
-                <p className="text-xs text-muted-foreground mt-1">
-                  {stats.ordersByStatus.delivered} من {orders.length} طلب
-                </p>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between pb-2">
-                <CardTitle className="text-sm font-medium">
-                  عدد الموردين
-                </CardTitle>
-                <Users className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">{suppliers.length}</div>
-                <p className="text-xs text-muted-foreground mt-1">مورد نشط</p>
-              </CardContent>
-            </Card>
-          </div>
-
-          <div className="grid gap-6 lg:grid-cols-2 mb-8">
-            {/* الأدوية الأكثر طلباً */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <TrendingUp className="h-5 w-5" />
-                  الأدوية الأكثر طلباً
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                {stats.topMedicines.length === 0 ? (
-                  <p className="text-sm text-muted-foreground text-center py-8">
-                    لا توجد بيانات
+        <PageContentInner className="flex-1 flex flex-col min-h-0">
+          <div className="flex-1 min-h-0 overflow-y-auto pb-6">
+            {/* الإحصائيات الرئيسية */}
+            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4 mb-8">
+              <Card>
+                <CardHeader className="flex flex-row items-center justify-between pb-2">
+                  <CardTitle className="text-sm font-medium">
+                    إجمالي الطلبات
+                  </CardTitle>
+                  <Package className="h-4 w-4 text-muted-foreground" />
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold">{orders.length}</div>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    {stats.totalMedicines} دواء إجمالاً
                   </p>
-                ) : (
-                  <div className="space-y-4">
-                    {stats.topMedicines.map((med, index) => (
-                      <div key={med.name} className="flex items-center gap-4">
-                        <div className="shrink-0 w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center font-bold text-primary">
-                          {index + 1}
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <p className="font-medium truncate">{med.name}</p>
-                          <div className="w-full bg-muted rounded-full h-2 mt-1">
-                            <div
-                              className="bg-primary h-2 rounded-full transition-all"
-                              style={{
-                                width: `${(med.count / stats.topMedicines[0].count) * 100}%`,
-                              }}
-                            />
-                          </div>
-                        </div>
-                        <div className="shrink-0 text-sm font-medium">
-                          {med.count} طلب
-                        </div>
-                      </div>
-                    ))}
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader className="flex flex-row items-center justify-between pb-2">
+                  <CardTitle className="text-sm font-medium">
+                    متوسط وقت التسليم
+                  </CardTitle>
+                  <Clock className="h-4 w-4 text-muted-foreground" />
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold">
+                    {stats.avgDeliveryTime} أيام
                   </div>
-                )}
-              </CardContent>
-            </Card>
-
-            {/* الطلبات حسب الحالة */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <BarChart3 className="h-5 w-5" />
-                  الطلبات حسب الحالة
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  <StatusBar
-                    label="قيد الانتظار"
-                    count={stats.ordersByStatus.pending}
-                    total={orders.length}
-                    color="bg-yellow-500"
-                  />
-                  <StatusBar
-                    label="تم الطلب"
-                    count={stats.ordersByStatus.ordered}
-                    total={orders.length}
-                    color="bg-purple-500"
-                  />
-                  <StatusBar
-                    label="وصل"
-                    count={stats.ordersByStatus.arrived}
-                    total={orders.length}
-                    color="bg-green-500"
-                  />
-                  <StatusBar
-                    label="تم التسليم"
-                    count={stats.ordersByStatus.delivered}
-                    total={orders.length}
-                    color="bg-blue-500"
-                  />
-                  <StatusBar
-                    label="ملغي"
-                    count={stats.ordersByStatus.cancelled}
-                    total={orders.length}
-                    color="bg-gray-500"
-                  />
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-
-          <div className="grid gap-6 lg:grid-cols-2">
-            {/* الطلبات حسب الشهر */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Calendar className="h-5 w-5" />
-                  الطلبات حسب الشهر
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                {Object.keys(stats.ordersByMonth).length === 0 ? (
-                  <p className="text-sm text-muted-foreground text-center py-8">
-                    لا توجد بيانات
+                  <p className="text-xs text-muted-foreground mt-1">
+                    للطلبات المكتملة
                   </p>
-                ) : (
-                  <div className="space-y-3">
-                    {Object.entries(stats.ordersByMonth)
-                      .sort(([a], [b]) => b.localeCompare(a))
-                      .slice(0, 6)
-                      .map(([month, count]) => (
-                        <div
-                          key={month}
-                          className="flex items-center justify-between"
-                        >
-                          <span className="text-sm font-medium">{month}</span>
-                          <div className="flex items-center gap-3">
-                            <div className="w-32 bg-muted rounded-full h-2">
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader className="flex flex-row items-center justify-between pb-2">
+                  <CardTitle className="text-sm font-medium">
+                    معدل الإنجاز
+                  </CardTitle>
+                  <CheckCircle className="h-4 w-4 text-muted-foreground" />
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold">
+                    {stats.completionRate}%
+                  </div>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    {stats.ordersByStatus.delivered} من {orders.length} طلب
+                  </p>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader className="flex flex-row items-center justify-between pb-2">
+                  <CardTitle className="text-sm font-medium">
+                    عدد الموردين
+                  </CardTitle>
+                  <Users className="h-4 w-4 text-muted-foreground" />
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold">{suppliers.length}</div>
+                  <p className="text-xs text-muted-foreground mt-1">مورد نشط</p>
+                </CardContent>
+              </Card>
+            </div>
+
+            <div className="grid gap-6 lg:grid-cols-2 mb-8">
+              {/* الأدوية الأكثر طلباً */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <TrendingUp className="h-5 w-5" />
+                    الأدوية الأكثر طلباً
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  {stats.topMedicines.length === 0 ? (
+                    <p className="text-sm text-muted-foreground text-center py-8">
+                      لا توجد بيانات
+                    </p>
+                  ) : (
+                    <div className="space-y-4">
+                      {stats.topMedicines.map((med, index) => (
+                        <div key={med.name} className="flex items-center gap-4">
+                          <div className="shrink-0 w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center font-bold text-primary">
+                            {index + 1}
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <p className="font-medium truncate">{med.name}</p>
+                            <div className="w-full bg-muted rounded-full h-2 mt-1">
                               <div
                                 className="bg-primary h-2 rounded-full transition-all"
                                 style={{
-                                  width: `${(count / Math.max(...Object.values(stats.ordersByMonth))) * 100}%`,
+                                  width: `${(med.count / stats.topMedicines[0].count) * 100}%`,
                                 }}
                               />
                             </div>
-                            <span className="text-sm font-bold w-12 text-left">
-                              {count}
-                            </span>
+                          </div>
+                          <div className="shrink-0 text-sm font-medium">
+                            {med.count} طلب
                           </div>
                         </div>
                       ))}
-                  </div>
-                )}
-              </CardContent>
-            </Card>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
 
-            {/* أفضل الموردين */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Award className="h-5 w-5" />
-                  أفضل الموردين
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                {stats.topSuppliers.length === 0 ? (
-                  <p className="text-sm text-muted-foreground text-center py-8">
-                    لا يوجد موردين
-                  </p>
-                ) : (
+              {/* الطلبات حسب الحالة */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <BarChart3 className="h-5 w-5" />
+                    الطلبات حسب الحالة
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
                   <div className="space-y-4">
-                    {stats.topSuppliers.map((supplier, index) => (
-                      <div
-                        key={supplier.id}
-                        className="flex items-center gap-4 p-3 rounded-lg border bg-card hover:bg-accent/50 transition-colors"
-                      >
-                        <div className="shrink-0 w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center font-bold text-primary">
-                          {index + 1}
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <p className="font-medium truncate">
-                            {supplier.name}
-                          </p>
-                          <div className="flex items-center gap-2 mt-1">
-                            <Badge variant="outline" className="text-xs">
-                              ⭐ {supplier.rating}
-                            </Badge>
-                            <span className="text-xs text-muted-foreground">
-                              {supplier.avgDeliveryDays} أيام
-                            </span>
+                    <StatusBar
+                      label="قيد الانتظار"
+                      count={stats.ordersByStatus.pending}
+                      total={orders.length}
+                      color="bg-yellow-500"
+                    />
+                    <StatusBar
+                      label="تم الطلب"
+                      count={stats.ordersByStatus.ordered}
+                      total={orders.length}
+                      color="bg-purple-500"
+                    />
+                    <StatusBar
+                      label="وصل"
+                      count={stats.ordersByStatus.arrived}
+                      total={orders.length}
+                      color="bg-green-500"
+                    />
+                    <StatusBar
+                      label="تم التسليم"
+                      count={stats.ordersByStatus.delivered}
+                      total={orders.length}
+                      color="bg-blue-500"
+                    />
+                    <StatusBar
+                      label="ملغي"
+                      count={stats.ordersByStatus.cancelled}
+                      total={orders.length}
+                      color="bg-gray-500"
+                    />
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+
+            <div className="grid gap-6 lg:grid-cols-2">
+              {/* الطلبات حسب الشهر */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Calendar className="h-5 w-5" />
+                    الطلبات حسب الشهر
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  {Object.keys(stats.ordersByMonth).length === 0 ? (
+                    <p className="text-sm text-muted-foreground text-center py-8">
+                      لا توجد بيانات
+                    </p>
+                  ) : (
+                    <div className="space-y-3">
+                      {Object.entries(stats.ordersByMonth)
+                        .sort(([a], [b]) => b.localeCompare(a))
+                        .slice(0, 6)
+                        .map(([month, count]) => (
+                          <div
+                            key={month}
+                            className="flex items-center justify-between"
+                          >
+                            <span className="text-sm font-medium">{month}</span>
+                            <div className="flex items-center gap-3">
+                              <div className="w-32 bg-muted rounded-full h-2">
+                                <div
+                                  className="bg-primary h-2 rounded-full transition-all"
+                                  style={{
+                                    width: `${(count / Math.max(...Object.values(stats.ordersByMonth))) * 100}%`,
+                                  }}
+                                />
+                              </div>
+                              <span className="text-sm font-bold w-12 text-left">
+                                {count}
+                              </span>
+                            </div>
+                          </div>
+                        ))}
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+
+              {/* أفضل الموردين */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Award className="h-5 w-5" />
+                    أفضل الموردين
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  {stats.topSuppliers.length === 0 ? (
+                    <p className="text-sm text-muted-foreground text-center py-8">
+                      لا يوجد موردين
+                    </p>
+                  ) : (
+                    <div className="space-y-4">
+                      {stats.topSuppliers.map((supplier, index) => (
+                        <div
+                          key={supplier.id}
+                          className="flex items-center gap-4 p-3 rounded-lg border bg-card hover:bg-accent/50 transition-colors"
+                        >
+                          <div className="shrink-0 w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center font-bold text-primary">
+                            {index + 1}
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <p className="font-medium truncate">
+                              {supplier.name}
+                            </p>
+                            <div className="flex items-center gap-2 mt-1">
+                              <Badge variant="outline" className="text-xs">
+                                ⭐ {supplier.rating}
+                              </Badge>
+                              <span className="text-xs text-muted-foreground">
+                                {supplier.avgDeliveryDays} أيام
+                              </span>
+                            </div>
+                          </div>
+                          <div className="shrink-0 text-sm text-muted-foreground">
+                            {supplier.totalOrders} طلب
                           </div>
                         </div>
-                        <div className="shrink-0 text-sm text-muted-foreground">
-                          {supplier.totalOrders} طلب
-                        </div>
-                      </div>
-                    ))}
+                      ))}
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* إحصائيات إضافية */}
+            <Card className="mt-6">
+              <CardHeader>
+                <CardTitle>ملخص الأداء</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid gap-4 md:grid-cols-3">
+                  <div className="space-y-2">
+                    <p className="text-sm text-muted-foreground">
+                      الطلبات النشطة
+                    </p>
+                    <p className="text-2xl font-bold">
+                      {stats.ordersByStatus.pending +
+                        stats.ordersByStatus.ordered +
+                        stats.ordersByStatus.arrived}
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      قيد المعالجة حالياً
+                    </p>
                   </div>
-                )}
+
+                  <div className="space-y-2">
+                    <p className="text-sm text-muted-foreground">
+                      الطلبات المكتملة
+                    </p>
+                    <p className="text-2xl font-bold">
+                      {stats.ordersByStatus.delivered}
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      تم تسليمها بنجاح
+                    </p>
+                  </div>
+
+                  <div className="space-y-2">
+                    <p className="text-sm text-muted-foreground">
+                      الطلبات الملغاة
+                    </p>
+                    <p className="text-2xl font-bold">
+                      {stats.ordersByStatus.cancelled}
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      {orders.length > 0
+                        ? Math.round(
+                            (stats.ordersByStatus.cancelled / orders.length) *
+                              100,
+                          )
+                        : 0}
+                      % من الإجمالي
+                    </p>
+                  </div>
+                </div>
               </CardContent>
             </Card>
           </div>
-
-          {/* إحصائيات إضافية */}
-          <Card className="mt-6">
-            <CardHeader>
-              <CardTitle>ملخص الأداء</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="grid gap-4 md:grid-cols-3">
-                <div className="space-y-2">
-                  <p className="text-sm text-muted-foreground">
-                    الطلبات النشطة
-                  </p>
-                  <p className="text-2xl font-bold">
-                    {stats.ordersByStatus.pending +
-                      stats.ordersByStatus.ordered +
-                      stats.ordersByStatus.arrived}
-                  </p>
-                  <p className="text-xs text-muted-foreground">
-                    قيد المعالجة حالياً
-                  </p>
-                </div>
-
-                <div className="space-y-2">
-                  <p className="text-sm text-muted-foreground">
-                    الطلبات المكتملة
-                  </p>
-                  <p className="text-2xl font-bold">
-                    {stats.ordersByStatus.delivered}
-                  </p>
-                  <p className="text-xs text-muted-foreground">
-                    تم تسليمها بنجاح
-                  </p>
-                </div>
-
-                <div className="space-y-2">
-                  <p className="text-sm text-muted-foreground">
-                    الطلبات الملغاة
-                  </p>
-                  <p className="text-2xl font-bold">
-                    {stats.ordersByStatus.cancelled}
-                  </p>
-                  <p className="text-xs text-muted-foreground">
-                    {orders.length > 0
-                      ? Math.round(
-                          (stats.ordersByStatus.cancelled / orders.length) *
-                            100,
-                        )
-                      : 0}
-                    % من الإجمالي
-                  </p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
         </PageContentInner>
       </PageContent>
     </Page>

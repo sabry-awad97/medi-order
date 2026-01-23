@@ -30,9 +30,8 @@ import {
   PageContent,
   PageContentInner,
   PageSection,
-  PageSectionHeader,
-  PageSectionContent,
 } from "@/components/ui/page";
+import { Loading } from "@/components/ui/loading";
 import { OrderCard } from "@/components/pharmacy/order-card";
 import { OrderForm } from "@/components/pharmacy/order-form";
 import { OrderViewDialog } from "@/components/pharmacy/order-view-dialog";
@@ -147,14 +146,7 @@ function PharmacyComponent() {
 
   // عرض loader أثناء التحميل
   if (isLoading) {
-    return (
-      <div className="flex items-center justify-center min-h-[calc(100vh-3.5rem)] py-16">
-        <div className="text-center border-2 border-dashed rounded-lg p-12">
-          <Package className="h-16 w-16 mx-auto text-muted-foreground mb-4 animate-pulse" />
-          <p className="text-muted-foreground">جاري تحميل الطلبات...</p>
-        </div>
-      </div>
-    );
+    return <Loading icon={Package} message="جاري تحميل الطلبات..." />;
   }
 
   return (

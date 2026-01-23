@@ -27,6 +27,7 @@ import {
   PageContent,
   PageContentInner,
 } from "@/components/ui/page";
+import { Loading } from "@/components/ui/loading";
 import {
   Empty,
   EmptyHeader,
@@ -132,14 +133,7 @@ function SuppliersPage() {
   };
 
   if (isLoading) {
-    return (
-      <div className="flex items-center justify-center min-h-[calc(100vh-3.5rem)] py-16">
-        <div className="text-center border-2 border-dashed rounded-lg p-12">
-          <Package className="h-16 w-16 mx-auto text-muted-foreground mb-4 animate-pulse" />
-          <p className="text-muted-foreground">جاري تحميل الموردين...</p>
-        </div>
-      </div>
-    );
+    return <Loading icon={Users} message="جاري تحميل الموردين..." />;
   }
 
   return (
