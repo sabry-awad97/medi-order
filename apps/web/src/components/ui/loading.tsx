@@ -21,7 +21,7 @@ export function Loading({
       )}
       {...props}
     >
-      <div className="text-center border-2 border-dashed rounded-lg p-12">
+      <div className="text-center border border-dashed rounded-lg p-12">
         {Icon && (
           <Icon className="h-16 w-16 mx-auto text-muted-foreground mb-4 animate-pulse" />
         )}

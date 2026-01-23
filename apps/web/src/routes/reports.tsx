@@ -156,7 +156,7 @@ function ReportsPage() {
         </PageHeader>
         <PageContent>
           <PageContentInner className="flex-1 flex items-center justify-center">
-            <Empty className="border-2 border-dashed rounded-lg p-8">
+            <Empty className="border border-dashed rounded-lg p-8">
               <EmptyHeader>
                 <EmptyMedia variant="icon">
                   <BarChart3 className="h-8 w-8" />

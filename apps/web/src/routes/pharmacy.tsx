@@ -249,7 +249,7 @@ function PharmacyComponent() {
           {/* البحث والتصفية */}
           {orders.length > 0 && (
             <div className="mb-6 flex flex-col sm:flex-row gap-4 shrink-0">
-              <div className="relative flex-1">
+              <div className="relative w-full sm:w-80">
                 <Search className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
                   placeholder="ابحث باسم العميل أو الدواء..."

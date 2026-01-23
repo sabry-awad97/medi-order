@@ -67,7 +67,7 @@ function HomeComponent() {
             </div>
 
             <div className="grid gap-6 md:grid-cols-3">
-              <Card className="border-2 border-dashed hover:border-solid transition-all">
+              <Card className="border border-dashed hover:border-solid transition-all">
                 <CardHeader>
                   <div className="flex items-center gap-2 mb-2">
                     <Package className="h-5 w-5 text-primary" />
@@ -85,7 +85,7 @@ function HomeComponent() {
                 </CardContent>
               </Card>
 
-              <Card className="border-2 border-dashed hover:border-solid transition-all">
+              <Card className="border border-dashed hover:border-solid transition-all">
                 <CardHeader>
                   <div className="flex items-center gap-2 mb-2">
                     <CheckCircle className="h-5 w-5 text-primary" />
@@ -100,7 +100,7 @@ function HomeComponent() {
                 </CardContent>
               </Card>
 
-              <Card className="border-2 border-dashed hover:border-solid transition-all">
+              <Card className="border border-dashed hover:border-solid transition-all">
                 <CardHeader>
                   <div className="flex items-center gap-2 mb-2">
                     <BarChart3 className="h-5 w-5 text-primary" />

@@ -219,7 +219,7 @@ function SuppliersPage() {
 
           {/* البحث */}
           {suppliers.length > 0 && (
-            <div className="relative mb-6 shrink-0">
+            <div className="relative w-full sm:w-80 mb-6 shrink-0">
               <Search className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
                 placeholder="ابحث باسم المورد أو رقم الهاتف أو الدواء..."
@@ -299,11 +299,11 @@ interface SupplierCardProps {
 
 function SupplierCard({ supplier, onEdit, onDelete }: SupplierCardProps) {
   return (
-    <Card className="border-2 border-dashed hover:border-solid hover:shadow-lg transition-all">
+    <Card className="border border-dashed hover:border-solid hover:shadow-lg transition-all">
       <CardHeader className="border-b-2 border-dashed">
         <CardTitle className="flex items-center justify-between">
           <span className="text-lg">{supplier.name}</span>
-          <Badge variant="outline" className="gap-1 border-2 border-dashed">
+          <Badge variant="outline" className="gap-1 border border-dashed">
             <Star className="h-3 w-3 fill-yellow-400 text-yellow-400" />
             {supplier.rating}
           </Badge>
@@ -315,7 +315,7 @@ function SupplierCard({ supplier, onEdit, onDelete }: SupplierCardProps) {
           <Button
             size="sm"
             variant="outline"
-            className="flex-1 gap-2 border-2 border-dashed hover:border-solid"
+            className="flex-1 gap-2 border border-dashed hover:border-solid"
             onClick={() => window.open(`tel:${supplier.phone}`)}
           >
             <Phone className="h-4 w-4" />
@@ -325,7 +325,7 @@ function SupplierCard({ supplier, onEdit, onDelete }: SupplierCardProps) {
             <Button
               size="sm"
               variant="outline"
-              className="flex-1 gap-2 border-2 border-dashed hover:border-solid"
+              className="flex-1 gap-2 border border-dashed hover:border-solid"
               onClick={() =>
                 window.open(
                   `https://wa.me/${supplier.whatsapp?.replace(/\D/g, "") || ""}`,
@@ -340,7 +340,7 @@ function SupplierCard({ supplier, onEdit, onDelete }: SupplierCardProps) {
             <Button
               size="sm"
               variant="outline"
-              className="flex-1 gap-2 border-2 border-dashed hover:border-solid"
+              className="flex-1 gap-2 border border-dashed hover:border-solid"
               onClick={() => window.open(`mailto:${supplier.email}`)}
             >
               <Mail className="h-4 w-4" />
@@ -350,7 +350,7 @@ function SupplierCard({ supplier, onEdit, onDelete }: SupplierCardProps) {
         </div>
 
         {/* معلومات الأداء */}
-        <div className="text-sm space-y-1 text-muted-foreground border-2 border-dashed rounded-lg p-3">
+        <div className="text-sm space-y-1 text-muted-foreground border border-dashed rounded-lg p-3">
           <p>📞 {supplier.phone}</p>
           <p>🚚 متوسط التوصيل: {supplier.avgDeliveryDays} أيام</p>
           <p>📦 عدد الطلبات: {supplier.totalOrders}</p>
@@ -358,14 +358,14 @@ function SupplierCard({ supplier, onEdit, onDelete }: SupplierCardProps) {
 
         {/* الأدوية المتوفرة */}
         {supplier.commonMedicines.length > 0 && (
-          <div className="border-2 border-dashed rounded-lg p-3">
+          <div className="border border-dashed rounded-lg p-3">
             <p className="text-sm font-medium mb-2">الأدوية المتوفرة:</p>
             <div className="flex flex-wrap gap-1">
               {supplier.commonMedicines.slice(0, 3).map((med, i) => (
                 <Badge
                   key={i}
                   variant="secondary"
-                  className="text-xs border-2 border-dashed"
+                  className="text-xs border border-dashed"
                 >
                   {med}
                 </Badge>
@@ -373,7 +373,7 @@ function SupplierCard({ supplier, onEdit, onDelete }: SupplierCardProps) {
               {supplier.commonMedicines.length > 3 && (
                 <Badge
                   variant="secondary"
-                  className="text-xs border-2 border-dashed"
+                  className="text-xs border border-dashed"
                 >
                   +{supplier.commonMedicines.length - 3}
                 </Badge>
@@ -384,14 +384,14 @@ function SupplierCard({ supplier, onEdit, onDelete }: SupplierCardProps) {
 
         {/* ملاحظات */}
         {supplier.notes && (
-          <div className="text-sm text-muted-foreground border-t-2 border-dashed pt-3">
+          <div className="text-sm text-muted-foreground border-t border-dashed pt-3">
             <p className="font-medium mb-1">ملاحظات:</p>
             <p className="line-clamp-2">{supplier.notes}</p>
           </div>
         )}
 
         {/* أزرار التحكم */}
-        <div className="flex gap-2 pt-2 border-t-2 border-dashed">
+        <div className="flex gap-2 pt-2 border-t border-dashed">
           <Button
             size="sm"
             variant="outline"

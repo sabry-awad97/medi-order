@@ -1,74 +1,14 @@
-import {
-  HeadContent,
-  Outlet,
-  createRootRouteWithContext,
-  Link,
-} from "@tanstack/react-router";
-import { TanStackRouterDevtools } from "@tanstack/react-router-devtools";
-import { createContext, useContext, type ReactNode } from "react";
+import { Link, createFileRoute } from "@tanstack/react-router";
 import { Home, ArrowRight, Search, FileQuestion } from "lucide-react";
 
-import { AppSidebar } from "@/components/app-sidebar";
-import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar";
 import { Button } from "@/components/ui/button";
 import { Page, PageContent, PageContentInner } from "@/components/ui/page";
-import "../index.css";
 
-export interface RouterAppContext {}
-
-// Context للعنوان والعنوان الفرعي
-interface PageHeaderContextType {
-  title?: string;
-  subtitle?: string;
-  actions?: ReactNode;
-}
-
-const PageHeaderContext = createContext<PageHeaderContextType>({});
-
-export const usePageHeader = () => useContext(PageHeaderContext);
-
-export const Route = createRootRouteWithContext<RouterAppContext>()({
-  component: RootComponent,
-  notFoundComponent: NotFoundComponent,
-  head: () => ({
-    meta: [
-      {
-        title: "نظام إدارة الطلبات الخاصة",
-      },
-      {
-        name: "description",
-        content: "نظام إدارة الطلبات الخاصة للصيدلية",
-      },
-    ],
-    links: [
-      {
-        rel: "icon",
-        href: "/favicon.ico",
-      },
-    ],
-  }),
+export const Route = createFileRoute("/404")({
+  component: NotFoundPage,
 });
 
-function RootComponent() {
-  return (
-    <>
-      <HeadContent />
-      <SidebarProvider defaultOpen={true}>
-        <div className="flex h-screen w-full overflow-hidden">
-          <AppSidebar />
-          <SidebarInset className="flex flex-col flex-1 min-w-0">
-            <main className="flex-1 overflow-y-auto overflow-x-hidden">
-              <Outlet />
-            </main>
-          </SidebarInset>
-        </div>
-      </SidebarProvider>
-      {import.meta.env.DEV && <TanStackRouterDevtools position="bottom-left" />}
-    </>
-  );
-}
-
-function NotFoundComponent() {
+function NotFoundPage() {
   return (
     <Page>
       <PageContent>
@@ -100,7 +40,7 @@ function NotFoundComponent() {
               <div className="flex flex-col sm:flex-row gap-3 justify-center">
                 <Button
                   size="lg"
-                  className="gap-2 w-full sm:w-auto"
+                  className="gap-2"
                   render={(props) => <Link to="/" {...props} />}
                 >
                   <Home className="h-5 w-5" />
@@ -109,7 +49,7 @@ function NotFoundComponent() {
                 <Button
                   variant="outline"
                   size="lg"
-                  className="gap-2 w-full sm:w-auto"
+                  className="gap-2"
                   render={(props) => <Link to="/pharmacy" {...props} />}
                 >
                   <Search className="h-5 w-5" />

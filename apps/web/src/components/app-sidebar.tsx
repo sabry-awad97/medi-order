@@ -125,14 +125,13 @@ export function AppSidebar() {
                     <SidebarMenuButton
                       isActive={isActive}
                       tooltip={state === "collapsed" ? item.title : undefined}
+                      render={(props) => <Link to={item.url} {...props} />}
                     >
-                      <Link to={item.url} className="flex items-center gap-2">
-                        <item.icon className="shrink-0 size-4" />
-                        <span className="flex-1 text-right">{item.title}</span>
-                        {showBadge && (
-                          <SidebarMenuBadge>{totalAlerts}</SidebarMenuBadge>
-                        )}
-                      </Link>
+                      <item.icon className="shrink-0 size-4" />
+                      <span className="flex-1 text-right">{item.title}</span>
+                      {showBadge && (
+                        <SidebarMenuBadge>{totalAlerts}</SidebarMenuBadge>
+                      )}
                     </SidebarMenuButton>
                   </SidebarMenuItem>
                 );
@@ -155,11 +154,10 @@ export function AppSidebar() {
                     <SidebarMenuButton
                       isActive={isActive}
                       tooltip={state === "collapsed" ? item.title : undefined}
+                      render={(props) => <Link to={item.url} {...props} />}
                     >
-                      <Link to={item.url} className="flex items-center gap-2">
-                        <item.icon className="shrink-0 size-4" />
-                        <span className="flex-1 text-right">{item.title}</span>
-                      </Link>
+                      <item.icon className="shrink-0 size-4" />
+                      <span className="flex-1 text-right">{item.title}</span>
                     </SidebarMenuButton>
                   </SidebarMenuItem>
                 );
@@ -205,26 +203,29 @@ export function AppSidebar() {
         <SidebarMenu>
           <SidebarMenuItem>
             <DropdownMenu>
-              <DropdownMenuTrigger>
-                <SidebarMenuButton
-                  size="lg"
-                  className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
-                >
-                  <div className="flex items-center gap-2 w-full">
-                    <Avatar className="h-8 w-8 rounded-lg shrink-0">
-                      <AvatarFallback className="rounded-lg bg-primary text-primary-foreground">
-                        ص
-                      </AvatarFallback>
-                    </Avatar>
-                    <div className="grid flex-1 text-right text-sm leading-tight min-w-0">
-                      <span className="truncate font-semibold">الصيدلية</span>
-                      <span className="truncate text-xs text-muted-foreground">
-                        صيدلي
-                      </span>
-                    </div>
-                    <ChevronDown className="mr-auto shrink-0 size-4" />
+              <DropdownMenuTrigger
+                render={(props) => (
+                  <SidebarMenuButton
+                    size="lg"
+                    className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
+                    {...props}
+                  />
+                )}
+              >
+                <div className="flex items-center gap-2 w-full">
+                  <Avatar className="h-8 w-8 rounded-lg shrink-0">
+                    <AvatarFallback className="rounded-lg bg-primary text-primary-foreground">
+                      ص
+                    </AvatarFallback>
+                  </Avatar>
+                  <div className="grid flex-1 text-right text-sm leading-tight min-w-0">
+                    <span className="truncate font-semibold">الصيدلية</span>
+                    <span className="truncate text-xs text-muted-foreground">
+                      صيدلي
+                    </span>
                   </div>
-                </SidebarMenuButton>
+                  <ChevronDown className="mr-auto shrink-0 size-4" />
+                </div>
               </DropdownMenuTrigger>
               <DropdownMenuContent
                 className="w-[--radix-dropdown-menu-trigger-width] min-w-56 rounded-lg"

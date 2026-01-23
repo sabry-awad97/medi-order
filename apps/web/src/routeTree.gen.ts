@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as SuppliersRouteImport } from './routes/suppliers'
 import { Route as ReportsRouteImport } from './routes/reports'
 import { Route as PharmacyRouteImport } from './routes/pharmacy'
+import { Route as R404RouteImport } from './routes/404'
 import { Route as IndexRouteImport } from './routes/index'
 
 const SuppliersRoute = SuppliersRouteImport.update({
@@ -29,6 +30,11 @@ const PharmacyRoute = PharmacyRouteImport.update({
   path: '/pharmacy',
   getParentRoute: () => rootRouteImport,
 } as any)
+const R404Route = R404RouteImport.update({
+  id: '/404',
+  path: '/404',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
@@ -37,12 +43,14 @@ const IndexRoute = IndexRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/404': typeof R404Route
   '/pharmacy': typeof PharmacyRoute
   '/reports': typeof ReportsRoute
   '/suppliers': typeof SuppliersRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/404': typeof R404Route
   '/pharmacy': typeof PharmacyRoute
   '/reports': typeof ReportsRoute
   '/suppliers': typeof SuppliersRoute
@@ -50,20 +58,22 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/404': typeof R404Route
   '/pharmacy': typeof PharmacyRoute
   '/reports': typeof ReportsRoute
   '/suppliers': typeof SuppliersRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/pharmacy' | '/reports' | '/suppliers'
+  fullPaths: '/' | '/404' | '/pharmacy' | '/reports' | '/suppliers'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/pharmacy' | '/reports' | '/suppliers'
-  id: '__root__' | '/' | '/pharmacy' | '/reports' | '/suppliers'
+  to: '/' | '/404' | '/pharmacy' | '/reports' | '/suppliers'
+  id: '__root__' | '/' | '/404' | '/pharmacy' | '/reports' | '/suppliers'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  R404Route: typeof R404Route
   PharmacyRoute: typeof PharmacyRoute
   ReportsRoute: typeof ReportsRoute
   SuppliersRoute: typeof SuppliersRoute
@@ -92,6 +102,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PharmacyRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/404': {
+      id: '/404'
+      path: '/404'
+      fullPath: '/404'
+      preLoaderRoute: typeof R404RouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -104,6 +121,7 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  R404Route: R404Route,
   PharmacyRoute: PharmacyRoute,
   ReportsRoute: ReportsRoute,
   SuppliersRoute: SuppliersRoute,
