@@ -41,8 +41,3 @@ export function ModeToggle() {
     </DropdownMenu>
   );
 }
-        </DropdownMenuItem>
-      </DropdownMenuContent>
-    </DropdownMenu>
-  );
-}

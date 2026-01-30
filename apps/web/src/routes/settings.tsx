@@ -79,10 +79,56 @@ import {
 import type { Settings } from "@/lib/types-settings";
 import type { SettingCategory, SettingDefinition } from "@/lib/types-settings";
 import { ManualUpdateCheck } from "@/components/manual-update-check";
+import { useState as useNotificationState } from "react";
 
 export const Route = createFileRoute("/settings")({
   component: SettingsPage,
 });
+
+// Notification Permission Button Component
+function NotificationPermissionButton() {
+  const { t } = useTranslation("settings");
+  const [permission, setPermission] =
+    useNotificationState<NotificationPermission>("default");
+
+  React.useEffect(() => {
+    if ("Notification" in window) {
+      setPermission(Notification.permission);
+    }
+  }, []);
+
+  const requestPermission = async () => {
+    if ("Notification" in window) {
+      const result = await Notification.requestPermission();
+      setPermission(result);
+    }
+  };
+
+  if (!("Notification" in window)) {
+    return null;
+  }
+
+  if (permission === "granted") {
+    return (
+      <div className="flex items-center gap-2 text-xs text-muted-foreground">
+        <Check className="h-3 w-3 text-green-600" />
+        <span>Notifications enabled</span>
+      </div>
+    );
+  }
+
+  return (
+    <Button
+      variant="outline"
+      size="sm"
+      onClick={requestPermission}
+      className="w-full text-xs"
+    >
+      <Bell className="h-3 w-3" />
+      <span>Enable Browser Notifications</span>
+    </Button>
+  );
+}
 
 // CVA variants for setting rows
 const settingRowVariants = cva(
@@ -378,6 +424,14 @@ function SettingsPage() {
                     <div className="p-4 pt-0 mt-auto">
                       <Separator className="mb-4" />
                       <ManualUpdateCheck />
+                    </div>
+                  )}
+
+                  {/* Notifications-specific components */}
+                  {categoryKey === "notifications" && (
+                    <div className="p-4 pt-0 mt-auto">
+                      <Separator className="mb-4" />
+                      <NotificationPermissionButton />
                     </div>
                   )}
                 </Card>

@@ -126,6 +126,7 @@ export const mockSettings: Settings = {
 
   // Appearance
   defaultTheme: "system",
+  defaultLanguage: "en",
   sidebarDefaultState: "open",
   itemsPerPage: 20,
 

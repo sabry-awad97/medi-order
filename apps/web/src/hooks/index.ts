@@ -48,3 +48,9 @@ export { useAppUpdater } from "./use-app-updater";
 
 // Hooks للترجمة
 export { useOrderStatusConfig } from "./use-order-status-config";
+
+// Hooks للإشعارات
+export { useNotifications } from "./use-notifications";
+
+// Hooks للأرشفة التلقائية
+export { useAutoArchive, useArchivableOrdersStats } from "./use-auto-archive";

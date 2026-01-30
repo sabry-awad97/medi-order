@@ -13,6 +13,7 @@ import {
   Sun,
   Languages,
 } from "lucide-react";
+import { useEffect, useRef } from "react";
 
 import {
   Sidebar,
@@ -37,7 +38,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { useTheme } from "@/components/theme-provider";
-import { useAlertStats } from "@/hooks";
+import { useAlertStats, useSettings, useUpdateSetting } from "@/hooks";
 import {
   useLocale,
   LOCALES,
@@ -46,7 +47,9 @@ import {
 } from "@meditrack/i18n";
 
 export function AppSidebar() {
-  const { state } = useSidebar();
+  const { state, open, setOpen } = useSidebar();
+  const { data: settings } = useSettings();
+  const updateSetting = useUpdateSetting();
   const routerState = useRouterState();
   const currentPath = routerState.location.pathname;
   const { theme, setTheme } = useTheme();
@@ -98,6 +101,37 @@ export function AppSidebar() {
     (alertStats?.oldOrders || 0) +
     (alertStats?.notPickedUp || 0) +
     (alertStats?.delayed || 0);
+
+  // Load sidebar state from settings on mount only
+  useEffect(() => {
+    if (settings?.sidebarDefaultState) {
+      const shouldBeOpen = settings.sidebarDefaultState === "open";
+      if (open !== shouldBeOpen) {
+        setOpen(shouldBeOpen);
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // Only run once on mount
+
+  // Save sidebar state to settings when it changes (but not on initial load)
+  const isInitialMount = useRef(true);
+  useEffect(() => {
+    // Skip the first render to avoid saving on initial load
+    if (isInitialMount.current) {
+      isInitialMount.current = false;
+      return;
+    }
+
+    if (settings) {
+      const newState = open ? "open" : "collapsed";
+      if (settings.sidebarDefaultState !== newState) {
+        updateSetting.mutate({
+          key: "sidebarDefaultState",
+          value: newState,
+        });
+      }
+    }
+  }, [open]);
 
   return (
     <Sidebar
