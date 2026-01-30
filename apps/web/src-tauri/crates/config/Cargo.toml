@@ -3,16 +3,13 @@ name = "app_config"
 version = "0.1.0"
 edition = "2024"
 
-[[bin]]
-name = "meditrack-config"
-path = "src/bin/meditrack-config.rs"
-
 [dependencies]
 aes-gcm = { workspace = true }
 anyhow = "1.0.95"
 argon2 = { workspace = true }
 base64 = { workspace = true }
 crossterm = "0.28.1"
+dialoguer = "0.11"
 dirs = "5.0.1"
 hostname = { workspace = true }
 reratui = "1.1.0"

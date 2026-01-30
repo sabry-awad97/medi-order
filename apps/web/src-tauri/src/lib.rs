@@ -1,7 +1,37 @@
+use clap::Parser;
 use tauri::Manager;
+
+/// MediTrack - Pharmacy Management System
+#[derive(Parser, Debug)]
+#[command(name = "meditrack")]
+#[command(about = "MediTrack - Pharmacy Management System", long_about = None)]
+struct Cli {
+    /// Launch the configuration TUI
+    #[arg(short, long)]
+    config: bool,
+}
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
+    // Parse CLI arguments
+    let cli = Cli::parse();
+
+    // Check for --config flag BEFORE starting Tauri to prevent window creation
+    if cli.config {
+        // Launch config TUI directly from the library
+        println!("Launching configuration TUI...");
+
+        // Run the TUI in a blocking manner
+        let runtime = tokio::runtime::Runtime::new().expect("Failed to create Tokio runtime");
+        match runtime.block_on(app_config::cli_tui::run_config_tui()) {
+            Ok(_) => std::process::exit(0),
+            Err(e) => {
+                eprintln!("Failed to run configuration TUI: {}", e);
+                std::process::exit(1);
+            }
+        }
+    }
+
     tauri::Builder::default()
         .plugin(tauri_plugin_updater::Builder::new().build())
         .setup(|app| {

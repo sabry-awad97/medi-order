@@ -18,9 +18,13 @@ pub struct SecureStorage {
 }
 
 impl SecureStorage {
-    /// Create a new secure storage with a derived key
-    ///
-    /// that configurations are tied to the specific machine.
+    /// Create a new secure storage with a password-derived key
+    pub fn new_with_password(password: &str) -> Result<Self> {
+        let key = Self::derive_key_from_password(password)?;
+        Ok(Self { key })
+    }
+
+    /// Create a new secure storage with a machine-derived key (legacy)
     pub fn new() -> Result<Self> {
         let machine_id = Self::get_machine_id()?;
         let key = Self::derive_key(&machine_id)?;
@@ -80,17 +84,29 @@ impl SecureStorage {
             .map_err(|e| ConfigError::Decryption(format!("Invalid UTF-8: {}", e)))
     }
 
+    /// Derive encryption key from password using Argon2
+    fn derive_key_from_password(password: &str) -> Result<[u8; 32]> {
+        // Use a fixed salt for password-based encryption
+        // In production, you might want to store this salt with the encrypted data
+        let salt = SaltString::from_b64("bWVkaXRyYWNrY29uZmlnc2FsdA")
+            .map_err(|e| ConfigError::Encryption(format!("Invalid salt: {}", e)))?;
+
+        let argon2 = Argon2::default();
+        let hash = argon2
+            .hash_password(password.as_bytes(), &salt)
+            .map_err(|e| ConfigError::Encryption(format!("Key derivation failed: {}", e)))?;
+
+        let hash_bytes = hash
+            .hash
+            .ok_or_else(|| ConfigError::Encryption("Hash generation failed".to_string()))?;
+
+        let mut key = [0u8; 32];
+        key.copy_from_slice(&hash_bytes.as_bytes()[..32]);
+        Ok(key)
+    }
+
     /// Get a machine-specific identifier
-    ///
-    /// This uses a combination of hostname and other system identifiers
-    /// to create a unique key for this machine.
     fn get_machine_id() -> Result<String> {
-        // In a real implementation, you would use:
-        // - Machine ID from /etc/machine-id (Linux)
-        // - Registry key (Windows)
-        // - IOPlatformUUID (macOS)
-        //
-        // For this example, we'll use hostname + username
         let hostname = hostname::get()
             .map_err(|e| ConfigError::Encryption(format!("Failed to get hostname: {}", e)))?
             .to_string_lossy()

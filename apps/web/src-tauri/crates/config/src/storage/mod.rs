@@ -11,25 +11,34 @@ use std::path::PathBuf;
 pub struct ConfigStorage {
     app_name: String,
     config_dir: Option<PathBuf>,
-    secure_storage: SecureStorage,
+    secure_storage: Option<SecureStorage>,
 }
 
 impl ConfigStorage {
-    /// Create a new configuration storage
+    /// Create a new configuration storage with password
+    pub fn new_with_password(app_name: &str, config_dir: PathBuf, password: &str) -> Result<Self> {
+        Ok(Self {
+            app_name: app_name.to_string(),
+            config_dir: Some(config_dir),
+            secure_storage: Some(SecureStorage::new_with_password(password)?),
+        })
+    }
+
+    /// Create a new configuration storage (legacy, machine-based)
     pub fn new(app_name: &str) -> Result<Self> {
         Ok(Self {
             app_name: app_name.to_string(),
             config_dir: None,
-            secure_storage: SecureStorage::new()?,
+            secure_storage: Some(SecureStorage::new()?),
         })
     }
 
-    /// Create a new configuration storage with custom path
+    /// Create a new configuration storage with custom path (legacy)
     pub fn new_with_path(app_name: &str, config_dir: PathBuf) -> Result<Self> {
         Ok(Self {
             app_name: app_name.to_string(),
             config_dir: Some(config_dir),
-            secure_storage: SecureStorage::new()?,
+            secure_storage: Some(SecureStorage::new()?),
         })
     }
 
@@ -41,11 +50,16 @@ impl ConfigStorage {
             return Err(ConfigError::NotFound);
         }
 
+        let secure_storage = self
+            .secure_storage
+            .as_ref()
+            .ok_or_else(|| ConfigError::Encryption("No encryption key available".to_string()))?;
+
         // Read encrypted configuration
         let encrypted_data = fs::read_to_string(&config_path).map_err(ConfigError::Io)?;
 
         // Decrypt configuration
-        let decrypted_data = self.secure_storage.decrypt(&encrypted_data)?;
+        let decrypted_data = secure_storage.decrypt(&encrypted_data)?;
 
         // Deserialize configuration
         let mut config: AppConfig =
@@ -70,6 +84,11 @@ impl ConfigStorage {
     pub fn save(&self, config: &AppConfig) -> Result<()> {
         let config_path = self.get_config_path_internal()?;
 
+        let secure_storage = self
+            .secure_storage
+            .as_ref()
+            .ok_or_else(|| ConfigError::Encryption("No encryption key available".to_string()))?;
+
         // Create parent directory if it doesn't exist
         if let Some(parent) = config_path.parent() {
             fs::create_dir_all(parent).map_err(ConfigError::Io)?;
@@ -79,7 +98,7 @@ impl ConfigStorage {
         let json_data = serde_json::to_string_pretty(config).map_err(ConfigError::Serialization)?;
 
         // Encrypt configuration
-        let encrypted_data = self.secure_storage.encrypt(&json_data)?;
+        let encrypted_data = secure_storage.encrypt(&json_data)?;
 
         // Write to file
         fs::write(&config_path, encrypted_data).map_err(ConfigError::Io)?;

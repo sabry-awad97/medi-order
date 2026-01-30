@@ -1,6 +1,6 @@
 use super::state::*;
 use super::utils::*;
-use app_config::{AppConfig, ConfigStorage};
+use crate::{AppConfig, ConfigStorage};
 use reratui::prelude::*;
 
 pub fn handle_key_event(code: KeyCode, state: &AppState, set_state: StateSetter<AppState>) {
@@ -316,22 +316,38 @@ fn handle_confirm_yes(state: &AppState, set_state: StateSetter<AppState>) {
     match &state.screen {
         Screen::Confirm(ConfirmAction::Reset) => {
             new_state.config = AppConfig::default();
-            match new_state.config.save(state.config_dir.clone()) {
-                Ok(_) => {
-                    new_state.message = Some((
-                        "Configuration reset to defaults and saved".to_string(),
-                        MessageType::Success,
-                    ));
-                }
+            match ConfigStorage::new_with_password(
+                "meditrack",
+                state.config_dir.clone(),
+                &state.password,
+            ) {
+                Ok(storage) => match storage.save(&new_state.config) {
+                    Ok(_) => {
+                        new_state.message = Some((
+                            "Configuration reset to defaults and saved".to_string(),
+                            MessageType::Success,
+                        ));
+                    }
+                    Err(e) => {
+                        new_state.message =
+                            Some((format!("Failed to save: {:?}", e), MessageType::Error));
+                    }
+                },
                 Err(e) => {
-                    new_state.message =
-                        Some((format!("Failed to save: {:?}", e), MessageType::Error));
+                    new_state.message = Some((
+                        format!("Failed to initialize storage: {:?}", e),
+                        MessageType::Error,
+                    ));
                 }
             }
             new_state.screen = Screen::Main;
         }
         Screen::Confirm(ConfirmAction::Delete) => {
-            match ConfigStorage::new_with_path("meditrack", state.config_dir.clone()) {
+            match ConfigStorage::new_with_password(
+                "meditrack",
+                state.config_dir.clone(),
+                &state.password,
+            ) {
                 Ok(storage) => match storage.delete() {
                     Ok(_) => {
                         new_state.message = Some((
@@ -362,15 +378,23 @@ fn handle_confirm_yes(state: &AppState, set_state: StateSetter<AppState>) {
 pub fn handle_save(state: &AppState, set_state: StateSetter<AppState>) {
     let mut new_state = state.clone();
 
-    match new_state.config.save(state.config_dir.clone()) {
-        Ok(_) => {
-            new_state.message = Some((
-                "Configuration saved successfully!".to_string(),
-                MessageType::Success,
-            ));
-        }
+    match ConfigStorage::new_with_password("meditrack", state.config_dir.clone(), &state.password) {
+        Ok(storage) => match storage.save(&new_state.config) {
+            Ok(_) => {
+                new_state.message = Some((
+                    "Configuration saved successfully!".to_string(),
+                    MessageType::Success,
+                ));
+            }
+            Err(e) => {
+                new_state.message = Some((format!("Failed to save: {:?}", e), MessageType::Error));
+            }
+        },
         Err(e) => {
-            new_state.message = Some((format!("Failed to save: {:?}", e), MessageType::Error));
+            new_state.message = Some((
+                format!("Failed to initialize storage: {:?}", e),
+                MessageType::Error,
+            ));
         }
     }
 
@@ -413,19 +437,31 @@ pub fn handle_import(state: &AppState, set_state: StateSetter<AppState>) {
         Ok(json) => match serde_json::from_str::<AppConfig>(&json) {
             Ok(config) => {
                 new_state.config = config;
-                match new_state.config.save(state.config_dir.clone()) {
-                    Ok(_) => {
-                        new_state.message = Some((
-                            "Configuration imported and saved!".to_string(),
-                            MessageType::Success,
-                        ));
-                        new_state.screen = Screen::Main;
-                        new_state.editing = false;
-                        new_state.edit_buffer.clear();
-                    }
+                match ConfigStorage::new_with_password(
+                    "meditrack",
+                    state.config_dir.clone(),
+                    &state.password,
+                ) {
+                    Ok(storage) => match storage.save(&new_state.config) {
+                        Ok(_) => {
+                            new_state.message = Some((
+                                "Configuration imported and saved!".to_string(),
+                                MessageType::Success,
+                            ));
+                            new_state.screen = Screen::Main;
+                            new_state.editing = false;
+                            new_state.edit_buffer.clear();
+                        }
+                        Err(e) => {
+                            new_state.message = Some((
+                                format!("Imported but failed to save: {:?}", e),
+                                MessageType::Error,
+                            ));
+                        }
+                    },
                     Err(e) => {
                         new_state.message = Some((
-                            format!("Imported but failed to save: {:?}", e),
+                            format!("Failed to initialize storage: {:?}", e),
                             MessageType::Error,
                         ));
                     }

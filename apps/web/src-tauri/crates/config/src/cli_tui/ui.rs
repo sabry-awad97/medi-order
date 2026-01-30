@@ -1,6 +1,6 @@
 use super::state::*;
 use super::utils::*;
-use app_config::AppConfig;
+use crate::AppConfig;
 use reratui::prelude::*;
 
 pub fn render_header(area: Rect, buffer: &mut Buffer) {

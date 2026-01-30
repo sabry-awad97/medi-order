@@ -5,6 +5,8 @@ mod database;
 mod error;
 mod storage;
 
+pub mod cli_tui;
+
 // Re-export types
 pub use database::DatabaseConfig;
 pub use error::{ConfigError, Result};

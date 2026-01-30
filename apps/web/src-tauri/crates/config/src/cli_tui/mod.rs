@@ -8,32 +8,37 @@ pub use state::*;
 pub use ui::*;
 pub use utils::*;
 
+use dialoguer::Password;
 use reratui::prelude::*;
 
-pub struct MediTrackConfigTUI;
+#[derive(Clone)]
+pub struct MediTrackConfigTUI {
+    password: String,
+}
 
 impl Component for MediTrackConfigTUI {
     fn render(&self, area: Rect, buffer: &mut Buffer) {
-        let (state, set_state) = use_state(|| AppState::new(get_config_dir()));
+        let (state, set_state) =
+            use_state(|| AppState::new_with_password(get_config_dir(), &self.password));
 
         // Handle keyboard events
-        if let Some(Event::Key(key)) = use_event() {
-            if key.kind == KeyEventKind::Press {
-                // Handle save shortcut
-                if key.code == KeyCode::Char('s') && !state.editing {
-                    if matches!(state.screen, Screen::EditDatabase | Screen::EditJwt) {
-                        handle_save(&state, set_state.clone());
-                    }
-                } else if key.code == KeyCode::Enter && state.editing {
-                    // Handle export/import
-                    match state.screen {
-                        Screen::Export => handle_export(&state, set_state.clone()),
-                        Screen::Import => handle_import(&state, set_state.clone()),
-                        _ => handle_key_event(key.code, &state, set_state.clone()),
-                    }
-                } else {
-                    handle_key_event(key.code, &state, set_state.clone());
+        if let Some(Event::Key(key)) = use_event()
+            && key.kind == KeyEventKind::Press
+        {
+            // Handle save shortcut
+            if key.code == KeyCode::Char('s') && !state.editing {
+                if matches!(state.screen, Screen::EditDatabase | Screen::EditJwt) {
+                    handle_save(&state, set_state);
                 }
+            } else if key.code == KeyCode::Enter && state.editing {
+                // Handle export/import
+                match state.screen {
+                    Screen::Export => handle_export(&state, set_state),
+                    Screen::Import => handle_import(&state, set_state),
+                    _ => handle_key_event(key.code, &state, set_state),
+                }
+            } else {
+                handle_key_event(key.code, &state, set_state);
             }
         }
 
@@ -67,6 +72,19 @@ impl Component for MediTrackConfigTUI {
 }
 
 pub async fn run_config_tui() -> anyhow::Result<()> {
-    reratui::render(|| MediTrackConfigTUI).await?;
+    // Initialize tracing
+    tracing_subscriber::fmt()
+        .with_max_level(tracing::Level::INFO)
+        .init();
+
+    // Prompt for password
+    let password = Password::new()
+        .with_prompt("Enter configuration password")
+        .with_confirmation("Confirm password", "Passwords do not match")
+        .allow_empty_password(false)
+        .interact()?;
+
+    let tui = MediTrackConfigTUI { password };
+    reratui::render(move || tui.clone()).await?;
     Ok(())
 }
