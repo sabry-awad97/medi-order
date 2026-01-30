@@ -232,7 +232,15 @@ export function AppSidebar() {
             <SidebarMenu>
               <SidebarMenuItem>
                 <SidebarMenuButton
-                  onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+                  onClick={() => {
+                    const newTheme = theme === "dark" ? "light" : "dark";
+                    setTheme(newTheme);
+                    // Save to database
+                    updateSetting.mutate({
+                      key: "defaultTheme",
+                      value: newTheme,
+                    });
+                  }}
                   tooltip={
                     state === "collapsed"
                       ? theme === "dark"
@@ -256,7 +264,15 @@ export function AppSidebar() {
               </SidebarMenuItem>
               <SidebarMenuItem>
                 <SidebarMenuButton
-                  onClick={() => setLocale(locale === "ar" ? "en" : "ar")}
+                  onClick={() => {
+                    const newLocale = locale === "ar" ? "en" : "ar";
+                    setLocale(newLocale);
+                    // Save to database
+                    updateSetting.mutate({
+                      key: "defaultLanguage",
+                      value: newLocale,
+                    });
+                  }}
                   tooltip={
                     state === "collapsed"
                       ? LOCALES[locale === "ar" ? "en" : "ar"].nativeName

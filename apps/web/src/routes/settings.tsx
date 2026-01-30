@@ -78,6 +78,7 @@ import {
 } from "@/lib/settings-definitions";
 import type { Settings } from "@/lib/types-settings";
 import type { SettingCategory, SettingDefinition } from "@/lib/types-settings";
+import { useTheme } from "@/components/theme-provider";
 import { ManualUpdateCheck } from "@/components/manual-update-check";
 import { useState as useNotificationState } from "react";
 
@@ -160,6 +161,7 @@ const categoryIcons: Record<SettingCategory, any> = {
 function SettingsPage() {
   const { t } = useTranslation("settings");
   const { locale, setLocale } = useLocale();
+  const { theme, setTheme } = useTheme();
   const { data: settings, isLoading } = useSettings();
   const updateSettings = useUpdateSettings();
   const resetSettings = useResetSettings();
@@ -186,6 +188,19 @@ function SettingsPage() {
     }
   }, [settings?.defaultLanguage, locale, setLocale]);
 
+  // Sync theme setting with ThemeProvider
+  useEffect(() => {
+    if (
+      settings?.defaultTheme &&
+      settings.defaultTheme !== theme &&
+      (settings.defaultTheme === "light" ||
+        settings.defaultTheme === "dark" ||
+        settings.defaultTheme === "system")
+    ) {
+      setTheme(settings.defaultTheme);
+    }
+  }, [settings?.defaultTheme, theme, setTheme]);
+
   const handleChange = (key: string, value: unknown) => {
     setFormData((prev) => ({ ...prev, [key]: value }));
     setHasChanges(true);
@@ -201,8 +216,7 @@ function SettingsPage() {
       key === "defaultTheme" &&
       (value === "light" || value === "dark" || value === "system")
     ) {
-      // We'll need to import useTheme hook
-      // For now, we'll let the save button handle it
+      setTheme(value);
     }
   };
 
