@@ -640,6 +640,132 @@ WHERE u.id = 'user-uuid';
    - Enums for user_status ensure consistent state management
    - UUID v7 IDs provide time-ordered, globally unique identifiers
 
+## PostgreSQL-Specific Optimizations
+
+This entity model is optimized for PostgreSQL with native database features:
+
+### Native Data Types
+
+1. **UUID Type**
+   - All ID fields use PostgreSQL native UUID type
+   - More efficient than VARCHAR(36) for storage and indexing
+   - Supports UUID v7 for time-ordered, globally unique identifiers
+   - Column type: `column_type = "Uuid"`
+
+2. **ENUM Types**
+   - Employment status, work schedule, and user status use PostgreSQL ENUM types
+   - More efficient than string comparisons
+   - Database-level validation
+   - Type-safe at both Rust and database levels
+   - Examples:
+     ```sql
+     CREATE TYPE employment_status AS ENUM ('active', 'on_leave', 'terminated');
+     CREATE TYPE work_schedule AS ENUM ('full_time', 'part_time', 'contract');
+     CREATE TYPE user_status AS ENUM ('active', 'inactive', 'suspended', 'pending_verification');
+     ```
+
+3. **TIMESTAMPTZ (Timestamp with Timezone)**
+   - All datetime fields use PostgreSQL TIMESTAMPTZ
+   - Stores timezone information with timestamps
+   - Prevents timezone-related bugs
+   - Supports global deployments
+   - Column type: `column_type = "TimestampWithTimeZone"`
+
+4. **JSONB (Binary JSON)**
+   - Role permissions stored as JSONB
+   - More efficient than JSON for querying
+   - Supports indexing and GIN indexes
+   - Column type: `column_type = "JsonBinary"`
+
+5. **TEXT vs VARCHAR**
+   - TEXT: Unlimited length fields (full_name, position, department, notes, password_hash, avatar_url)
+   - VARCHAR with specific lengths: Fields with known size constraints
+     - email: VARCHAR(255) - email standard
+     - phone: VARCHAR(20) - international phone format
+     - employee_id: VARCHAR(50) - employee ID format
+     - username: VARCHAR(100) - username length limit
+     - npi_number: VARCHAR(10) - NPI standard length
+
+6. **NUMERIC with Precision**
+   - Compensation field uses NUMERIC(12,2)
+   - Precise decimal arithmetic (no floating-point errors)
+   - 12 digits total, 2 decimal places
+   - Suitable for currency and financial data
+   - Column type: `column_type = "Decimal(Some((12, 2)))"`
+
+### Column Type Mapping
+
+| Rust Type              | PostgreSQL Type     | SeaORM Annotation                         | Use Case                       |
+| ---------------------- | ------------------- | ----------------------------------------- | ------------------------------ |
+| `Id`                   | `UUID`              | `column_type = "Uuid"`                    | Primary keys, foreign keys     |
+| `String` (unlimited)   | `TEXT`              | `column_type = "Text"`                    | Long text, notes, descriptions |
+| `String` (limited)     | `VARCHAR(N)`        | `column_type = "String(StringLen::N(N))"` | Constrained text fields        |
+| `EmploymentStatus`     | `employment_status` | `db_type = "Enum"`                        | Employment status enum         |
+| `WorkSchedule`         | `work_schedule`     | `db_type = "Enum"`                        | Work schedule enum             |
+| `UserStatus`           | `user_status`       | `db_type = "Enum"`                        | User status enum               |
+| `DateTimeWithTimeZone` | `TIMESTAMPTZ`       | `column_type = "TimestampWithTimeZone"`   | All timestamps                 |
+| `Date`                 | `DATE`              | Default                                   | Date-only fields               |
+| `Decimal`              | `NUMERIC(12,2)`     | `column_type = "Decimal(Some((12, 2)))"`  | Currency, compensation         |
+| `Json`                 | `JSONB`             | `column_type = "JsonBinary"`              | Permissions, flexible data     |
+| `bool`                 | `BOOLEAN`           | Default                                   | Boolean flags                  |
+| `i32`                  | `INTEGER`           | `column_type = "Integer"`                 | Integer values                 |
+
+### Performance Optimizations
+
+1. **Explicit Column Types**
+   - All fields have explicit PostgreSQL column types
+   - Optimizes storage and query performance
+   - Prevents type conversion overhead
+
+2. **Proper Indexing**
+   - UUID fields indexed for fast lookups
+   - ENUM fields indexed for filtering
+   - TIMESTAMPTZ fields indexed for time-based queries
+   - Partial indexes on `deleted_at IS NULL` for active records
+
+3. **JSONB Indexing**
+
+   ```sql
+   CREATE INDEX idx_roles_permissions ON roles USING GIN (permissions);
+   ```
+
+4. **Nullable Annotations**
+   - Explicit `nullable` annotations for optional fields
+   - Prevents unnecessary NOT NULL constraints
+   - Optimizes storage for sparse data
+
+### Migration Considerations
+
+1. **Create ENUM types first**
+
+   ```sql
+   CREATE TYPE employment_status AS ENUM ('active', 'on_leave', 'terminated');
+   CREATE TYPE work_schedule AS ENUM ('full_time', 'part_time', 'contract');
+   CREATE TYPE user_status AS ENUM ('active', 'inactive', 'suspended', 'pending_verification');
+   ```
+
+2. **Create tables with proper types**
+
+   ```sql
+   CREATE TABLE staff (
+       id UUID PRIMARY KEY,
+       employee_id VARCHAR(50) UNIQUE NOT NULL,
+       employment_status employment_status NOT NULL,
+       work_schedule work_schedule NOT NULL,
+       compensation NUMERIC(12,2),
+       created_at TIMESTAMPTZ NOT NULL,
+       updated_at TIMESTAMPTZ NOT NULL,
+       deleted_at TIMESTAMPTZ
+   );
+   ```
+
+3. **Add indexes**
+   ```sql
+   CREATE INDEX idx_staff_deleted_at ON staff(id) WHERE deleted_at IS NULL;
+   CREATE INDEX idx_users_deleted_at ON users(id) WHERE deleted_at IS NULL;
+   CREATE INDEX idx_roles_permissions ON roles USING GIN (permissions);
+   ```
+
 ## Implementation Notes
 
 - Use `staff_id` as a unique foreign key in User entity
@@ -652,9 +778,13 @@ WHERE u.id = 'user-uuid';
 - Implement role-based access control (RBAC) using the Role entity
 - Use timezone-aware timestamps (DateTimeWithTimeZone) for all datetime fields
 - Auto-update `updated_at` timestamp on every modification
-- Store permissions as JSON for flexibility
+- Store permissions as JSONB for flexibility and query performance
 - Protect system roles from deletion (`is_system = true`)
-- Use enums for status fields to ensure type safety
+- Use enums for status fields to ensure type safety at both Rust and database levels
+- Use PostgreSQL native UUID type for all ID fields
+- Use appropriate VARCHAR lengths for constrained fields
+- Use TEXT for unlimited length fields
+- Use NUMERIC with precision for financial data
 
 ### Soft Deletion Best Practices
 

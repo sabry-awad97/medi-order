@@ -4,9 +4,9 @@ use super::id::Id;
 use sea_orm::entity::prelude::*;
 use serde::{Deserialize, Serialize};
 
-/// User status enum
+/// User status enum - PostgreSQL native enum type
 #[derive(Debug, Clone, Copy, PartialEq, Eq, EnumIter, DeriveActiveEnum, Serialize, Deserialize)]
-#[sea_orm(rs_type = "String", db_type = "String(StringLen::N(50))")]
+#[sea_orm(rs_type = "String", db_type = "Enum", enum_name = "user_status")]
 pub enum UserStatus {
     #[sea_orm(string_value = "active")]
     Active,
@@ -21,76 +21,92 @@ pub enum UserStatus {
 /// User entity - represents staff members with app access (authentication/authorization layer)
 /// Every user MUST be a staff member (required staff_id)
 /// This entity adds authentication and permission capabilities to staff members
+/// Optimized for PostgreSQL with native types
 #[derive(Clone, Debug, PartialEq, DeriveEntityModel, Eq, Serialize, Deserialize)]
 #[sea_orm(table_name = "users")]
 pub struct Model {
-    #[sea_orm(primary_key, auto_increment = false)]
+    /// Primary key - PostgreSQL UUID type
+    #[sea_orm(primary_key, auto_increment = false, column_type = "Uuid")]
     pub id: Id,
 
-    /// Required link to staff member - every user is a staff member
-    #[sea_orm(unique)]
+    /// Required link to staff member - PostgreSQL UUID with UNIQUE constraint
+    #[sea_orm(unique, column_type = "Uuid")]
     pub staff_id: Id,
 
     // === Authentication & Identity ===
-    /// Unique username for login
-    #[sea_orm(unique)]
+    /// Unique username for login - VARCHAR(100)
+    #[sea_orm(unique, column_type = "String(StringLen::N(100))")]
     pub username: String,
 
-    /// Unique email address for login
-    #[sea_orm(unique)]
+    /// Unique email address for login - VARCHAR(255)
+    #[sea_orm(unique, column_type = "String(StringLen::N(255))")]
     pub email: String,
 
-    /// Hashed password
+    /// Hashed password - TEXT type for bcrypt/argon2 hashes
+    #[sea_orm(column_type = "Text")]
     pub password_hash: String,
 
     // === Profile Information ===
-    /// First name
+    /// First name - VARCHAR(100)
+    #[sea_orm(column_type = "String(StringLen::N(100))")]
     pub first_name: String,
 
-    /// Last name
+    /// Last name - VARCHAR(100)
+    #[sea_orm(column_type = "String(StringLen::N(100))")]
     pub last_name: String,
 
-    /// Display name (can be different from first+last)
+    /// Display name (can be different from first+last) - VARCHAR(200) (nullable)
+    #[sea_orm(column_type = "String(StringLen::N(200))", nullable)]
     pub display_name: Option<String>,
 
-    /// Profile avatar URL or path
+    /// Profile avatar URL or path - TEXT (nullable)
+    #[sea_orm(column_type = "Text", nullable)]
     pub avatar_url: Option<String>,
 
     // === Professional Information ===
-    /// NPI (National Provider Identifier)
+    /// NPI (National Provider Identifier) - VARCHAR(10) (nullable)
+    #[sea_orm(column_type = "String(StringLen::N(10))", nullable)]
     pub npi_number: Option<String>,
 
-    /// Supervisor's user ID (organizational hierarchy)
+    /// Supervisor's user ID (organizational hierarchy) - UUID (nullable)
+    #[sea_orm(column_type = "Uuid", nullable)]
     pub supervisor_id: Option<Id>,
 
     // === Authorization ===
-    /// User role ID (foreign key to roles table)
+    /// User role ID (foreign key to roles table) - PostgreSQL UUID
+    #[sea_orm(column_type = "Uuid")]
     pub role_id: Id,
 
     // === System & Security ===
-    /// Current account status
+    /// Current account status - PostgreSQL ENUM type
     pub status: UserStatus,
 
-    /// Whether the user account is active (can be inactive even if staff is active)
+    /// Whether the user account is active - PostgreSQL BOOLEAN
     pub is_active: bool,
 
-    /// Last login timestamp with timezone
+    /// Last login timestamp - PostgreSQL TIMESTAMPTZ (nullable)
+    #[sea_orm(column_type = "TimestampWithTimeZone", nullable)]
     pub last_login_at: Option<DateTimeWithTimeZone>,
 
     // === Audit & Compliance ===
-    /// User who created this account
+    /// User who created this account - UUID (nullable)
+    #[sea_orm(column_type = "Uuid", nullable)]
     pub created_by: Option<Id>,
 
-    /// User who last modified this account
+    /// User who last modified this account - UUID (nullable)
+    #[sea_orm(column_type = "Uuid", nullable)]
     pub updated_by: Option<Id>,
 
-    /// Account creation timestamp with timezone
+    /// Account creation timestamp - PostgreSQL TIMESTAMPTZ
+    #[sea_orm(column_type = "TimestampWithTimeZone")]
     pub created_at: DateTimeWithTimeZone,
 
-    /// Last update timestamp with timezone
+    /// Last update timestamp - PostgreSQL TIMESTAMPTZ (auto-updated)
+    #[sea_orm(column_type = "TimestampWithTimeZone")]
     pub updated_at: DateTimeWithTimeZone,
 
-    /// Soft deletion timestamp with timezone
+    /// Soft deletion timestamp - PostgreSQL TIMESTAMPTZ (nullable)
+    #[sea_orm(column_type = "TimestampWithTimeZone", nullable)]
     pub deleted_at: Option<DateTimeWithTimeZone>,
 }
 

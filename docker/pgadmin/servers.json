@@ -1,0 +1,14 @@
+{
+  "Servers": {
+    "1": {
+      "Name": "MediTrack Database",
+      "Group": "Development",
+      "Host": "postgres",
+      "Port": 5432,
+      "MaintenanceDB": "meditrack",
+      "Username": "meditrack",
+      "SSLMode": "prefer",
+      "Comment": "MediTrack PostgreSQL 18 database with pgvector for development"
+    }
+  }
+}

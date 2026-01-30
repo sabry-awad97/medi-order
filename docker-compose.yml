@@ -1,0 +1,163 @@
+# ═══════════════════════════════════════════════════════════════════════════════
+#  🏥 MediTrack - Docker Compose Configuration
+# ═══════════════════════════════════════════════════════════════════════════════
+#  Professional PostgreSQL database setup for development and testing
+# ═══════════════════════════════════════════════════════════════════════════════
+
+name: 'meditrack'
+
+services:
+  # ─────────────────────────────────────────────────────────────────────────────
+  #  PostgreSQL Database with pgvector and pg_textsearch
+  # ─────────────────────────────────────────────────────────────────────────────
+  postgres:
+    build:
+      context: ./docker/postgres
+      dockerfile: Dockerfile
+    image: meditrack-postgres:latest
+    container_name: meditrack-db
+    restart: unless-stopped
+    
+    environment:
+      # Database credentials
+      POSTGRES_DB: meditrack
+      POSTGRES_USER: meditrack
+      POSTGRES_PASSWORD: meditrack_dev_password
+      
+      # PostgreSQL configuration
+      POSTGRES_INITDB_ARGS: "--encoding=UTF8 --locale=en_US.UTF-8"
+      
+      # Timezone
+      TZ: UTC
+      PGTZ: UTC
+    
+    ports:
+      - "5432:5432"
+    
+    volumes:
+      # Persistent data storage
+      - postgres_data:/var/lib/postgresql
+      
+      # Custom PostgreSQL configuration
+      - ./docker/postgres/postgresql.conf:/etc/postgresql/postgresql.conf:ro
+      
+      # Initialization scripts (run on first start)
+      - ./docker/postgres/init:/docker-entrypoint-initdb.d:ro
+      
+      # Backup directory
+      - ./docker/postgres/backups:/backups
+    
+    command: 
+      - "postgres"
+      - "-c"
+      - "config_file=/etc/postgresql/postgresql.conf"
+    
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U meditrack -d meditrack"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    
+    networks:
+      - meditrack-network
+    
+    labels:
+      com.meditrack.description: "PostgreSQL database for MediTrack"
+      com.meditrack.service: "database"
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  #  pgAdmin - Database Management UI (Optional)
+  # ─────────────────────────────────────────────────────────────────────────────
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: meditrack-pgadmin
+    restart: unless-stopped
+    
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@meditrack.local
+      PGADMIN_DEFAULT_PASSWORD: admin
+      PGADMIN_CONFIG_SERVER_MODE: 'False'
+      PGADMIN_CONFIG_MASTER_PASSWORD_REQUIRED: 'False'
+    
+    ports:
+      - "5050:80"
+    
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
+      - ./docker/pgadmin/servers.json:/pgadmin4/servers.json:ro
+    
+    depends_on:
+      postgres:
+        condition: service_healthy
+    
+    networks:
+      - meditrack-network
+    
+    labels:
+      com.meditrack.description: "pgAdmin web interface for database management"
+      com.meditrack.service: "admin-ui"
+    
+    profiles:
+      - admin
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  #  Redis Cache (Optional - for future use)
+  # ─────────────────────────────────────────────────────────────────────────────
+  redis:
+    image: redis:8-alpine
+    container_name: meditrack-redis
+    restart: unless-stopped
+    
+    command: redis-server --appendonly yes --requirepass meditrack_redis_password
+    
+    ports:
+      - "6379:6379"
+    
+    volumes:
+      - redis_data:/data
+    
+    healthcheck:
+      test: ["CMD", "redis-cli", "--raw", "incr", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+      start_period: 5s
+    
+    networks:
+      - meditrack-network
+    
+    labels:
+      com.meditrack.description: "Redis cache for session and data caching"
+      com.meditrack.service: "cache"
+    
+    profiles:
+      - cache
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#  Volumes
+# ═══════════════════════════════════════════════════════════════════════════════
+volumes:
+  postgres_data:
+    driver: local
+    labels:
+      com.meditrack.description: "PostgreSQL data volume"
+  
+  pgadmin_data:
+    driver: local
+    labels:
+      com.meditrack.description: "pgAdmin configuration volume"
+  
+  redis_data:
+    driver: local
+    labels:
+      com.meditrack.description: "Redis data volume"
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#  Networks
+# ═══════════════════════════════════════════════════════════════════════════════
+networks:
+  meditrack-network:
+    driver: bridge
+    labels:
+      com.meditrack.description: "Internal network for MediTrack services"

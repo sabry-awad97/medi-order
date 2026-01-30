@@ -4,9 +4,9 @@ use super::id::Id;
 use sea_orm::entity::prelude::*;
 use serde::{Deserialize, Serialize};
 
-/// Employment status enum
+/// Employment status enum - PostgreSQL native enum type
 #[derive(Debug, Clone, Copy, PartialEq, Eq, EnumIter, DeriveActiveEnum, Serialize, Deserialize)]
-#[sea_orm(rs_type = "String", db_type = "String(StringLen::N(50))")]
+#[sea_orm(rs_type = "String", db_type = "Enum", enum_name = "employment_status")]
 pub enum EmploymentStatus {
     #[sea_orm(string_value = "active")]
     Active,
@@ -16,9 +16,9 @@ pub enum EmploymentStatus {
     Terminated,
 }
 
-/// Work schedule enum
+/// Work schedule enum - PostgreSQL native enum type
 #[derive(Debug, Clone, Copy, PartialEq, Eq, EnumIter, DeriveActiveEnum, Serialize, Deserialize)]
-#[sea_orm(rs_type = "String", db_type = "String(StringLen::N(50))")]
+#[sea_orm(rs_type = "String", db_type = "Enum", enum_name = "work_schedule")]
 pub enum WorkSchedule {
     #[sea_orm(string_value = "full_time")]
     FullTime,
@@ -29,70 +29,85 @@ pub enum WorkSchedule {
 }
 
 /// Staff entity - represents all actively working employees
-/// This is the base entity for all staff members
+/// Optimized for PostgreSQL with native types
 #[derive(Clone, Debug, PartialEq, DeriveEntityModel, Eq, Serialize, Deserialize)]
 #[sea_orm(table_name = "staff")]
 pub struct Model {
-    #[sea_orm(primary_key, auto_increment = false)]
+    /// Primary key - PostgreSQL UUID type
+    #[sea_orm(primary_key, auto_increment = false, column_type = "Uuid")]
     pub id: Id,
 
-    /// Full name of staff member
+    /// Full name - PostgreSQL TEXT type (unlimited length)
+    #[sea_orm(column_type = "Text")]
     pub full_name: String,
 
-    /// Employee ID or badge number
-    #[sea_orm(unique)]
+    /// Employee ID - VARCHAR(50) with UNIQUE constraint
+    #[sea_orm(unique, column_type = "String(StringLen::N(50))")]
     pub employee_id: String,
 
-    /// Job title/position
+    /// Job title/position - TEXT type
+    #[sea_orm(column_type = "Text")]
     pub position: String,
 
-    /// Department (pharmacy, administration, etc.)
+    /// Department - TEXT type
+    #[sea_orm(column_type = "Text")]
     pub department: String,
 
-    /// Contact phone number
+    /// Contact phone - VARCHAR(20)
+    #[sea_orm(column_type = "String(StringLen::N(20))")]
     pub phone: String,
 
-    /// Contact email
+    /// Contact email - VARCHAR(255) for email standard
+    #[sea_orm(column_type = "String(StringLen::N(255))")]
     pub email: String,
 
-    /// Employment status (active, on_leave, terminated)
+    /// Employment status - PostgreSQL ENUM type
     pub employment_status: EmploymentStatus,
 
-    /// Date of hire
+    /// Date of hire - PostgreSQL DATE type
     pub hire_date: Date,
 
-    /// Date of termination (if applicable)
+    /// Date of termination - PostgreSQL DATE type (nullable)
     pub termination_date: Option<Date>,
 
-    /// Work schedule (full_time, part_time, contract)
+    /// Work schedule - PostgreSQL ENUM type
     pub work_schedule: WorkSchedule,
 
-    /// Hourly rate or salary
+    /// Compensation - PostgreSQL NUMERIC(12,2) for precise decimal
+    #[sea_orm(column_type = "Decimal(Some((12, 2)))")]
     pub compensation: Option<Decimal>,
 
-    /// Emergency contact name
+    /// Emergency contact name - TEXT (nullable)
+    #[sea_orm(column_type = "Text", nullable)]
     pub emergency_contact_name: Option<String>,
 
-    /// Emergency contact phone
+    /// Emergency contact phone - VARCHAR(20) (nullable)
+    #[sea_orm(column_type = "String(StringLen::N(20))", nullable)]
     pub emergency_contact_phone: Option<String>,
 
-    /// Additional notes
+    /// Additional notes - TEXT (nullable)
+    #[sea_orm(column_type = "Text", nullable)]
     pub notes: Option<String>,
 
     // === Audit & Compliance ===
-    /// User who created this record
+    /// User who created this record - UUID (nullable)
+    #[sea_orm(column_type = "Uuid", nullable)]
     pub created_by: Option<Id>,
 
-    /// User who last modified this record
+    /// User who last modified this record - UUID (nullable)
+    #[sea_orm(column_type = "Uuid", nullable)]
     pub updated_by: Option<Id>,
 
-    /// Record creation timestamp with timezone
+    /// Record creation timestamp - PostgreSQL TIMESTAMPTZ
+    #[sea_orm(column_type = "TimestampWithTimeZone")]
     pub created_at: DateTimeWithTimeZone,
 
-    /// Last update timestamp with timezone
+    /// Last update timestamp - PostgreSQL TIMESTAMPTZ (auto-updated)
+    #[sea_orm(column_type = "TimestampWithTimeZone")]
     pub updated_at: DateTimeWithTimeZone,
 
-    /// Soft deletion timestamp with timezone
+    /// Soft deletion timestamp - PostgreSQL TIMESTAMPTZ (nullable)
+    #[sea_orm(column_type = "TimestampWithTimeZone", nullable)]
     pub deleted_at: Option<DateTimeWithTimeZone>,
 }
 
@@ -111,7 +126,7 @@ impl Related<super::user::Entity> for Entity {
 
 #[async_trait::async_trait]
 impl ActiveModelBehavior for ActiveModel {
-    /// Called before insert - generate ID if not set
+    /// Called before insert - generate ID and set timestamps
     fn new() -> Self {
         Self {
             id: sea_orm::ActiveValue::Set(Id::new()),
@@ -121,7 +136,7 @@ impl ActiveModelBehavior for ActiveModel {
         }
     }
 
-    /// Called before update - update timestamp
+    /// Called before save - update timestamp on modifications
     async fn before_save<C>(mut self, _db: &C, insert: bool) -> Result<Self, DbErr>
     where
         C: ConnectionTrait,
