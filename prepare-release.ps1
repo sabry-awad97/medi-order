@@ -11,8 +11,8 @@ Write-Host ""
 
 # Paths
 $nsisPath = "apps\web\src-tauri\target\release\bundle\nsis"
-$installer = "$nsisPath\medi-order_${Version}_x64-setup.exe"
-$signature = "$nsisPath\medi-order_${Version}_x64-setup.exe.sig"
+$installer = "$nsisPath\meditrack${Version}_x64-setup.exe"
+$signature = "$nsisPath\meditrack_${Version}_x64-setup.exe.sig"
 
 # Check if files exist
 if (-not (Test-Path $installer)) {
@@ -48,7 +48,7 @@ $latestJson = @"
   "platforms": {
     "windows-x86_64": {
       "signature": "$sig",
-      "url": "https://github.com/sabry-awad97/medi-order/releases/download/v$Version/medi-order_${Version}_x64-setup.exe"
+      "url": "https://github.com/sabry-awad97/meditrack/releases/download/v$Version/meditrack_${Version}_x64-setup.exe"
     }
   }
 }

@@ -4,8 +4,8 @@
   "pub_date": "2026-01-30T15:00:00Z",
   "platforms": {
     "windows-x86_64": {
-      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVSWU1pekt4c1Ywc25uM3NwbFo3bUUyOTMxMStiQzNMOTBGc2xZSUpVWW5NdFM2cmt6cU1zYVQ4TTNxbklUQSt1QzR5SkQ3Ykk1NXcraERqaEFMTnF0MytFQXI0emVLelFBPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzY5NzY5MTczCWZpbGU6bWVkaXRyYWNrXzAuMy4wX3g2NC1zZXR1cC5leGUKaWdtSFI3NlQ3S3YyS09FemV2WlhqbnJQcmJ6MGk3S0tyTUQvbkppM2doT1pTMWQ3eENkNXpiZjloL0hydEx3b1hXSlhUZ1N2Y2N4ZExpcTA1K2VrRHc9PQo==",
-      "url": "https://github.com/sabry-awad97/meditrack/releases/download/v0.3.0/meditrack_0.3.0_x64-setup.exe"
+      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVSWU1pekt4c1Ywc21ZTDM3Z2R4c0JIZXdpZnFaWFV0VWNIdHpzeldFYlVxRFd5WGVOL3FpN2pBa1d4UitMeGE1QWxWRWNLWHlrUDdDdmw2a3o4Nk5MaTBNTWl3UllwQkFvPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzY5ODE2MTMxCWZpbGU6bWVkaXRyYWNrXzAuNC4wX3g2NC1zZXR1cC5leGUKcTdML0RLb3lqM2tzRzVRdFhtMGhHVWdHa1d5UzhsTGlyRzZ1V3V5bXRjeEpjdFc0QTBzVzJjYmt5ckZZalplQUN1cERzL2NXNjl1bVh0ZnFqRndiQlE9PQo=",
+      "url": "https://github.com/sabry-awad97/meditrack/releases/download/v0.4.0/meditrack_0.4.0_x64-setup.exe"
     }
   }
 }
