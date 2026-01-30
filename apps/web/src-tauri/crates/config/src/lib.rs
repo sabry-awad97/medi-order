@@ -1,3 +1,4 @@
+use derive_getters::Getters;
 use serde::{Deserialize, Serialize};
 
 mod crypto;
@@ -13,7 +14,7 @@ pub use error::{ConfigError, Result};
 pub use storage::ConfigStorage;
 
 /// Main application configuration
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, Getters)]
 pub struct AppConfig {
     /// Application name (used for storage paths)
     #[serde(skip)]

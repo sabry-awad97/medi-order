@@ -110,7 +110,7 @@ impl Component for MediTrackConfigTUI {
     }
 }
 
-pub async fn run_config_tui() -> anyhow::Result<()> {
+pub async fn run_config_tui() -> Result<(), Box<dyn std::error::Error>> {
     // Initialize tracing
     tracing_subscriber::fmt()
         .with_max_level(tracing::Level::INFO)

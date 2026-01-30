@@ -41,6 +41,14 @@ impl DatabaseConfig {
             self.username, self.password, self.host, self.port, self.database
         )
     }
+
+    /// Get safe representation (without password)
+    pub fn safe_repr(&self) -> String {
+        format!(
+            "PostgreSQL: {}@{}:{}/{}",
+            self.username, self.host, self.port, self.database
+        )
+    }
 }
 
 impl Default for DatabaseConfig {
