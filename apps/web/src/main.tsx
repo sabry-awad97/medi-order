@@ -5,6 +5,7 @@ import { lazy, Suspense } from "react";
 import { AppProviders } from "./providers";
 import { routeTree } from "./routeTree.gen";
 import { Loading } from "./components/ui/loading";
+import { SplashScreen } from "./components/splash-screen";
 
 // Lazy load UpdateDialog
 const UpdateDialog = lazy(() =>
@@ -36,6 +37,7 @@ if (!rootElement.innerHTML) {
   const root = ReactDOM.createRoot(rootElement);
   root.render(
     <AppProviders>
+      <SplashScreen />
       <RouterProvider router={router} />
       <Suspense fallback={null}>
         <UpdateDialog />

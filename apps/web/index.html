@@ -26,14 +26,151 @@
         margin: 0;
         padding: 0;
         min-height: 100vh;
+        font-family: "Cairo", "Noto Sans Arabic", sans-serif;
       }
       #app {
         min-height: 100vh;
+      }
+
+      /* Splash Screen Styles */
+      #splash-screen {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(135deg, #09090b 0%, #18181b 100%);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        z-index: 9999;
+        opacity: 1;
+      }
+
+      .splash-content {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 2rem;
+      }
+
+      .splash-icon {
+        width: 80px;
+        height: 80px;
+        background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
+        border-radius: 20px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        animation: pulse 2s ease-in-out infinite;
+        box-shadow: 0 10px 40px rgba(59, 130, 246, 0.3);
+      }
+
+      .splash-icon svg {
+        width: 48px;
+        height: 48px;
+        color: white;
+      }
+
+      .splash-title {
+        font-size: 2rem;
+        font-weight: 700;
+        background: linear-gradient(135deg, #fafafa 0%, #a1a1aa 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin: 0;
+      }
+
+      .splash-subtitle {
+        font-size: 1rem;
+        color: #71717a;
+        margin: 0;
+      }
+
+      .splash-loader {
+        margin-top: 2rem;
+        display: flex;
+        gap: 0.5rem;
+      }
+
+      .splash-dot {
+        width: 8px;
+        height: 8px;
+        background: #3b82f6;
+        border-radius: 50%;
+        animation: bounce 1.4s ease-in-out infinite;
+      }
+
+      .splash-dot:nth-child(1) {
+        animation-delay: -0.32s;
+      }
+
+      .splash-dot:nth-child(2) {
+        animation-delay: -0.16s;
+      }
+
+      @keyframes pulse {
+        0%,
+        100% {
+          transform: scale(1);
+          box-shadow: 0 10px 40px rgba(59, 130, 246, 0.3);
+        }
+        50% {
+          transform: scale(1.05);
+          box-shadow: 0 15px 50px rgba(59, 130, 246, 0.5);
+        }
+      }
+
+      @keyframes bounce {
+        0%,
+        80%,
+        100% {
+          transform: scale(0);
+          opacity: 0.5;
+        }
+        40% {
+          transform: scale(1);
+          opacity: 1;
+        }
       }
     </style>
   </head>
 
   <body>
+    <!-- Splash Screen -->
+    <div id="splash-screen">
+      <div class="splash-content">
+        <div class="splash-icon">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="48"
+            height="48"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <path
+              d="m10.5 20.5 10-10a4.95 4.95 0 1 0-7-7l-10 10a4.95 4.95 0 1 0 7 7Z"
+            />
+            <path d="m8.5 8.5 7 7" />
+          </svg>
+        </div>
+        <h1 class="splash-title">ميدي تراك</h1>
+        <p class="splash-subtitle">نظام إدارة الصيدلية الاحترافي</p>
+        <div class="splash-loader">
+          <div class="splash-dot"></div>
+          <div class="splash-dot"></div>
+          <div class="splash-dot"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- App Container -->
     <div id="app"></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
