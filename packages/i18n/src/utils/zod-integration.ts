@@ -1,5 +1,5 @@
 import type { TFunction } from "i18next";
-import type { z } from "zod/v3";
+import * as z from "zod/v3";
 
 /**
  * Create a localized Zod error map
@@ -102,32 +102,37 @@ export function createZodErrorMap(t: TFunction): z.ZodErrorMap {
 /**
  * Create a localized Zod schema by applying the error map
  *
- * @param schema - The Zod schema to localize
+ * This function sets the global Zod error map to use localized messages.
+ * This is the recommended approach for applying custom error messages in Zod.
+ *
+ * @param schema - The Zod schema to use
  * @param t - Translation function from useTranslation hook
- * @returns The same schema with localized error messages
+ * @returns The original schema (error map is applied globally)
  *
  * @example
  * ```tsx
  * const { t } = useTranslation("validation");
- * const schema = localizedZodSchema(
+ *
+ * // This sets the global error map
+ * localizedZodSchema(
  *   z.object({
  *     email: z.string().email(),
  *     password: z.string().min(8),
  *   }),
  *   t
  * );
+ *
+ * // All subsequent validations will use localized messages
+ * const result = schema.safeParse(formData);
  * ```
  */
 export function localizedZodSchema<T extends z.ZodTypeAny>(
   schema: T,
   t: TFunction,
 ): T {
+  // Set the global error map - this is the recommended way in Zod
   const errorMap = createZodErrorMap(t);
-  return schema.superRefine((_, ctx) => {
-      // Apply error map to this schema instance
-      (ctx as any)._def = {
-          ...(ctx as any)._def,
-          errorMap,
-      };
-  }) as unknown as T;
+  z.setErrorMap(errorMap);
+
+  return schema;
 }

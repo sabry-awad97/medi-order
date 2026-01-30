@@ -82,3 +82,47 @@ export function formatCurrency(
     return `${currency} ${value}`;
   }
 }
+
+/**
+ * Pluralization utility for i18n
+ *
+ * Provides a helper function to generate plural translation keys
+ * that work with i18next's pluralization system.
+ *
+ * @example
+ * ```ts
+ * const { t } = useTranslation();
+ * const itemCount = 5;
+ * const text = t(pluralKey('item'), { count: itemCount }); // "5 items"
+ * ```
+ */
+
+/**
+ * Generate a plural translation key for use with i18next
+ *
+ * i18next automatically handles pluralization by appending suffixes
+ * like _one, _other, _zero, _two, _few, _many based on the count
+ * and the language's plural rules.
+ *
+ * @param key - Base translation key (e.g., "item", "order")
+ * @param namespace - Optional namespace (defaults to "common")
+ * @returns The base key to use with t() function along with count parameter
+ *
+ * @example
+ * ```ts
+ * // English: uses _one and _other
+ * t(pluralKey('item'), { count: 1 }) // "1 item"
+ * t(pluralKey('item'), { count: 5 }) // "5 items"
+ *
+ * // Arabic: uses _zero, _one, _two, _few, _many, _other
+ * t(pluralKey('item'), { count: 0 }) // "لا توجد عناصر"
+ * t(pluralKey('item'), { count: 1 }) // "عنصر واحد"
+ * t(pluralKey('item'), { count: 2 }) // "عنصران"
+ * t(pluralKey('item'), { count: 5 }) // "5 عناصر"
+ * ```
+ */
+export function pluralKey(key: string, namespace: string = "common"): string {
+  // i18next handles the plural suffix automatically based on count
+  // We just need to return the base key with namespace
+  return `${namespace}:plurals.${key}`;
+}

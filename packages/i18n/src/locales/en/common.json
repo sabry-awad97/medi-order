@@ -95,6 +95,24 @@
     "optional": "Optional",
     "days": "days"
   },
+  "plurals": {
+    "item_one": "{{count}} item",
+    "item_other": "{{count}} items",
+    "order_one": "{{count}} order",
+    "order_other": "{{count}} orders",
+    "supplier_one": "{{count}} supplier",
+    "supplier_other": "{{count}} suppliers",
+    "result_one": "{{count}} result",
+    "result_other": "{{count}} results",
+    "day_one": "{{count}} day",
+    "day_other": "{{count}} days",
+    "hour_one": "{{count}} hour",
+    "hour_other": "{{count}} hours",
+    "minute_one": "{{count}} minute",
+    "minute_other": "{{count}} minutes",
+    "second_one": "{{count}} second",
+    "second_other": "{{count}} seconds"
+  },
   "update": {
     "available": "Update Available",
     "newVersion": "New version {{version}} is available for download",
