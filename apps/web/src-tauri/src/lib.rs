@@ -80,6 +80,10 @@ pub async fn run() {
         ipc::commands::user::delete_user_permanently,
         // Statistics
         ipc::commands::user::get_user_statistics,
+        // Onboarding & First-Run Setup
+        ipc::commands::onboarding::check_first_run,
+        ipc::commands::onboarding::complete_first_run_setup,
+        ipc::commands::onboarding::complete_first_run_setup_default,
     ]);
 
     builder

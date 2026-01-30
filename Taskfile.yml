@@ -407,30 +407,6 @@ tasks:
         prompt: "⚠️  This will restore from {{.BACKUP_FILE}}. Continue?"
 
   # ═══════════════════════════════════════════════════════════════════════════
-  #  🌱 Database Seeding
-  # ═══════════════════════════════════════════════════════════════════════════
-
-  db:seed:staff:
-    desc: "🌱 Seed sample staff data"
-    cmds:
-      - "{{.PSQL}} -c \"INSERT INTO staff (id, full_name, employee_id, position, department, phone, email, employment_status, hire_date, work_schedule) VALUES (gen_random_uuid(), 'John Doe', 'EMP001', 'Pharmacist', 'Pharmacy', '555-0100', 'john.doe@pharmacy.com', 'active', CURRENT_DATE, 'full_time') ON CONFLICT (employee_id) DO NOTHING;\""
-      - "{{.PSQL}} -c \"INSERT INTO staff (id, full_name, employee_id, position, department, phone, email, employment_status, hire_date, work_schedule) VALUES (gen_random_uuid(), 'Jane Smith', 'EMP002', 'Pharmacy Technician', 'Pharmacy', '555-0101', 'jane.smith@pharmacy.com', 'active', CURRENT_DATE, 'full_time') ON CONFLICT (employee_id) DO NOTHING;\""
-      - echo "✅ Sample staff data seeded"
-
-  db:seed:test-user:
-    desc: "🌱 Seed test admin user"
-    cmds:
-      - docker-compose exec -T postgres psql -U meditrack -d meditrack < docker/postgres/seed-admin.sql
-      - echo "✅ Test admin user created (username admin, password password)"
-
-  db:seed:all:
-    desc: "🌱 Seed all sample data"
-    cmds:
-      - task: db:seed:staff
-      - task: db:seed:test-user
-      - echo "✅ All sample data seeded"
-
-  # ═══════════════════════════════════════════════════════════════════════════
   #  🧹 Database Cleanup
   # ═══════════════════════════════════════════════════════════════════════════
 

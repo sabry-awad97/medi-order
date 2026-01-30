@@ -139,6 +139,17 @@ pub struct ResetPasswordDto {
     pub new_password: String,
 }
 
+/// DTO for first-run setup - creates initial admin user
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct FirstRunSetupDto {
+    pub username: String,
+    pub email: String,
+    pub password: String,
+    pub first_name: String,
+    pub last_name: String,
+    pub organization_name: Option<String>,
+}
+
 impl From<super::Model> for UserResponseDto {
     fn from(model: super::Model) -> Self {
         Self {

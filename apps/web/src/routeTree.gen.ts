@@ -13,6 +13,8 @@ import { Route as SuppliersRouteImport } from './routes/suppliers'
 import { Route as SpecialOrdersRouteImport } from './routes/special-orders'
 import { Route as SettingsRouteImport } from './routes/settings'
 import { Route as ReportsRouteImport } from './routes/reports'
+import { Route as OnboardingRouteImport } from './routes/onboarding'
+import { Route as LoginRouteImport } from './routes/login'
 import { Route as R404RouteImport } from './routes/404'
 import { Route as IndexRouteImport } from './routes/index'
 
@@ -36,6 +38,16 @@ const ReportsRoute = ReportsRouteImport.update({
   path: '/reports',
   getParentRoute: () => rootRouteImport,
 } as any)
+const OnboardingRoute = OnboardingRouteImport.update({
+  id: '/onboarding',
+  path: '/onboarding',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LoginRoute = LoginRouteImport.update({
+  id: '/login',
+  path: '/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const R404Route = R404RouteImport.update({
   id: '/404',
   path: '/404',
@@ -50,6 +62,8 @@ const IndexRoute = IndexRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/404': typeof R404Route
+  '/login': typeof LoginRoute
+  '/onboarding': typeof OnboardingRoute
   '/reports': typeof ReportsRoute
   '/settings': typeof SettingsRoute
   '/special-orders': typeof SpecialOrdersRoute
@@ -58,6 +72,8 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/404': typeof R404Route
+  '/login': typeof LoginRoute
+  '/onboarding': typeof OnboardingRoute
   '/reports': typeof ReportsRoute
   '/settings': typeof SettingsRoute
   '/special-orders': typeof SpecialOrdersRoute
@@ -67,6 +83,8 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/404': typeof R404Route
+  '/login': typeof LoginRoute
+  '/onboarding': typeof OnboardingRoute
   '/reports': typeof ReportsRoute
   '/settings': typeof SettingsRoute
   '/special-orders': typeof SpecialOrdersRoute
@@ -77,16 +95,28 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/404'
+    | '/login'
+    | '/onboarding'
     | '/reports'
     | '/settings'
     | '/special-orders'
     | '/suppliers'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/404' | '/reports' | '/settings' | '/special-orders' | '/suppliers'
+  to:
+    | '/'
+    | '/404'
+    | '/login'
+    | '/onboarding'
+    | '/reports'
+    | '/settings'
+    | '/special-orders'
+    | '/suppliers'
   id:
     | '__root__'
     | '/'
     | '/404'
+    | '/login'
+    | '/onboarding'
     | '/reports'
     | '/settings'
     | '/special-orders'
@@ -96,6 +126,8 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   R404Route: typeof R404Route
+  LoginRoute: typeof LoginRoute
+  OnboardingRoute: typeof OnboardingRoute
   ReportsRoute: typeof ReportsRoute
   SettingsRoute: typeof SettingsRoute
   SpecialOrdersRoute: typeof SpecialOrdersRoute
@@ -132,6 +164,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ReportsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/onboarding': {
+      id: '/onboarding'
+      path: '/onboarding'
+      fullPath: '/onboarding'
+      preLoaderRoute: typeof OnboardingRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/login': {
+      id: '/login'
+      path: '/login'
+      fullPath: '/login'
+      preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/404': {
       id: '/404'
       path: '/404'
@@ -152,6 +198,8 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   R404Route: R404Route,
+  LoginRoute: LoginRoute,
+  OnboardingRoute: OnboardingRoute,
   ReportsRoute: ReportsRoute,
   SettingsRoute: SettingsRoute,
   SpecialOrdersRoute: SpecialOrdersRoute,

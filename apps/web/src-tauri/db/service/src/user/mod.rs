@@ -634,6 +634,286 @@ impl UserService {
             suspended,
         })
     }
+
+    /// Create initial admin user for first-run setup (with default credentials)
+    pub async fn create_initial_admin(&self) -> ServiceResult<UserResponseDto> {
+        tracing::info!("Creating initial admin user for first-run setup");
+
+        // Check if any users exist
+        let user_count = User::find()
+            .filter(user::Column::DeletedAt.is_null())
+            .count(&*self.db)
+            .await?;
+
+        if user_count > 0 {
+            return Err(ServiceError::Conflict(
+                "Users already exist. First-run setup already completed.".to_string(),
+            ));
+        }
+
+        // Create admin role if it doesn't exist
+        let admin_role_id = self.ensure_admin_role().await?;
+
+        // Create admin staff member
+        let admin_staff = self.create_admin_staff().await?;
+
+        // Create admin user account
+        let now = chrono::Utc::now();
+        let password_hash = self.hash_password("admin123")?;
+
+        let admin_user = user::ActiveModel {
+            id: Set(Id::new()),
+            staff_id: Set(admin_staff.id),
+            username: Set("admin".to_string()),
+            email: Set("admin@pharmacy.com".to_string()),
+            password_hash: Set(password_hash),
+            first_name: Set("System".to_string()),
+            last_name: Set("Administrator".to_string()),
+            display_name: Set(Some("Admin".to_string())),
+            avatar_url: Set(None),
+            npi_number: Set(None),
+            supervisor_id: Set(None),
+            role_id: Set(admin_role_id),
+            status: Set(db_entity::user::UserStatus::Active),
+            is_active: Set(true),
+            last_login_at: Set(None),
+            created_by: Set(None),
+            updated_by: Set(None),
+            created_at: Set(now.into()),
+            updated_at: Set(now.into()),
+            deleted_at: Set(None),
+        };
+
+        let result = admin_user.insert(&*self.db).await?;
+
+        tracing::info!(
+            "Initial admin user created successfully: {} ({})",
+            result.username,
+            result.id
+        );
+
+        Ok(UserResponseDto::from(result))
+    }
+
+    /// Create initial admin user with custom credentials for first-run setup
+    pub async fn create_initial_admin_custom(
+        &self,
+        dto: db_entity::user::dto::FirstRunSetupDto,
+    ) -> ServiceResult<UserResponseDto> {
+        tracing::info!("Creating custom initial admin user for first-run setup");
+
+        // Check if any users exist
+        let user_count = User::find()
+            .filter(user::Column::DeletedAt.is_null())
+            .count(&*self.db)
+            .await?;
+
+        if user_count > 0 {
+            return Err(ServiceError::Conflict(
+                "Users already exist. First-run setup already completed.".to_string(),
+            ));
+        }
+
+        // Validate password length
+        if dto.password.len() < 8 {
+            return Err(ServiceError::BadRequest(
+                "Password must be at least 8 characters".to_string(),
+            ));
+        }
+
+        // Create admin role if it doesn't exist
+        let admin_role_id = self.ensure_admin_role().await?;
+
+        // Create admin staff member with custom info
+        let admin_staff = self
+            .create_admin_staff_custom(&dto.first_name, &dto.last_name, &dto.email)
+            .await?;
+
+        // Create admin user account with custom credentials
+        let now = chrono::Utc::now();
+        let password_hash = self.hash_password(&dto.password)?;
+
+        let admin_user = user::ActiveModel {
+            id: Set(Id::new()),
+            staff_id: Set(admin_staff.id),
+            username: Set(dto.username),
+            email: Set(dto.email),
+            password_hash: Set(password_hash),
+            first_name: Set(dto.first_name),
+            last_name: Set(dto.last_name),
+            display_name: Set(dto.organization_name),
+            avatar_url: Set(None),
+            npi_number: Set(None),
+            supervisor_id: Set(None),
+            role_id: Set(admin_role_id),
+            status: Set(db_entity::user::UserStatus::Active),
+            is_active: Set(true),
+            last_login_at: Set(None),
+            created_by: Set(None),
+            updated_by: Set(None),
+            created_at: Set(now.into()),
+            updated_at: Set(now.into()),
+            deleted_at: Set(None),
+        };
+
+        let result = admin_user.insert(&*self.db).await?;
+
+        tracing::info!(
+            "Custom initial admin user created successfully: {} ({})",
+            result.username,
+            result.id
+        );
+
+        Ok(UserResponseDto::from(result))
+    }
+
+    /// Create admin staff member with custom information
+    async fn create_admin_staff_custom(
+        &self,
+        first_name: &str,
+        last_name: &str,
+        email: &str,
+    ) -> ServiceResult<db_entity::staff::Model> {
+        use db_entity::staff::{self, EmploymentStatus, Entity as Staff, WorkSchedule};
+
+        let full_name = format!("{} {}", first_name, last_name);
+
+        // Check if admin staff exists
+        if let Some(staff) = Staff::find()
+            .filter(staff::Column::EmployeeId.eq("ADMIN001"))
+            .filter(staff::Column::DeletedAt.is_null())
+            .one(&*self.db)
+            .await?
+        {
+            tracing::info!("Admin staff member already exists: {}", staff.id);
+            return Ok(staff);
+        }
+
+        // Create admin staff member
+        let now = chrono::Utc::now();
+        let admin_staff = staff::ActiveModel {
+            id: Set(Id::new()),
+            full_name: Set(full_name),
+            employee_id: Set("ADMIN001".to_string()),
+            position: Set("System Administrator".to_string()),
+            department: Set("Administration".to_string()),
+            phone: Set("000-000-0000".to_string()),
+            email: Set(email.to_string()),
+            employment_status: Set(EmploymentStatus::Active),
+            hire_date: Set(chrono::Utc::now().date_naive()),
+            termination_date: Set(None),
+            work_schedule: Set(WorkSchedule::FullTime),
+            compensation: Set(None),
+            emergency_contact_name: Set(None),
+            emergency_contact_phone: Set(None),
+            notes: Set(Some("Initial system administrator account".to_string())),
+            created_by: Set(None),
+            updated_by: Set(None),
+            created_at: Set(now.into()),
+            updated_at: Set(now.into()),
+            deleted_at: Set(None),
+        };
+
+        let result = admin_staff.insert(&*self.db).await?;
+        tracing::info!("Created custom admin staff member: {}", result.id);
+
+        Ok(result)
+    }
+
+    /// Ensure admin role exists, create if not
+    async fn ensure_admin_role(&self) -> ServiceResult<Id> {
+        use db_entity::role::{self, Entity as Role};
+
+        // Check if admin role exists
+        if let Some(role) = Role::find()
+            .filter(role::Column::Name.eq("admin"))
+            .filter(role::Column::DeletedAt.is_null())
+            .one(&*self.db)
+            .await?
+        {
+            tracing::info!("Admin role already exists: {}", role.id);
+            return Ok(role.id);
+        }
+
+        // Create admin role
+        let now = chrono::Utc::now();
+        let admin_role = role::ActiveModel {
+            id: Set(Id::new()),
+            name: Set("admin".to_string()),
+            display_name: Set("Administrator".to_string()),
+            description: Set(Some(
+                "Full system administrator with all permissions".to_string(),
+            )),
+            level: Set(100),
+            is_system: Set(true),
+            is_active: Set(true),
+            permissions: Set(serde_json::json!([
+                "users:*",
+                "roles:*",
+                "staff:*",
+                "orders:*",
+                "suppliers:*",
+                "reports:*",
+                "settings:*"
+            ])),
+            created_by: Set(None),
+            updated_by: Set(None),
+            created_at: Set(now.into()),
+            updated_at: Set(now.into()),
+            deleted_at: Set(None),
+        };
+
+        let result = admin_role.insert(&*self.db).await?;
+        tracing::info!("Created admin role: {}", result.id);
+
+        Ok(result.id)
+    }
+
+    /// Create admin staff member (default)
+    async fn create_admin_staff(&self) -> ServiceResult<db_entity::staff::Model> {
+        use db_entity::staff::{self, EmploymentStatus, Entity as Staff, WorkSchedule};
+
+        // Check if admin staff exists
+        if let Some(staff) = Staff::find()
+            .filter(staff::Column::EmployeeId.eq("ADMIN001"))
+            .filter(staff::Column::DeletedAt.is_null())
+            .one(&*self.db)
+            .await?
+        {
+            tracing::info!("Admin staff member already exists: {}", staff.id);
+            return Ok(staff);
+        }
+
+        // Create admin staff member
+        let now = chrono::Utc::now();
+        let admin_staff = staff::ActiveModel {
+            id: Set(Id::new()),
+            full_name: Set("System Administrator".to_string()),
+            employee_id: Set("ADMIN001".to_string()),
+            position: Set("System Administrator".to_string()),
+            department: Set("IT".to_string()),
+            phone: Set("000-000-0000".to_string()),
+            email: Set("admin@pharmacy.com".to_string()),
+            employment_status: Set(EmploymentStatus::Active),
+            hire_date: Set(chrono::Utc::now().date_naive()),
+            termination_date: Set(None),
+            work_schedule: Set(WorkSchedule::FullTime),
+            compensation: Set(None),
+            emergency_contact_name: Set(None),
+            emergency_contact_phone: Set(None),
+            notes: Set(Some("Initial system administrator account".to_string())),
+            created_by: Set(None),
+            updated_by: Set(None),
+            created_at: Set(now.into()),
+            updated_at: Set(now.into()),
+            deleted_at: Set(None),
+        };
+
+        let result = admin_staff.insert(&*self.db).await?;
+        tracing::info!("Created admin staff member: {}", result.id);
+
+        Ok(result)
+    }
 }
 
 /// User statistics

@@ -3,9 +3,16 @@ import {
   Outlet,
   createRootRouteWithContext,
   Link,
+  useRouterState,
 } from "@tanstack/react-router";
 import { TanStackRouterDevtools } from "@tanstack/react-router-devtools";
-import { createContext, useContext, type ReactNode } from "react";
+import {
+  createContext,
+  useContext,
+  useEffect,
+  useState,
+  type ReactNode,
+} from "react";
 import {
   Home,
   ArrowRight,
@@ -14,6 +21,7 @@ import {
   FileQuestion,
 } from "lucide-react";
 import { useDirection, useTranslation } from "@meditrack/i18n";
+import { invoke } from "@tauri-apps/api/core";
 
 import { AppSidebar } from "@/components/app-sidebar";
 import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar";
@@ -59,7 +67,61 @@ export const Route = createRootRouteWithContext<RouterAppContext>()({
 
 function RootComponent() {
   const { direction } = useDirection();
+  const router = useRouterState();
+  const [isFirstRun, setIsFirstRun] = useState<boolean | null>(null);
+  const [isChecking, setIsChecking] = useState(true);
 
+  useEffect(() => {
+    checkFirstRun();
+  }, []);
+
+  const checkFirstRun = async () => {
+    try {
+      const response = await invoke<{ data: boolean }>("check_first_run");
+      setIsFirstRun(response.data);
+
+      // Redirect to onboarding if first run and not already there
+      if (response.data && router.location.pathname !== "/onboarding") {
+        window.location.href = "/onboarding";
+      }
+    } catch (error) {
+      console.error("Failed to check first run:", error);
+      setIsFirstRun(false);
+    } finally {
+      setIsChecking(false);
+    }
+  };
+
+  // Show loading state while checking first run
+  if (isChecking) {
+    return (
+      <div className="flex h-screen items-center justify-center">
+        <div className="text-center">
+          <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-current border-r-transparent motion-reduce:animate-[spin_1.5s_linear_infinite]" />
+          <p className="mt-4 text-sm text-muted-foreground">Loading...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Check if current route is login or onboarding (no sidebar/layout)
+  const noLayoutRoutes = ["/login", "/onboarding"];
+  const isNoLayoutRoute = noLayoutRoutes.includes(router.location.pathname);
+
+  // If login/onboarding route, render without sidebar
+  if (isNoLayoutRoute) {
+    return (
+      <>
+        <HeadContent />
+        <Outlet />
+        {import.meta.env.DEV && (
+          <TanStackRouterDevtools position="bottom-left" />
+        )}
+      </>
+    );
+  }
+
+  // Regular layout with sidebar for authenticated routes
   return (
     <>
       <HeadContent />

@@ -72,6 +72,31 @@ export {
   userKeys as userKeysDB,
 } from "./use-users-db";
 
+// Hooks للمصادقة (Authentication)
+export {
+  useAuth,
+  useAuthCheck,
+  useCurrentUser,
+  usePermission,
+  useRole,
+  useAnyPermission,
+  useAllPermissions,
+  useAnyRole,
+  useLogin as useLoginHook,
+  useLogout,
+  useRefreshSession,
+} from "./use-auth";
+
+// Hooks للإعداد الأولي (Onboarding)
+export {
+  useCheckFirstRun,
+  useCompleteFirstRunSetup,
+  useCompleteFirstRunSetupDefault,
+  useRefreshFirstRun,
+  useResetFirstRunCache,
+  onboardingKeys,
+} from "./use-onboarding-db";
+
 // Hooks للتنبيهات
 export { useOrderAlerts, useAlertStats } from "./use-order-alerts";
 

@@ -256,11 +256,6 @@ task db:stats               # Show database statistics
 task db:vacuum              # Vacuum database
 task db:backup              # Backup database to file
 task db:restore             # Restore database from backup
-
-# Seeding
-task db:seed:staff          # Seed sample staff data
-task db:seed:test-user      # Seed test admin user
-task db:seed:all            # Seed all sample data
 ```
 
 ### Docker Management

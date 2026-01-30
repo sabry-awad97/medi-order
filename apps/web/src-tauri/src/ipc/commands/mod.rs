@@ -1,3 +1,4 @@
+pub mod onboarding;
 pub mod user;
 
 pub use user::{
@@ -22,3 +23,5 @@ pub use user::{
     restore_user,
     update_user,
 };
+
+pub use onboarding::{check_first_run, complete_first_run_setup, complete_first_run_setup_default};

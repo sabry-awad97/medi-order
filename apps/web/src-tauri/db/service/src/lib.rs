@@ -6,6 +6,7 @@ use typed_builder::TypedBuilder;
 
 use db_migration::run_migrations;
 
+mod onboarding;
 mod staff;
 mod user;
 
@@ -23,6 +24,9 @@ pub use staff::{StaffService, StaffStatistics};
 
 // Export User service
 pub use user::{UserService, UserStatistics};
+
+// Export Onboarding service
+pub use onboarding::OnboardingService;
 
 /// Database connection configuration
 pub struct DatabaseConfig {
@@ -55,6 +59,10 @@ pub struct ServiceManager {
     /// User service
     #[builder(setter(into))]
     user: Arc<UserService>,
+
+    /// Onboarding service
+    #[builder(setter(into))]
+    onboarding: Arc<OnboardingService>,
 }
 
 impl ServiceManager {
@@ -97,13 +105,20 @@ impl ServiceManager {
         .expect("Failed to create JWT service");
 
         let db = Arc::new(db);
-        let staff = StaffService::new(db.clone());
-        let user = UserService::new(db.clone(), Arc::new(staff.clone()), Arc::new(jwt_service));
+        let staff = Arc::new(StaffService::new(db.clone()));
+        let jwt_service = Arc::new(jwt_service);
+        let user = Arc::new(UserService::new(
+            db.clone(),
+            staff.clone(),
+            jwt_service.clone(),
+        ));
+        let onboarding = Arc::new(OnboardingService::new(user.clone()));
 
         Ok(Self::builder()
             .db(db.clone())
             .staff(staff)
             .user(user)
+            .onboarding(onboarding)
             .build())
     }
 }

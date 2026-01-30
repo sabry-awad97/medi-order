@@ -3,6 +3,7 @@ import { Toaster } from "@/components/ui/sonner";
 import { I18nProvider, useDirection } from "@meditrack/i18n";
 import { QueryProvider } from "./query-provider";
 import { ZodProvider } from "./zod-provider";
+import { AuthProvider } from "@/contexts/auth-context";
 import { useEffect, useState } from "react";
 import type { Locale } from "@meditrack/i18n";
 import { useNotifications, useAutoArchive } from "@/hooks";
@@ -102,12 +103,14 @@ function AppContent({ children }: { children: React.ReactNode }) {
           disableTransitionOnChange
           storageKey="pharmacy-theme"
         >
-          {children}
-          <Toaster
-            richColors
-            position="top-center"
-            dir={direction.isRTL ? "rtl" : "ltr"}
-          />
+          <AuthProvider>
+            {children}
+            <Toaster
+              richColors
+              position="top-center"
+              dir={direction.isRTL ? "rtl" : "ltr"}
+            />
+          </AuthProvider>
         </ThemeProvider>
       </QueryProvider>
     </ZodProvider>
