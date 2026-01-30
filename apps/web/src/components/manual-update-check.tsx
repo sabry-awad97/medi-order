@@ -10,7 +10,7 @@ import {
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Download, CheckCircle2, AlertCircle, Loader2 } from "lucide-react";
 import { useTranslation } from "@meditrack/i18n";
-import { getVersion } from "@tauri-apps/api/app";
+import { getAppVersion } from "@/lib/tauri-api";
 import { useState, useEffect } from "react";
 
 export function ManualUpdateCheck() {
@@ -20,7 +20,7 @@ export function ManualUpdateCheck() {
 
   useEffect(() => {
     // Get version from Tauri
-    getVersion()
+    getAppVersion()
       .then(setCurrentVersion)
       .catch(() => {
         // Fallback to package version
