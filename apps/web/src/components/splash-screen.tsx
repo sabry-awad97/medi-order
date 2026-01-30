@@ -2,17 +2,27 @@
  * Splash Screen Component
  *
  * Displays a beautiful loading screen while the app initializes.
- * Automatically hidden once React mounts.
+ * Only shows on first load, not on subsequent refreshes.
  */
 
-import { Pill } from "lucide-react";
 import { useEffect } from "react";
 
 export function SplashScreen() {
   useEffect(() => {
-    // Hide splash screen after component mounts
+    // Check if this is the first load in this session
+    const hasShownSplash = sessionStorage.getItem("splash-shown");
+
     const splash = document.getElementById("splash-screen");
-    if (splash) {
+    if (!splash) return;
+
+    if (hasShownSplash) {
+      // If splash was already shown, remove it immediately
+      splash.remove();
+    } else {
+      // First load - show splash and mark as shown
+      sessionStorage.setItem("splash-shown", "true");
+
+      // Hide splash screen after component mounts
       // Add fade-out animation
       splash.style.opacity = "0";
       splash.style.transition = "opacity 0.3s ease-out";
@@ -37,4 +47,9 @@ export function hideSplashScreen() {
       splash.remove();
     }, 300);
   }
+}
+
+// Function to reset splash screen (for testing or special cases)
+export function resetSplashScreen() {
+  sessionStorage.removeItem("splash-shown");
 }

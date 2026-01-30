@@ -139,6 +139,13 @@
   </head>
 
   <body>
+    <script>
+      // Hide splash immediately if already shown in this session
+      if (sessionStorage.getItem("splash-shown")) {
+        document.write("<style>#splash-screen{display:none!important}</style>");
+      }
+    </script>
+
     <!-- Splash Screen -->
     <div id="splash-screen">
       <div class="splash-content">
