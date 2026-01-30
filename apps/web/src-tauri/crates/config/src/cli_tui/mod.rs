@@ -1,11 +1,11 @@
+pub mod components;
 pub mod handlers;
 pub mod state;
-pub mod ui;
 pub mod utils;
 
+pub use components::*;
 pub use handlers::*;
 pub use state::*;
-pub use ui::*;
 pub use utils::*;
 
 use dialoguer::Password;
@@ -52,22 +52,61 @@ impl Component for MediTrackConfigTUI {
             ])
             .split(area);
 
-        // Render header
-        render_header(chunks[0], buffer);
+        // Render header component
+        Header.render(chunks[0], buffer);
 
-        // Render content based on current screen
+        // Render content based on current screen using components
         match &state.screen {
-            Screen::Main => render_main_menu(chunks[1], buffer, state.selected_menu),
-            Screen::ViewConfig => render_view_config(chunks[1], buffer, &state.config),
-            Screen::EditDatabase => render_edit_database(chunks[1], buffer, &state),
-            Screen::EditJwt => render_edit_jwt(chunks[1], buffer, &state),
-            Screen::Export => render_export(chunks[1], buffer, &state),
-            Screen::Import => render_import(chunks[1], buffer, &state),
-            Screen::Confirm(action) => render_confirm(chunks[1], buffer, action),
+            Screen::Main => {
+                MainMenu {
+                    selected: state.selected_menu,
+                }
+                .render(chunks[1], buffer);
+            }
+            Screen::ViewConfig => {
+                ConfigView {
+                    config: state.config.clone(),
+                }
+                .render(chunks[1], buffer);
+            }
+            Screen::EditDatabase => {
+                DatabaseEditor {
+                    state: state.clone(),
+                }
+                .render(chunks[1], buffer);
+            }
+            Screen::EditJwt => {
+                JwtEditor {
+                    state: state.clone(),
+                }
+                .render(chunks[1], buffer);
+            }
+            Screen::Export => {
+                ExportDialog {
+                    state: state.clone(),
+                }
+                .render(chunks[1], buffer);
+            }
+            Screen::Import => {
+                ImportDialog {
+                    state: state.clone(),
+                }
+                .render(chunks[1], buffer);
+            }
+            Screen::Confirm(action) => {
+                ConfirmDialog {
+                    action: action.clone(),
+                }
+                .render(chunks[1], buffer);
+            }
         }
 
-        // Render footer with message
-        render_footer(chunks[2], buffer, &state.message);
+        // Render footer component
+        Footer {
+            message: state.message.clone(),
+            screen: state.screen.clone(),
+        }
+        .render(chunks[2], buffer);
     }
 }
 
