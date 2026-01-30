@@ -26,7 +26,18 @@ const STORAGE_KEY = "medi-order-locale";
 export const missingTranslations = new Set<string>();
 
 // Helper to check if we're in development mode
-const isDevelopment = false; // Will be replaced by build tool
+// This will be false by default, can be overridden by build tools
+const isDevelopment = false;
+
+// Helper to get missing translations as array
+export function getMissingTranslations(): string[] {
+  return Array.from(missingTranslations);
+}
+
+// Helper to clear missing translations registry
+export function clearMissingTranslations(): void {
+  missingTranslations.clear();
+}
 
 export function getStoredLocale(): Locale | null {
   try {
@@ -66,60 +77,101 @@ export function detectLocale(): Locale {
 export async function initializeI18n(initialLocale?: Locale) {
   const locale = initialLocale || detectLocale();
 
-  await i18n.use(initReactI18next).init({
-    resources: {
-      en: {
-        common: commonEn,
-        home: homeEn,
-        orders: ordersEn,
-        suppliers: suppliersEn,
-        reports: reportsEn,
-        settings: settingsEn,
-        validation: validationEn,
+  try {
+    await i18n.use(initReactI18next).init({
+      resources: {
+        en: {
+          common: commonEn,
+          home: homeEn,
+          orders: ordersEn,
+          suppliers: suppliersEn,
+          reports: reportsEn,
+          settings: settingsEn,
+          validation: validationEn,
+        },
+        ar: {
+          common: commonAr,
+          home: homeAr,
+          orders: ordersAr,
+          suppliers: suppliersAr,
+          reports: reportsAr,
+          settings: settingsAr,
+          validation: validationAr,
+        },
       },
-      ar: {
-        common: commonAr,
-        home: homeAr,
-        orders: ordersAr,
-        suppliers: suppliersAr,
-        reports: reportsAr,
-        settings: settingsAr,
-        validation: validationAr,
+      lng: locale,
+      fallbackLng: FALLBACK_LOCALE,
+      defaultNS: "common",
+      fallbackNS: "common",
+
+      debug: isDevelopment,
+
+      interpolation: {
+        escapeValue: false, // React already escapes
       },
-    },
-    lng: locale,
-    fallbackLng: FALLBACK_LOCALE,
-    defaultNS: "common",
-    fallbackNS: "common",
 
-    debug: isDevelopment,
+      react: {
+        useSuspense: false, // Use loading states instead
+      },
 
-    interpolation: {
-      escapeValue: false, // React already escapes
-    },
+      returnNull: false,
+      returnEmptyString: false,
 
-    react: {
-      useSuspense: false, // Use loading states instead
-    },
+      saveMissing: isDevelopment,
+      missingKeyHandler: (lngs, ns, key) => {
+        if (isDevelopment) {
+          const missingKey = `${ns}:${key}`;
+          missingTranslations.add(missingKey);
+          console.warn(
+            `🔴 Missing translation: ${missingKey} for languages: ${lngs.join(", ")}`,
+          );
+        }
+      },
 
-    returnNull: false,
-    returnEmptyString: false,
+      // Format missing keys with visual indicator in development
+      parseMissingKeyHandler: (key) => {
+        if (isDevelopment) {
+          return `⚠️ ${key} ⚠️`;
+        }
+        return key;
+      },
+    });
 
-    saveMissing: isDevelopment,
-    missingKeyHandler: (lngs, ns, key) => {
-      if (isDevelopment) {
-        const missingKey = `${ns}:${key}`;
-        missingTranslations.add(missingKey);
-        console.warn(
-          `Missing translation: ${missingKey} for languages: ${lngs.join(", ")}`,
-        );
-      }
-    },
-  });
+    // Store the selected locale
+    setStoredLocale(locale);
 
-  // Store the selected locale
-  setStoredLocale(locale);
+    return i18n;
+  } catch (error) {
+    console.error("Failed to initialize i18n:", error);
+    // Continue with minimal configuration
+    console.warn("Continuing with fallback configuration");
 
-  return i18n;
+    // Try to initialize with minimal config
+    try {
+      await i18n.use(initReactI18next).init({
+        lng: FALLBACK_LOCALE,
+        fallbackLng: FALLBACK_LOCALE,
+        defaultNS: "common",
+        resources: {
+          en: {
+            common: commonEn,
+          },
+        },
+        interpolation: {
+          escapeValue: false,
+        },
+        react: {
+          useSuspense: false,
+        },
+      });
+    } catch (fallbackError) {
+      console.error(
+        "Failed to initialize i18n with fallback config:",
+        fallbackError,
+      );
+    }
+
+    return i18n;
+  }
 }
 export { i18n };

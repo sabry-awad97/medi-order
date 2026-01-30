@@ -22,3 +22,7 @@ export type { UseDirectionReturn } from "./hooks/useDirection";
 
 // Configuration
 export { LOCALES, DEFAULT_LOCALE, FALLBACK_LOCALE } from "./config/locales";
+export {
+  getMissingTranslations,
+  clearMissingTranslations,
+} from "./config/i18n-config";
