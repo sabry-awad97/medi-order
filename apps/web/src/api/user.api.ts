@@ -211,7 +211,9 @@ export type UserStatistics = z.infer<typeof UserStatisticsSchema>;
  */
 export async function createUser(data: CreateUser): Promise<MutationResult> {
   logger.info("Creating user:", data.username);
-  return invokeCommand("create_user", MutationResultSchema, { data });
+  return invokeCommand("create_user", MutationResultSchema, {
+    params: { data },
+  });
 }
 
 /**
@@ -219,7 +221,7 @@ export async function createUser(data: CreateUser): Promise<MutationResult> {
  */
 export async function getUser(id: UserId): Promise<UserResponse> {
   logger.info("Getting user:", id);
-  return invokeCommand("get_user", UserResponseSchema, { id });
+  return invokeCommand("get_user", UserResponseSchema, { params: { id } });
 }
 
 /**
@@ -230,7 +232,9 @@ export async function updateUser(
   data: UpdateUser,
 ): Promise<MutationResult> {
   logger.info("Updating user:", id);
-  return invokeCommand("update_user", MutationResultSchema, { id, data });
+  return invokeCommand("update_user", MutationResultSchema, {
+    params: { id, data },
+  });
 }
 
 /**
@@ -242,8 +246,7 @@ export async function deleteUser(
 ): Promise<MutationResult> {
   logger.info("Deleting user:", id);
   return invokeCommand("delete_user", MutationResultSchema, {
-    id,
-    deleted_by: deleted_by || null,
+    params: { id, deleted_by: deleted_by || null },
   });
 }
 
@@ -259,8 +262,10 @@ export async function listUsers(
     "list_users",
     PaginationResultSchema(UserResponseSchema),
     {
-      filter: filter || null,
-      pagination: pagination || null,
+      params: {
+        filter: filter || null,
+        pagination: pagination || null,
+      },
     },
   );
 }
@@ -275,7 +280,7 @@ export async function listUsers(
 export async function loginUser(credentials: Login): Promise<LoginResponse> {
   logger.info("Logging in user:", credentials.username);
   return invokeCommand("login_user", LoginResponseSchema, {
-    data: credentials,
+    params: { data: credentials },
   });
 }
 
@@ -287,7 +292,9 @@ export async function changePassword(
   data: ChangePassword,
 ): Promise<MutationResult> {
   logger.info("Changing password for user:", id);
-  return invokeCommand("change_password", MutationResultSchema, { id, data });
+  return invokeCommand("change_password", MutationResultSchema, {
+    params: { id, data },
+  });
 }
 
 /**
@@ -298,7 +305,9 @@ export async function resetPassword(
   data: ResetPassword,
 ): Promise<MutationResult> {
   logger.info("Resetting password for user:", id);
-  return invokeCommand("reset_password", MutationResultSchema, { id, data });
+  return invokeCommand("reset_password", MutationResultSchema, {
+    params: { id, data },
+  });
 }
 
 // ============================================================================
@@ -334,7 +343,9 @@ export async function getUserByStaffId(
  */
 export async function getUserWithStaff(id: UserId): Promise<UserWithStaff> {
   logger.info("Getting user with staff info:", id);
-  return invokeCommand("get_user_with_staff", UserWithStaffSchema, { id });
+  return invokeCommand("get_user_with_staff", UserWithStaffSchema, {
+    params: { id },
+  });
 }
 
 /**
@@ -354,7 +365,7 @@ export async function getActiveUsers(): Promise<UserResponse[]> {
  */
 export async function restoreUser(id: UserId): Promise<UserResponse> {
   logger.info("Restoring user:", id);
-  return invokeCommand("restore_user", UserResponseSchema, { id });
+  return invokeCommand("restore_user", UserResponseSchema, { params: { id } });
 }
 
 /**
@@ -364,7 +375,9 @@ export async function deleteUserPermanently(
   id: UserId,
 ): Promise<MutationResult> {
   logger.warn("Permanently deleting user:", id);
-  return invokeCommand("delete_user_permanently", MutationResultSchema, { id });
+  return invokeCommand("delete_user_permanently", MutationResultSchema, {
+    params: { id },
+  });
 }
 
 // ============================================================================

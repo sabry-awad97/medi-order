@@ -10,8 +10,9 @@ use uuid::Uuid;
 /// - Globally unique: No coordination needed across systems
 /// - Sortable: Natural chronological ordering
 /// - 128-bit: Collision-resistant
-#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, Serialize, Deserialize)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, Serialize, Deserialize, DeriveValueType)]
 #[serde(transparent)]
+#[sea_orm(column_type = "Uuid")]
 pub struct Id(Uuid);
 
 impl Id {
@@ -100,42 +101,6 @@ impl std::str::FromStr for Id {
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         Ok(Self(Uuid::parse_str(s)?))
-    }
-}
-
-// SeaORM integration
-impl From<Id> for Value {
-    fn from(id: Id) -> Self {
-        Value::String(Some(Box::new(id.0.to_string())))
-    }
-}
-
-impl sea_orm::TryGetableFromJson for Id {}
-
-impl sea_orm::sea_query::ValueType for Id {
-    fn try_from(v: Value) -> Result<Self, sea_orm::sea_query::ValueTypeErr> {
-        match v {
-            Value::String(Some(s)) => Id::parse(&s).map_err(|_| sea_orm::sea_query::ValueTypeErr),
-            _ => Err(sea_orm::sea_query::ValueTypeErr),
-        }
-    }
-
-    fn type_name() -> String {
-        "Id".to_string()
-    }
-
-    fn array_type() -> sea_orm::sea_query::ArrayType {
-        sea_orm::sea_query::ArrayType::String
-    }
-
-    fn column_type() -> sea_orm::sea_query::ColumnType {
-        sea_orm::sea_query::ColumnType::String(sea_orm::sea_query::StringLen::N(36))
-    }
-}
-
-impl sea_orm::sea_query::Nullable for Id {
-    fn null() -> Value {
-        Value::String(None)
     }
 }
 
