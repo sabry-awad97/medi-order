@@ -19,6 +19,8 @@ pub struct CreateUserDto {
     pub role_id: Id,
     pub status: UserStatus,
     pub is_active: bool,
+    pub created_by: Option<Id>,
+    pub updated_by: Option<Id>,
 }
 
 /// DTO for updating an existing user
@@ -36,6 +38,13 @@ pub struct UpdateUserDto {
     pub role_id: Option<Id>,
     pub status: Option<UserStatus>,
     pub is_active: Option<bool>,
+    pub updated_by: Option<Id>,
+}
+
+/// DTO for deleting (soft delete) a user
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct DeleteUserDto {
+    pub deleted_by: Option<Id>,
 }
 
 /// DTO for user query filters

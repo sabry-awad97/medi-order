@@ -14,11 +14,14 @@ pub struct CreateStaffDto {
     pub email: String,
     pub employment_status: EmploymentStatus,
     pub hire_date: Date,
+    pub termination_date: Option<Date>,
     pub work_schedule: WorkSchedule,
     pub compensation: Option<Decimal>,
     pub emergency_contact_name: Option<String>,
     pub emergency_contact_phone: Option<String>,
     pub notes: Option<String>,
+    pub created_by: Option<Id>,
+    pub updated_by: Option<Id>,
 }
 
 /// DTO for updating an existing staff member
@@ -38,6 +41,7 @@ pub struct UpdateStaffDto {
     pub emergency_contact_name: Option<String>,
     pub emergency_contact_phone: Option<String>,
     pub notes: Option<String>,
+    pub updated_by: Option<Id>,
 }
 
 /// DTO for staff query filters
@@ -90,6 +94,13 @@ pub struct StaffListDto {
 pub struct TerminateStaffDto {
     pub termination_date: Date,
     pub notes: Option<String>,
+    pub updated_by: Option<Id>,
+}
+
+/// DTO for deleting (soft delete) a staff member
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct DeleteStaffDto {
+    pub deleted_by: Option<Id>,
 }
 
 impl From<super::Model> for StaffResponseDto {

@@ -13,14 +13,36 @@ pub fn run() {
                 )?;
             }
 
-            // Initialize database and services
-            let database_url = std::env::var("DATABASE_URL").unwrap_or_else(|_| {
-                "postgresql://meditrack:meditrack_dev_password@localhost:5432/meditrack".to_string()
-            });
+            // Get app config directory
+            let config_dir = app
+                .path()
+                .app_config_dir()
+                .expect("Failed to get app config directory");
 
+            // Load application configuration from storage or use defaults
+            let config = app_config::AppConfig::load_or_default(config_dir);
+
+            // Prepare database configuration
+            let db_config = db_service::DatabaseConfig {
+                url: config.database.connection_url(),
+                max_connections: config.database.max_connections,
+                min_connections: config.database.min_connections,
+                connect_timeout: config.database.connect_timeout,
+                idle_timeout: config.database.idle_timeout,
+            };
+
+            // Prepare JWT configuration
+            let jwt_config = db_service::JwtConfig {
+                secret: config.jwt.secret,
+                issuer: config.jwt.issuer,
+                audience: config.jwt.audience,
+                expiration_hours: config.jwt.expiration_hours,
+            };
+
+            // Initialize database and services
             let app_handle = app.handle().clone();
             tauri::async_runtime::spawn(async move {
-                match db_service::setup_services(&database_url).await {
+                match db_service::ServiceManager::init(db_config, jwt_config).await {
                     Ok(service_manager) => {
                         log::info!("Database services initialized successfully");
                         app_handle.manage(service_manager);

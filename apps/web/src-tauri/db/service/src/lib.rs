@@ -1,13 +1,42 @@
 use std::sync::Arc;
 
 use derive_getters::Getters;
-use sea_orm::{Database, DatabaseConnection};
+use sea_orm::{ConnectOptions, Database, DatabaseConnection};
 use typed_builder::TypedBuilder;
 
 use db_migration::run_migrations;
 
+mod staff;
+mod user;
+
 mod error;
 pub use error::{ServiceError, ServiceResult};
+
+mod jwt;
+pub use jwt::{Claims, JwtError, JwtService};
+
+// Export Staff service
+pub use staff::{StaffService, StaffStatistics};
+
+// Export User service
+pub use user::{UserService, UserStatistics};
+
+/// Database connection configuration
+pub struct DatabaseConfig {
+    pub url: String,
+    pub max_connections: u32,
+    pub min_connections: u32,
+    pub connect_timeout: u64,
+    pub idle_timeout: u64,
+}
+
+/// JWT service configuration
+pub struct JwtConfig {
+    pub secret: String,
+    pub issuer: String,
+    pub audience: String,
+    pub expiration_hours: i64,
+}
 
 /// Service manager containing all application services
 #[derive(Getters, TypedBuilder)]
@@ -15,31 +44,63 @@ pub struct ServiceManager {
     /// Thread-safe reference to database connection
     #[builder(setter(into))]
     db: Arc<DatabaseConnection>,
+
+    /// Staff service
+    #[builder(setter(into))]
+    staff: StaffService,
+
+    /// User service
+    #[builder(setter(into))]
+    user: UserService,
 }
 
 impl ServiceManager {
-    /// Initialize service manager with given database connection
-    pub fn init(db: Arc<DatabaseConnection>) -> Self {
-        Self::builder().db(db.clone()).build()
-    }
-}
+    /// Initialize service manager with database and JWT configuration
+    pub async fn init(
+        db_config: DatabaseConfig,
+        jwt_config: JwtConfig,
+    ) -> Result<Self, ServiceError> {
+        // Build database connection options
+        let mut opt = ConnectOptions::new(db_config.url);
+        opt.max_connections(db_config.max_connections)
+            .min_connections(db_config.min_connections)
+            .connect_timeout(std::time::Duration::from_secs(db_config.connect_timeout))
+            .idle_timeout(std::time::Duration::from_secs(db_config.idle_timeout))
+            .sqlx_logging(true);
 
-/// Sets up all services for the application
-pub async fn setup_services(url: &str) -> Result<ServiceManager, ServiceError> {
-    let db = Database::connect(url).await?;
-    // Run migrations with error handling
-    match run_migrations(&db).await {
-        Ok(_) => {
-            tracing::info!("Migrations completed successfully");
+        // Connect to database
+        let db = Database::connect(opt).await?;
+
+        // Run migrations with error handling
+        match run_migrations(&db).await {
+            Ok(_) => {
+                tracing::info!("Migrations completed successfully");
+            }
+            Err(e) => {
+                tracing::warn!(
+                    "Migration error (this might be expected if table already exists): {:?}",
+                    e
+                );
+            }
         }
-        Err(e) => {
-            tracing::warn!(
-                "Migration error (this might be expected if table already exists): {:?}",
-                e
-            );
-            // Continue anyway - the table might already exist with the correct schema
-            // or we might be able to work with the existing schema
-        }
+
+        // Create JWT service
+        let jwt_service = JwtService::new(
+            jwt_config.secret,
+            jwt_config.issuer,
+            jwt_config.audience,
+            jwt_config.expiration_hours,
+        )
+        .expect("Failed to create JWT service");
+
+        let db = Arc::new(db);
+        let staff = StaffService::new(db.clone());
+        let user = UserService::new(db.clone(), Arc::new(staff.clone()), Arc::new(jwt_service));
+
+        Ok(Self::builder()
+            .db(db.clone())
+            .staff(staff)
+            .user(user)
+            .build())
     }
-    Ok(ServiceManager::init(Arc::new(db)))
 }
