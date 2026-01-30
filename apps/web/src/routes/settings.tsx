@@ -102,6 +102,15 @@ function SettingsPage() {
   const [hasChanges, setHasChanges] = useState(false);
   const [showResetDialog, setShowResetDialog] = useState(false);
 
+  // Debug: Log i18n status
+  React.useEffect(() => {
+    console.log("🔍 Settings i18n debug:");
+    console.log("- Namespace: settings");
+    console.log("- Sample translation test:", t("title"));
+    console.log("- Category test:", t("categories.general.label"));
+    console.log("- Field test:", t("fields.pharmacyName.label"));
+  }, [t]);
+
   // تحديث formData عند تحميل الإعدادات
   if (settings && Object.keys(formData).length === 0) {
     setFormData(settings);
@@ -215,10 +224,19 @@ function SettingsPage() {
             <TabsList className="w-full justify-start mb-6 shrink-0">
               {Object.entries(SETTINGS_CATEGORIES).map(([key, category]) => {
                 const Icon = categoryIcons[key as SettingCategory];
+                const translatedLabel = t(category.label);
+
+                // Debug: Warn if translation is missing
+                if (translatedLabel === category.label) {
+                  console.warn(
+                    `⚠️ Translation missing for category: ${category.label}`,
+                  );
+                }
+
                 return (
                   <TabsTrigger key={key} value={key} className="gap-2">
                     <Icon className="h-4 w-4" />
-                    {category.label}
+                    {translatedLabel}
                   </TabsTrigger>
                 );
               })}
@@ -236,9 +254,11 @@ function SettingsPage() {
                             className: "h-5 w-5",
                           },
                         )}
-                        {category.label}
+                        {t(category.label)}
                       </CardTitle>
-                      <CardDescription>{category.description}</CardDescription>
+                      <CardDescription>
+                        {t(category.description)}
+                      </CardDescription>
                     </CardHeader>
                     <CardContent className="space-y-6">
                       {SETTINGS_DEFINITIONS.filter(
@@ -265,10 +285,10 @@ function SettingsPage() {
 
       {/* نافذة تأكيد إعادة التعيين */}
       <AlertDialog open={showResetDialog} onOpenChange={setShowResetDialog}>
-        <AlertDialogContent dir="rtl">
+        <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>{t("resetTitle")}</AlertDialogTitle>
-            <AlertDialogDescription className="text-right">
+            <AlertDialogDescription>
               {t("resetDescription")}
             </AlertDialogDescription>
           </AlertDialogHeader>
@@ -297,6 +317,21 @@ interface SettingFieldProps {
 function SettingField({ setting, value, onChange }: SettingFieldProps) {
   const { t } = useTranslation("settings");
 
+  // Debug: Log translation attempts
+  React.useEffect(() => {
+    const label = t(setting.label);
+    const description = t(setting.description);
+
+    if (label === setting.label) {
+      console.warn(`⚠️ Translation missing for label: ${setting.label}`);
+    }
+    if (description === setting.description) {
+      console.warn(
+        `⚠️ Translation missing for description: ${setting.description}`,
+      );
+    }
+  }, [setting.label, setting.description, t]);
+
   const renderField = () => {
     switch (setting.type) {
       case "text":
@@ -309,8 +344,6 @@ function SettingField({ setting, value, onChange }: SettingFieldProps) {
                 ? setting.defaultValue
                 : ""
             }
-            className="text-right"
-            dir="rtl"
           />
         );
 
@@ -328,7 +361,6 @@ function SettingField({ setting, value, onChange }: SettingFieldProps) {
             onChange={(e) => onChange(Number(e.target.value))}
             min={setting.min}
             max={setting.max}
-            className="text-right"
           />
         );
 
@@ -359,13 +391,13 @@ function SettingField({ setting, value, onChange }: SettingFieldProps) {
             onValueChange={onChange}
             items={setting.options || []}
           >
-            <SelectTrigger className="text-right">
+            <SelectTrigger>
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
               {setting.options?.map((option) => (
                 <SelectItem key={option.value} value={option.value}>
-                  {option.label}
+                  {t(option.label)}
                 </SelectItem>
               ))}
             </SelectContent>
@@ -376,7 +408,7 @@ function SettingField({ setting, value, onChange }: SettingFieldProps) {
         // Multiselect component - قيد التطوير
         return (
           <div className="text-sm text-muted-foreground">
-            {t("settings.multiselect")}
+            {t("multiselect")}
           </div>
         );
 
@@ -390,12 +422,14 @@ function SettingField({ setting, value, onChange }: SettingFieldProps) {
       <div className="flex items-center justify-between">
         <div className="space-y-0.5">
           <Label className="text-base font-medium">
-            {setting.label}
+            {t(setting.label)}
             {setting.required && (
               <span className="text-destructive mr-1">*</span>
             )}
           </Label>
-          <p className="text-sm text-muted-foreground">{setting.description}</p>
+          <p className="text-sm text-muted-foreground">
+            {t(setting.description)}
+          </p>
         </div>
         {setting.type !== "boolean" && (
           <div className="w-64">{renderField()}</div>

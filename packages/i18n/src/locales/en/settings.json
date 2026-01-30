@@ -5,16 +5,161 @@
   "saveChanges": "Save Changes",
   "import": "Import",
   "export": "Export",
+  "reset": "Reset",
   "resetTitle": "Reset Settings",
   "resetDescription": "Are you sure you want to reset all settings to default values? All current customizations will be lost.",
-  "categories": {
-    "general": "General",
-    "orders": "Orders",
-    "suppliers": "Suppliers",
-    "alerts": "Alerts",
-    "notifications": "Notifications",
-    "appearance": "Appearance",
-    "system": "System"
+  "multiselect": "Multi-select (under development)",
+  "actions": {
+    "cancel": "Cancel",
+    "reset": "Reset"
   },
-  "multiselect": "Multi-select (under development)"
+  "categories": {
+    "general": {
+      "label": "General Settings",
+      "description": "Basic pharmacy information"
+    },
+    "orders": {
+      "label": "Orders Settings",
+      "description": "Manage order behavior and constraints"
+    },
+    "suppliers": {
+      "label": "Suppliers Settings",
+      "description": "Supplier criteria and constraints"
+    },
+    "alerts": {
+      "label": "Alerts Settings",
+      "description": "Customize alerts and reminders"
+    },
+    "notifications": {
+      "label": "Notifications Settings",
+      "description": "Manage notifications and alerts"
+    },
+    "appearance": {
+      "label": "Appearance Settings",
+      "description": "Customize user interface"
+    },
+    "system": {
+      "label": "System Settings",
+      "description": "Advanced system settings"
+    }
+  },
+  "fields": {
+    "pharmacyName": {
+      "label": "Pharmacy Name",
+      "description": "Official pharmacy name displayed in the system"
+    },
+    "pharmacyPhone": {
+      "label": "Pharmacy Phone",
+      "description": "Main pharmacy phone number"
+    },
+    "pharmacyAddress": {
+      "label": "Pharmacy Address",
+      "description": "Complete pharmacy address"
+    },
+    "workingHours": {
+      "label": "Working Hours",
+      "description": "Pharmacy working hours"
+    },
+    "defaultOrderStatus": {
+      "label": "Default Order Status",
+      "description": "Status assigned to new orders",
+      "options": {
+        "pending": "Pending",
+        "ordered": "Ordered"
+      }
+    },
+    "autoArchiveDays": {
+      "label": "Auto Archive Days",
+      "description": "Days after delivery to auto-archive order (0 = disable)"
+    },
+    "requireCustomerPhone": {
+      "label": "Require Customer Phone",
+      "description": "Is customer phone required when creating an order?"
+    },
+    "allowedMedicineForms": {
+      "label": "Allowed Medicine Forms",
+      "description": "Medicine forms that can be added to orders"
+    },
+    "maxMedicinesPerOrder": {
+      "label": "Max Medicines Per Order",
+      "description": "Maximum number of medicines in a single order"
+    },
+    "minSupplierRating": {
+      "label": "Minimum Supplier Rating",
+      "description": "Minimum acceptable supplier rating (1 to 5)"
+    },
+    "maxDeliveryDays": {
+      "label": "Maximum Delivery Days",
+      "description": "Maximum acceptable days for order delivery from supplier"
+    },
+    "requireSupplierEmail": {
+      "label": "Require Supplier Email",
+      "description": "Is email required when adding a supplier?"
+    },
+    "enableAlerts": {
+      "label": "Enable Alerts",
+      "description": "Enable alert system for orders"
+    },
+    "oldOrderThreshold": {
+      "label": "Old Order Threshold (Days)",
+      "description": "Number of days after which an order is considered old"
+    },
+    "pickupReminderDays": {
+      "label": "Pickup Reminder (Days)",
+      "description": "Days after arrival to remind customer for pickup"
+    },
+    "alertCheckInterval": {
+      "label": "Alert Check Interval (Minutes)",
+      "description": "How often to check for new alerts"
+    },
+    "enableNotifications": {
+      "label": "Enable Notifications",
+      "description": "Enable desktop notifications"
+    },
+    "notificationSound": {
+      "label": "Notification Sound",
+      "description": "Play sound when a new notification appears"
+    },
+    "notifyOnNewOrder": {
+      "label": "Notify on New Order",
+      "description": "Send notification when a new order is added"
+    },
+    "notifyOnStatusChange": {
+      "label": "Notify on Status Change",
+      "description": "Send notification when order status changes"
+    },
+    "defaultTheme": {
+      "label": "Default Theme",
+      "description": "Default system theme",
+      "options": {
+        "light": "Light",
+        "dark": "Dark",
+        "system": "System"
+      }
+    },
+    "sidebarDefaultState": {
+      "label": "Default Sidebar State",
+      "description": "Whether sidebar is open or collapsed on startup",
+      "options": {
+        "open": "Open",
+        "collapsed": "Collapsed"
+      }
+    },
+    "itemsPerPage": {
+      "label": "Items Per Page",
+      "description": "Number of items displayed per page"
+    },
+    "enableDevMode": {
+      "label": "Enable Developer Mode",
+      "description": "Show developer tools and test data"
+    },
+    "autoBackup": {
+      "label": "Auto Backup",
+      "description": "Enable automatic data backup"
+    },
+    "backupIntervalDays": {
+      "label": "Backup Interval (Days)",
+      "description": "How often to create a backup"
+    }
+  }
 }

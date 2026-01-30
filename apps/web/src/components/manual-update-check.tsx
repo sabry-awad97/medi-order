@@ -10,19 +10,34 @@ import {
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Download, CheckCircle2, AlertCircle, Loader2 } from "lucide-react";
 import { useTranslation } from "@meditrack/i18n";
+import { getVersion } from "@tauri-apps/api/app";
+import { useState, useEffect } from "react";
 
 export function ManualUpdateCheck() {
-  const { t } = useTranslation();
+  const { t } = useTranslation("common");
   const { update, checking, error, checkForUpdates } = useAppUpdater();
+  const [currentVersion, setCurrentVersion] = useState<string>("0.3.0");
+
+  useEffect(() => {
+    // Get version from Tauri
+    getVersion()
+      .then(setCurrentVersion)
+      .catch(() => {
+        // Fallback to package version
+        setCurrentVersion("0.3.0");
+      });
+  }, []);
 
   return (
     <Card>
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <Download className="h-5 w-5" />
-          {t("update.available")}
+          {t("update.checkForUpdates")}
         </CardTitle>
-        <CardDescription>{t("update.checkForUpdates")}</CardDescription>
+        <CardDescription>
+          {t("update.currentVersion", { version: currentVersion })}
+        </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
         {error && (
@@ -35,11 +50,7 @@ export function ManualUpdateCheck() {
         {!update && !error && !checking && (
           <Alert>
             <CheckCircle2 className="h-4 w-4" />
-            <AlertDescription>
-              {t("update.upToDate", {
-                defaultValue: "Application is up to date",
-              })}
-            </AlertDescription>
+            <AlertDescription>{t("update.upToDate")}</AlertDescription>
           </Alert>
         )}
 
@@ -52,23 +63,10 @@ export function ManualUpdateCheck() {
           </Alert>
         )}
 
-        <div className="flex items-center gap-2">
-          <Button
-            onClick={checkForUpdates}
-            disabled={checking}
-            variant="outline"
-          >
-            {checking && <Loader2 className="ml-2 h-4 w-4 animate-spin" />}
-            {checking ? t("update.checking") : t("update.checkForUpdates")}
-          </Button>
-
-          <p className="text-xs text-muted-foreground">
-            {t("update.currentVersion", {
-              version: import.meta.env.VITE_APP_VERSION || "0.1.0",
-              defaultValue: `Current version: ${import.meta.env.VITE_APP_VERSION || "0.1.0"}`,
-            })}
-          </p>
-        </div>
+        <Button onClick={checkForUpdates} disabled={checking} variant="outline">
+          {checking && <Loader2 className="h-4 w-4 animate-spin" />}
+          {checking ? t("update.checking") : t("update.checkForUpdates")}
+        </Button>
       </CardContent>
     </Card>
   );

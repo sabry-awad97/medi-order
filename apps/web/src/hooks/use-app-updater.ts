@@ -28,6 +28,12 @@ export function useAppUpdater() {
     }
   };
 
+  const dismissUpdate = () => {
+    // Just close the dialog for this session
+    // It will show again on next app launch
+    setUpdate(null);
+  };
+
   const downloadAndInstall = async () => {
     if (!update) return;
 
@@ -85,5 +91,6 @@ export function useAppUpdater() {
     error,
     checkForUpdates,
     downloadAndInstall,
+    dismissUpdate,
   };
 }

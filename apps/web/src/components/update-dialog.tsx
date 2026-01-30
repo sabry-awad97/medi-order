@@ -13,6 +13,19 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Download, AlertCircle } from "lucide-react";
 import { useTranslation } from "@meditrack/i18n";
 
+// Detect if text is primarily Arabic
+function isArabicText(text: string): boolean {
+  // Arabic Unicode range: \u0600-\u06FF
+  const arabicChars = text.match(/[\u0600-\u06FF]/g);
+  const totalChars = text.replace(/\s/g, "").length;
+
+  if (totalChars === 0) return false;
+
+  // If more than 30% of characters are Arabic, consider it Arabic text
+  const arabicRatio = (arabicChars?.length || 0) / totalChars;
+  return arabicRatio > 0.3;
+}
+
 export function UpdateDialog() {
   const { t } = useTranslation();
   const {
@@ -22,9 +35,16 @@ export function UpdateDialog() {
     downloadProgress,
     error,
     downloadAndInstall,
+    dismissUpdate,
   } = useAppUpdater();
 
   const isOpen = !!update && !downloading;
+
+  // Detect text direction for release notes
+  const releaseNotesDir =
+    update?.body && isArabicText(update.body) ? "rtl" : "ltr";
+  const releaseNotesAlign =
+    releaseNotesDir === "rtl" ? "text-right" : "text-left";
 
   if (!update) return null;
 
@@ -42,8 +62,13 @@ export function UpdateDialog() {
         </DialogHeader>
 
         {update.body && (
-          <div className="my-4 max-h-60 overflow-y-auto rounded-md bg-muted p-4">
-            <p className="text-sm whitespace-pre-wrap">{update.body}</p>
+          <div
+            className="my-4 max-h-60 overflow-y-auto rounded-md bg-muted p-4"
+            dir={releaseNotesDir}
+          >
+            <p className={`text-sm whitespace-pre-wrap ${releaseNotesAlign}`}>
+              {update.body}
+            </p>
           </div>
         )}
 
@@ -76,7 +101,7 @@ export function UpdateDialog() {
         <DialogFooter className="gap-2">
           <Button
             variant="outline"
-            onClick={() => window.location.reload()}
+            onClick={dismissUpdate}
             disabled={downloading || checking}
           >
             {t("update.later")}

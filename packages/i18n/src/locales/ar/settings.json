@@ -5,16 +5,161 @@
   "saveChanges": "حفظ التغييرات",
   "import": "استيراد",
   "export": "تصدير",
+  "reset": "إعادة تعيين",
   "resetTitle": "إعادة تعيين الإعدادات",
   "resetDescription": "هل أنت متأكد من إعادة تعيين جميع الإعدادات إلى القيم الافتراضية؟ سيتم فقدان جميع التخصيصات الحالية.",
-  "categories": {
-    "general": "عام",
-    "orders": "الطلبات",
-    "suppliers": "الموردين",
-    "alerts": "التنبيهات",
-    "notifications": "الإشعارات",
-    "appearance": "المظهر",
-    "system": "النظام"
+  "multiselect": "اختيار متعدد (قيد التطوير)",
+  "actions": {
+    "cancel": "إلغاء",
+    "reset": "إعادة تعيين"
   },
-  "multiselect": "متعدد الاختيار (قيد التطوير)"
+  "categories": {
+    "general": {
+      "label": "الإعدادات العامة",
+      "description": "معلومات الصيدلية الأساسية"
+    },
+    "orders": {
+      "label": "إعدادات الطلبات",
+      "description": "إدارة سلوك الطلبات والقيود"
+    },
+    "suppliers": {
+      "label": "إعدادات الموردين",
+      "description": "معايير وقيود الموردين"
+    },
+    "alerts": {
+      "label": "إعدادات التنبيهات",
+      "description": "تخصيص التنبيهات والتذكيرات"
+    },
+    "notifications": {
+      "label": "إعدادات الإشعارات",
+      "description": "إدارة الإشعارات والتنبيهات"
+    },
+    "appearance": {
+      "label": "إعدادات المظهر",
+      "description": "تخصيص واجهة المستخدم"
+    },
+    "system": {
+      "label": "إعدادات النظام",
+      "description": "إعدادات النظام المتقدمة"
+    }
+  },
+  "fields": {
+    "pharmacyName": {
+      "label": "اسم الصيدلية",
+      "description": "الاسم الرسمي للصيدلية الذي يظهر في النظام"
+    },
+    "pharmacyPhone": {
+      "label": "رقم هاتف الصيدلية",
+      "description": "رقم الهاتف الرئيسي للصيدلية"
+    },
+    "pharmacyAddress": {
+      "label": "عنوان الصيدلية",
+      "description": "العنوان الكامل للصيدلية"
+    },
+    "workingHours": {
+      "label": "ساعات العمل",
+      "description": "ساعات عمل الصيدلية"
+    },
+    "defaultOrderStatus": {
+      "label": "حالة الطلب الافتراضية",
+      "description": "الحالة التي يتم تعيينها للطلبات الجديدة",
+      "options": {
+        "pending": "قيد الانتظار",
+        "ordered": "تم الطلب"
+      }
+    },
+    "autoArchiveDays": {
+      "label": "أيام الأرشفة التلقائية",
+      "description": "عدد الأيام بعد التسليم لأرشفة الطلب تلقائياً (0 = تعطيل)"
+    },
+    "requireCustomerPhone": {
+      "label": "إلزامية رقم هاتف العميل",
+      "description": "هل رقم هاتف العميل إلزامي عند إنشاء طلب؟"
+    },
+    "allowedMedicineForms": {
+      "label": "أشكال الأدوية المسموحة",
+      "description": "أشكال الأدوية التي يمكن إضافتها في الطلبات"
+    },
+    "maxMedicinesPerOrder": {
+      "label": "الحد الأقصى للأدوية في الطلب",
+      "description": "أقصى عدد من الأدوية يمكن إضافتها في طلب واحد"
+    },
+    "minSupplierRating": {
+      "label": "الحد الأدنى لتقييم المورد",
+      "description": "أقل تقييم مقبول للموردين (من 1 إلى 5)"
+    },
+    "maxDeliveryDays": {
+      "label": "الحد الأقصى لأيام التوصيل",
+      "description": "أقصى عدد أيام مقبول لتوصيل الطلب من المورد"
+    },
+    "requireSupplierEmail": {
+      "label": "إلزامية البريد الإلكتروني للمورد",
+      "description": "هل البريد الإلكتروني إلزامي عند إضافة مورد؟"
+    },
+    "enableAlerts": {
+      "label": "تفعيل التنبيهات",
+      "description": "تفعيل نظام التنبيهات للطلبات"
+    },
+    "oldOrderThreshold": {
+      "label": "عتبة الطلبات القديمة (أيام)",
+      "description": "عدد الأيام التي بعدها يعتبر الطلب قديماً"
+    },
+    "pickupReminderDays": {
+      "label": "تذكير الاستلام (أيام)",
+      "description": "عدد الأيام بعد الوصول لتذكير العميل بالاستلام"
+    },
+    "alertCheckInterval": {
+      "label": "فترة فحص التنبيهات (دقائق)",
+      "description": "كل كم دقيقة يتم فحص التنبيهات الجديدة"
+    },
+    "enableNotifications": {
+      "label": "تفعيل الإشعارات",
+      "description": "تفعيل إشعارات سطح المكتب"
+    },
+    "notificationSound": {
+      "label": "صوت الإشعارات",
+      "description": "تشغيل صوت عند ظهور إشعار جديد"
+    },
+    "notifyOnNewOrder": {
+      "label": "إشعار عند طلب جديد",
+      "description": "إرسال إشعار عند إضافة طلب جديد"
+    },
+    "notifyOnStatusChange": {
+      "label": "إشعار عند تغيير الحالة",
+      "description": "إرسال إشعار عند تغيير حالة الطلب"
+    },
+    "defaultTheme": {
+      "label": "المظهر الافتراضي",
+      "description": "المظهر الافتراضي للنظام",
+      "options": {
+        "light": "فاتح",
+        "dark": "داكن",
+        "system": "حسب النظام"
+      }
+    },
+    "sidebarDefaultState": {
+      "label": "حالة الشريط الجانبي الافتراضية",
+      "description": "هل يكون الشريط الجانبي مفتوحاً أو مطوياً عند بدء التشغيل",
+      "options": {
+        "open": "مفتوح",
+        "collapsed": "مطوي"
+      }
+    },
+    "itemsPerPage": {
+      "label": "عدد العناصر في الصفحة",
+      "description": "عدد العناصر المعروضة في كل صفحة"
+    },
+    "enableDevMode": {
+      "label": "تفعيل وضع المطور",
+      "description": "إظهار أدوات المطور والبيانات التجريبية"
+    },
+    "autoBackup": {
+      "label": "النسخ الاحتياطي التلقائي",
+      "description": "تفعيل النسخ الاحتياطي التلقائي للبيانات"
+    },
+    "backupIntervalDays": {
+      "label": "فترة النسخ الاحتياطي (أيام)",
+      "description": "كل كم يوم يتم إنشاء نسخة احتياطية"
+    }
+  }
 }
