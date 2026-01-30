@@ -65,7 +65,7 @@ export async function completeFirstRunSetup(
 ): Promise<LoginResponse> {
   logger.info("Completing first-run setup for user:", data.username);
   return invokeCommand("complete_first_run_setup", LoginResponseSchema, {
-    data,
+    params: { data },
   });
 }
 

@@ -8,6 +8,7 @@ import type suppliers from "../locales/en/suppliers.json";
 import type reports from "../locales/en/reports.json";
 import type settings from "../locales/en/settings.json";
 import type validation from "../locales/en/validation.json";
+import type onboarding from "../locales/en/onboarding.json";
 
 declare module "i18next" {
   interface CustomTypeOptions {
@@ -20,6 +21,7 @@ declare module "i18next" {
       reports: typeof reports;
       settings: typeof settings;
       validation: typeof validation;
+      onboarding: typeof onboarding;
     };
     returnNull: false;
   }

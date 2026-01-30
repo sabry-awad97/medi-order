@@ -1,0 +1,49 @@
+{
+  "welcome": {
+    "title": "Welcome to MediTrack",
+    "subtitle": "Your professional pharmacy management system. Let's set up your administrator account in just a few steps.",
+    "getStarted": "Get Started",
+    "features": {
+      "orders": "Complete pharmacy order management",
+      "inventory": "Real-time inventory tracking",
+      "reports": "Comprehensive reporting tools",
+      "security": "Secure user authentication"
+    }
+  },
+  "personal": {
+    "title": "Personal Information",
+    "subtitle": "Tell us about yourself",
+    "firstName": "First Name",
+    "lastName": "Last Name",
+    "email": "Email Address"
+  },
+  "account": {
+    "title": "Account Setup",
+    "subtitle": "Create your administrator credentials",
+    "username": "Username",
+    "password": "Password",
+    "confirmPassword": "Confirm Password",
+    "security": {
+      "title": "Security Requirements",
+      "minLength": "Minimum 8 characters",
+      "strong": "Use a strong, unique password",
+      "admin": "This account has full administrator privileges"
+    }
+  },
+  "organization": {
+    "title": "Organization Details",
+    "subtitle": "Optional: Add your pharmacy information",
+    "name": "Organization Name",
+    "skipNote": "You can skip this step and add your organization details later in the settings."
+  },
+  "actions": {
+    "back": "Back",
+    "continue": "Continue",
+    "skip": "Skip",
+    "complete": "Complete Setup",
+    "creating": "Creating Account..."
+  },
+  "footer": "By continuing, you agree to our Terms of Service and Privacy Policy",
+  "required": "Required",
+  "languageSelector": "Select your language"
+}

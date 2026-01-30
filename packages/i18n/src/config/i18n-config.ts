@@ -11,6 +11,7 @@ import suppliersEn from "../locales/en/suppliers.json";
 import reportsEn from "../locales/en/reports.json";
 import settingsEn from "../locales/en/settings.json";
 import validationEn from "../locales/en/validation.json";
+import onboardingEn from "../locales/en/onboarding.json";
 
 import commonAr from "../locales/ar/common.json";
 import homeAr from "../locales/ar/home.json";
@@ -19,6 +20,7 @@ import suppliersAr from "../locales/ar/suppliers.json";
 import reportsAr from "../locales/ar/reports.json";
 import settingsAr from "../locales/ar/settings.json";
 import validationAr from "../locales/ar/validation.json";
+import onboardingAr from "../locales/ar/onboarding.json";
 
 const STORAGE_KEY = "meditrack-locale";
 
@@ -89,6 +91,7 @@ export async function initializeI18n(initialLocale?: Locale) {
           reports: reportsEn,
           settings: settingsEn,
           validation: validationEn,
+          onboarding: onboardingEn,
         },
         ar: {
           common: commonAr,
@@ -98,6 +101,7 @@ export async function initializeI18n(initialLocale?: Locale) {
           reports: reportsAr,
           settings: settingsAr,
           validation: validationAr,
+          onboarding: onboardingAr,
         },
       },
       lng: locale,

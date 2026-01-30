@@ -298,6 +298,10 @@ function LoginPage() {
       setLoginAttempts(0);
 
       logger.info("Login successful");
+
+      // Navigate after successful login
+      const redirectTo = search.redirect || "/";
+      navigate({ to: redirectTo });
     } catch (err) {
       logger.error("Login failed:", err);
 

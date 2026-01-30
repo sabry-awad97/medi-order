@@ -15,7 +15,6 @@ import {
   useCallback,
   type ReactNode,
 } from "react";
-import { useNavigate } from "@tanstack/react-router";
 import { toast } from "sonner";
 import { createLogger } from "@/lib/logger";
 import {
@@ -69,8 +68,6 @@ export function AuthProvider({ children }: AuthProviderProps) {
     });
     return initialState;
   });
-
-  const navigate = useNavigate();
 
   // ============================================================================
   // Session Validation
@@ -132,61 +129,57 @@ export function AuthProvider({ children }: AuthProviderProps) {
   // Login
   // ============================================================================
 
-  const handleLogin = useCallback(
-    async (credentials: Login) => {
-      try {
-        logger.info("Attempting login:", credentials.username);
+  const handleLogin = useCallback(async (credentials: Login) => {
+    try {
+      logger.info("Attempting login:", credentials.username);
 
-        setAuthState((prev) => ({ ...prev, isLoading: true }));
+      setAuthState((prev) => ({ ...prev, isLoading: true }));
 
-        // Call login API
-        const response: LoginResponse = await userApi.login(credentials);
+      // Call login API
+      const response: LoginResponse = await userApi.login(credentials);
 
-        logger.info("Login successful:", response.user.username);
+      logger.info("Login successful:", response.user.username);
 
-        // Store tokens
-        if (response.token) {
-          setAuthTokens({
-            accessToken: response.token,
-          });
-        }
-
-        // Store user data
-        const authUser: AuthUser = {
-          ...response.user,
-          // Add permissions and roles if available from backend
-          permissions: [],
-          roles: [],
-        };
-
-        setAuthUser(authUser);
-
-        // Update state
-        setAuthState({
-          user: authUser,
-          token: response.token,
-          isAuthenticated: true,
-          isLoading: false,
+      // Store tokens
+      if (response.token) {
+        setAuthTokens({
+          accessToken: response.token,
         });
-
-        toast.success(`Welcome back, ${response.user.first_name}!`);
-
-        // Navigate to dashboard
-        navigate({ to: "/" });
-      } catch (error) {
-        logger.error("Login failed:", error);
-
-        setAuthState((prev) => ({ ...prev, isLoading: false }));
-
-        const errorMessage =
-          error instanceof Error ? error.message : "Login failed";
-        toast.error(errorMessage);
-
-        throw error;
       }
-    },
-    [navigate],
-  );
+
+      // Store user data
+      const authUser: AuthUser = {
+        ...response.user,
+        // Add permissions and roles if available from backend
+        permissions: [],
+        roles: [],
+      };
+
+      setAuthUser(authUser);
+
+      // Update state
+      setAuthState({
+        user: authUser,
+        token: response.token,
+        isAuthenticated: true,
+        isLoading: false,
+      });
+
+      toast.success(`Welcome back, ${response.user.first_name}!`);
+
+      // Don't navigate here - let the calling component handle navigation
+    } catch (error) {
+      logger.error("Login failed:", error);
+
+      setAuthState((prev) => ({ ...prev, isLoading: false }));
+
+      const errorMessage =
+        error instanceof Error ? error.message : "Login failed";
+      toast.error(errorMessage);
+
+      throw error;
+    }
+  }, []);
 
   // ============================================================================
   // Logout
@@ -209,13 +202,12 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
       toast.info("You have been logged out");
 
-      // Navigate to login
-      navigate({ to: "/login" });
+      // Don't navigate here - let the calling component handle navigation
     } catch (error) {
       logger.error("Logout failed:", error);
       toast.error("Failed to logout properly");
     }
-  }, [authState.user, navigate]);
+  }, [authState.user]);
 
   // ============================================================================
   // Refresh Session
