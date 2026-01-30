@@ -1,4 +1,5 @@
 pub use sea_orm_migration::prelude::*;
+use sea_orm_migration::sea_orm::DatabaseConnection;
 
 mod m20250130_000001_create_enums;
 mod m20250130_000002_create_staff_table;
@@ -19,4 +20,8 @@ impl MigratorTrait for Migrator {
             Box::new(m20250130_000005_create_indexes::Migration),
         ]
     }
+}
+
+pub async fn run_migrations(db: &DatabaseConnection) -> Result<(), DbErr> {
+    Migrator::up(db, None).await
 }
