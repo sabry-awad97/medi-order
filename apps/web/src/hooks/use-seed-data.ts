@@ -1,9 +1,14 @@
 import { useState } from "react";
 import { toast } from "sonner";
 import { logger } from "@/lib/logger";
-import { generateSeedOrders, generateSeedSuppliers } from "@/lib/seed-data";
+import {
+  generateSeedOrders,
+  generateSeedSuppliers,
+  generateSeedInventory,
+} from "@/lib/seed-data";
 import { ordersCollection } from "./use-orders-db";
 import { suppliersCollection } from "./use-suppliers-db";
+import { inventoryApi } from "@/api/inventory.api";
 
 // Hook لإضافة بيانات تجريبية
 export function useSeedData() {
@@ -20,6 +25,7 @@ export function useSeedData() {
         // توليد البيانات
         const orders = generateSeedOrders(15);
         const suppliers = generateSeedSuppliers(8);
+        const inventory = generateSeedInventory();
 
         // إضافة الطلبات
         for (const order of orders) {
@@ -31,8 +37,19 @@ export function useSeedData() {
           suppliersCollection.insert(supplier);
         }
 
+        // إضافة المخزون
+        let inventoryCount = 0;
+        for (const item of inventory) {
+          try {
+            await inventoryApi.create(item);
+            inventoryCount++;
+          } catch (error) {
+            logger.error("Error seeding inventory item:", error);
+          }
+        }
+
         toast.success(
-          `تم إضافة ${orders.length} طلب و ${suppliers.length} مورد بنجاح`,
+          `تم إضافة ${orders.length} طلب، ${suppliers.length} مورد، و ${inventoryCount} صنف للمخزون بنجاح`,
         );
         options?.onSuccess?.();
       } catch (error) {

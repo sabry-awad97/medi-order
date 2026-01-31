@@ -55,6 +55,7 @@ import {
   SETTING_DEFAULT_THEME,
   SETTING_DEFAULT_LANGUAGE,
 } from "@/lib/constants";
+import { useInventoryStatistics } from "@/hooks/use-inventory";
 
 export function AppSidebar() {
   const { state, open, setOpen } = useSidebar();
@@ -67,6 +68,7 @@ export function AppSidebar() {
   const currentPath = routerState.location.pathname;
   const { theme, setTheme } = useTheme();
   const { data: alertStats } = useAlertStats();
+  const { data: inventoryStats } = useInventoryStatistics();
   const { locale, setLocale } = useLocale();
   const { t } = useTranslation("common");
   const { isRTL } = useDirection();
@@ -90,12 +92,13 @@ export function AppSidebar() {
       title: t("navigation.orders"),
       url: "/special-orders",
       icon: Package,
-      badge: true,
+      badge: "orders",
     },
     {
       title: t("navigation.inventory"),
       url: "/inventory",
       icon: PackageSearch,
+      badge: "inventory",
     },
     {
       title: t("navigation.suppliers"),
@@ -127,6 +130,8 @@ export function AppSidebar() {
     (alertStats?.oldOrders || 0) +
     (alertStats?.notPickedUp || 0) +
     (alertStats?.delayed || 0);
+
+  const totalInventoryItems = inventoryStats?.active_items || 0;
 
   // Load sidebar state from settings on mount only
   useEffect(() => {
@@ -194,7 +199,19 @@ export function AppSidebar() {
             <SidebarMenu>
               {mainMenuItems.map((item) => {
                 const isActive = currentPath === item.url;
-                const showBadge = item.badge && totalAlerts > 0;
+                let badgeValue = 0;
+                let showBadge = false;
+
+                if (item.badge === "orders" && totalAlerts > 0) {
+                  badgeValue = totalAlerts;
+                  showBadge = true;
+                } else if (
+                  item.badge === "inventory" &&
+                  totalInventoryItems > 0
+                ) {
+                  badgeValue = totalInventoryItems;
+                  showBadge = true;
+                }
 
                 return (
                   <SidebarMenuItem key={item.title}>
@@ -210,7 +227,7 @@ export function AppSidebar() {
                         {item.title}
                       </span>
                       {showBadge && (
-                        <SidebarMenuBadge>{totalAlerts}</SidebarMenuBadge>
+                        <SidebarMenuBadge>{badgeValue}</SidebarMenuBadge>
                       )}
                     </SidebarMenuButton>
                   </SidebarMenuItem>

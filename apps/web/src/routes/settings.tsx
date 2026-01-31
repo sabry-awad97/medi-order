@@ -12,6 +12,8 @@ import {
   Settings as SettingsIcon,
   Users,
   X,
+  Database,
+  Trash2,
 } from "lucide-react";
 import * as React from "react";
 import { useEffect, useState } from "react";
@@ -63,6 +65,18 @@ import {
   SETTING_DEFAULT_LANGUAGE,
   SETTING_DEFAULT_THEME,
 } from "@/lib/constants";
+import { useSeedData, useClearData } from "@/hooks/use-seed-data";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
 export const Route = createFileRoute("/settings")({
   component: SettingsPage,
@@ -146,6 +160,8 @@ function SettingsPage() {
   const { theme, setTheme } = useTheme();
   const { isLoading } = useSettings();
   const upsertSettingValue = useUpsertSettingValue();
+  const seedData = useSeedData();
+  const clearData = useClearData();
 
   const [searchQuery, setSearchQuery] = useState("");
 
@@ -364,6 +380,135 @@ function SettingsPage() {
                 </Card>
               );
             })}
+          </div>
+
+          {/* Developer Tools Section */}
+          <div className="mt-8">
+            <Card>
+              <CardHeader>
+                <div className="flex items-center gap-3">
+                  <div className="p-2.5 rounded-lg bg-orange-500/10">
+                    <Database className="h-5 w-5 text-orange-500" />
+                  </div>
+                  <div>
+                    <CardTitle className="text-base">Developer Tools</CardTitle>
+                    <CardDescription className="text-xs">
+                      Tools for testing and development
+                    </CardDescription>
+                  </div>
+                </div>
+              </CardHeader>
+              <Separator />
+              <CardContent className="p-4">
+                <div className="grid gap-3 sm:grid-cols-2">
+                  {/* Seed Data Button */}
+                  <AlertDialog>
+                    <AlertDialogTrigger
+                      render={(props) => (
+                        <button
+                          {...props}
+                          className="inline-flex items-center justify-start gap-2 w-full rounded-md border border-input bg-background px-3 py-2 text-sm hover:bg-accent hover:text-accent-foreground disabled:pointer-events-none disabled:opacity-50"
+                          disabled={seedData.isPending}
+                        >
+                          <Database className="h-4 w-4" />
+                          <div className="flex-1 text-left">
+                            <div className="font-medium text-sm">
+                              Seed Test Data
+                            </div>
+                            <div className="text-xs text-muted-foreground">
+                              Add sample orders, suppliers & inventory
+                            </div>
+                          </div>
+                        </button>
+                      )}
+                    />
+                    <AlertDialogContent>
+                      <AlertDialogHeader>
+                        <AlertDialogTitle>Seed Test Data?</AlertDialogTitle>
+                        <AlertDialogDescription>
+                          This will add sample data to your database:
+                          <ul className="list-disc list-inside mt-2 space-y-1">
+                            <li>15 sample orders</li>
+                            <li>8 suppliers</li>
+                            <li>
+                              30+ inventory items (including low-stock and
+                              out-of-stock items)
+                            </li>
+                          </ul>
+                          <p className="mt-2 text-sm">
+                            This is useful for testing and development purposes.
+                          </p>
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                        <AlertDialogAction
+                          onClick={() => {
+                            seedData.mutate(undefined, {
+                              onSuccess: () => {
+                                window.location.reload();
+                              },
+                            });
+                          }}
+                        >
+                          Seed Data
+                        </AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
+
+                  {/* Clear Data Button */}
+                  <AlertDialog>
+                    <AlertDialogTrigger
+                      render={(props) => (
+                        <button
+                          {...props}
+                          className="inline-flex items-center justify-start gap-2 w-full rounded-md border border-input bg-background px-3 py-2 text-sm hover:bg-accent hover:text-accent-foreground disabled:pointer-events-none disabled:opacity-50 text-destructive hover:text-destructive"
+                          disabled={clearData.isPending}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                          <div className="flex-1 text-left">
+                            <div className="font-medium text-sm">
+                              Clear All Data
+                            </div>
+                            <div className="text-xs text-muted-foreground">
+                              Remove all orders and suppliers
+                            </div>
+                          </div>
+                        </button>
+                      )}
+                    />
+                    <AlertDialogContent>
+                      <AlertDialogHeader>
+                        <AlertDialogTitle>Clear All Data?</AlertDialogTitle>
+                        <AlertDialogDescription>
+                          This will permanently delete all orders and suppliers
+                          from your database.
+                          <p className="mt-2 font-semibold text-destructive">
+                            This action cannot be undone!
+                          </p>
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                        <AlertDialogAction
+                          onClick={() => {
+                            clearData.mutate(undefined, {
+                              onSuccess: () => {
+                                window.location.reload();
+                              },
+                            });
+                          }}
+                          className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                        >
+                          Clear Data
+                        </AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
+                </div>
+              </CardContent>
+            </Card>
           </div>
 
           {filteredCategories.length === 0 && (
