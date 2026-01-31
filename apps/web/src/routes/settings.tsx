@@ -1,49 +1,25 @@
-import { useState, useEffect } from "react";
-import * as React from "react";
+import { useLocale, useTranslation } from "@meditrack/i18n";
 import { createFileRoute } from "@tanstack/react-router";
-import {
-  Settings as SettingsIcon,
-  Save,
-  RotateCcw,
-  Download,
-  Upload,
-  Package,
-  Users,
-  Bell,
-  MessageSquare,
-  Palette,
-  Cog,
-  Check,
-  Search,
-  X,
-} from "lucide-react";
-import { useTranslation } from "@meditrack/i18n";
-import { useLocale } from "@meditrack/i18n";
 import { cva, type VariantProps } from "class-variance-authority";
+import {
+  Bell,
+  Check,
+  Cog,
+  MessageSquare,
+  Package,
+  Palette,
+  Search,
+  Settings as SettingsIcon,
+  Users,
+  X
+} from "lucide-react";
+import * as React from "react";
+import { useEffect, useState } from "react";
 
+import { ManualUpdateCheck } from "@/components/manual-update-check";
+import { useTheme } from "@/components/theme-provider";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Switch } from "@/components/ui/switch";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import {
-  Page,
-  PageHeader,
-  PageHeaderTrigger,
-  PageHeaderContent,
-  PageHeaderTitle,
-  PageHeaderDescription,
-  PageHeaderActions,
-  PageContent,
-  PageContentInner,
-} from "@/components/ui/page";
-import { Loading } from "@/components/ui/loading";
 import {
   Card,
   CardContent,
@@ -51,27 +27,36 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Separator } from "@/components/ui/separator";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Loading } from "@/components/ui/loading";
 import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
-import { cn } from "@/lib/utils";
+  Page,
+  PageContent,
+  PageContentInner,
+  PageHeader,
+  PageHeaderActions,
+  PageHeaderContent,
+  PageHeaderDescription,
+  PageHeaderTitle,
+  PageHeaderTrigger,
+} from "@/components/ui/page";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Separator } from "@/components/ui/separator";
+import { Switch } from "@/components/ui/switch";
 import { useSettings, useSettingValue, useUpsertSettingValue } from "@/hooks";
 import {
-  SETTINGS_DEFINITIONS,
   SETTINGS_CATEGORIES,
+  SETTINGS_DEFINITIONS,
 } from "@/lib/settings-definitions";
 import type { SettingCategory, SettingDefinition } from "@/lib/types-settings";
-import { useTheme } from "@/components/theme-provider";
-import { ManualUpdateCheck } from "@/components/manual-update-check";
+import { cn } from "@/lib/utils";
 import { useState as useNotificationState } from "react";
 
 export const Route = createFileRoute("/settings")({
@@ -154,7 +139,7 @@ function SettingsPage() {
   const { t } = useTranslation("settings");
   const { locale, setLocale } = useLocale();
   const { theme, setTheme } = useTheme();
-  const { data: settings, isLoading } = useSettings();
+  const { isLoading } = useSettings();
   const upsertSettingValue = useUpsertSettingValue();
 
   const [searchQuery, setSearchQuery] = useState("");
