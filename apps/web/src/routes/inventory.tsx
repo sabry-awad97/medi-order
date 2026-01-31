@@ -7,8 +7,6 @@ import {
   AlertTriangle,
   XCircle,
   Shield,
-  Database,
-  Trash2,
   Filter,
   LayoutGrid,
   Table as TableIcon,
@@ -100,24 +98,57 @@ import {
 import {
   useInventoryItems,
   useInventoryStatistics,
-  useResetInventory,
-  useClearInventory,
   useSettingValue,
   useUpsertSettingValue,
 } from "@/hooks";
 import { MEDICINE_FORMS, SETTING_INVENTORY_VIEW_MODE } from "@/lib/constants";
-import {
-  getStockStatus,
-  getStockStatusColor,
-  getStockStatusLabel,
-} from "@/lib/inventory-types";
-import type { InventoryItem } from "@/lib/inventory-types";
+import type { InventoryItemWithStockResponse } from "@/api/inventory.api";
+
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/inventory")({
   component: InventoryComponent,
 });
+
+// Type alias for convenience
+type InventoryItem = InventoryItemWithStockResponse;
+
+// Helper functions for stock status
+function getStockStatus(
+  stockQuantity: number,
+  minStockLevel: number,
+): "in_stock" | "low_stock" | "out_of_stock" {
+  if (stockQuantity === 0) return "out_of_stock";
+  if (stockQuantity <= minStockLevel) return "low_stock";
+  return "in_stock";
+}
+
+function getStockStatusColor(
+  status: "in_stock" | "low_stock" | "out_of_stock",
+): string {
+  switch (status) {
+    case "out_of_stock":
+      return "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200";
+    case "low_stock":
+      return "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200";
+    case "in_stock":
+      return "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200";
+  }
+}
+
+function getStockStatusLabel(
+  status: "in_stock" | "low_stock" | "out_of_stock",
+): string {
+  switch (status) {
+    case "out_of_stock":
+      return "Out of Stock";
+    case "low_stock":
+      return "Low Stock";
+    case "in_stock":
+      return "In Stock";
+  }
+}
 
 // Helper function to generate pagination items with ellipsis
 function generatePaginationItems(
@@ -167,15 +198,9 @@ function InventoryComponent() {
   // Fetch data
   const { data: items = [], isLoading } = useInventoryItems();
   const { data: stats } = useInventoryStatistics();
-  const resetInventory = useResetInventory();
-  const clearInventory = useClearInventory();
 
   // Direction for RTL/LTR support
   const { isRTL } = useDirection();
-
-  // Settings
-  const enableDevMode = useSettingValue<boolean>("enableDevMode", false);
-  const isDev = enableDevMode ?? import.meta.env.DEV;
 
   // View mode setting
   const viewMode = useSettingValue<"table" | "grid">(
@@ -211,7 +236,7 @@ function InventoryComponent() {
       const matchesSearch =
         !searchQuery ||
         item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        item.genericName?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        item.generic_name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
         item.barcode?.toLowerCase().includes(searchQuery.toLowerCase());
 
       // Form filter
@@ -220,8 +245,8 @@ function InventoryComponent() {
 
       // Stock filter
       const stockStatus = getStockStatus(
-        item.stockQuantity,
-        item.minStockLevel,
+        item.stock_quantity,
+        item.min_stock_level,
       );
       const matchesStock =
         !stockFilter || stockFilter === "all" || stockStatus === stockFilter;
@@ -230,8 +255,8 @@ function InventoryComponent() {
       const matchesPrescription =
         !prescriptionFilter ||
         prescriptionFilter === "all" ||
-        (prescriptionFilter === "prescription" && item.requiresPrescription) ||
-        (prescriptionFilter === "otc" && !item.requiresPrescription);
+        (prescriptionFilter === "prescription" && item.requires_prescription) ||
+        (prescriptionFilter === "otc" && !item.requires_prescription);
 
       return (
         matchesSearch && matchesForm && matchesStock && matchesPrescription
@@ -257,9 +282,9 @@ function InventoryComponent() {
         cell: ({ row }) => (
           <div className="min-w-[200px]">
             <div className="font-medium">{row.original.name}</div>
-            {row.original.genericName && (
+            {row.original.generic_name && (
               <div className="text-xs text-muted-foreground">
-                {row.original.genericName}
+                {row.original.generic_name}
               </div>
             )}
           </div>
@@ -284,17 +309,17 @@ function InventoryComponent() {
         ),
       },
       {
-        accessorKey: "stockQuantity",
+        accessorKey: "stock_quantity",
         header: "Stock",
         cell: ({ row }) => {
           const stockStatus = getStockStatus(
-            row.original.stockQuantity,
-            row.original.minStockLevel,
+            row.original.stock_quantity,
+            row.original.min_stock_level,
           );
           const stockColor = getStockStatusColor(stockStatus);
           const stockLabel = getStockStatusLabel(stockStatus);
           const percentage = Math.min(
-            (row.original.stockQuantity / row.original.minStockLevel) * 100,
+            (row.original.stock_quantity / row.original.min_stock_level) * 100,
             100,
           );
 
@@ -302,7 +327,7 @@ function InventoryComponent() {
             <div className="min-w-[150px]">
               <div className="flex items-center justify-between mb-1">
                 <span className="text-sm font-medium">
-                  {row.original.stockQuantity} units
+                  {row.original.stock_quantity} units
                 </span>
                 <Badge className={cn("text-xs", stockColor)}>
                   {stockLabel}
@@ -326,11 +351,11 @@ function InventoryComponent() {
         },
       },
       {
-        accessorKey: "unitPrice",
+        accessorKey: "unit_price",
         header: "Unit Price",
         cell: ({ row }) => (
           <span className="font-medium">
-            ${row.original.unitPrice.toFixed(2)}
+            ${row.original.unit_price.toFixed(2)}
           </span>
         ),
       },
@@ -351,12 +376,12 @@ function InventoryComponent() {
         header: "Type",
         cell: ({ row }) => (
           <div className="flex flex-wrap gap-1 min-w-[120px]">
-            {row.original.requiresPrescription && (
+            {row.original.requires_prescription && (
               <Badge variant="secondary" className="text-xs">
                 Rx
               </Badge>
             )}
-            {row.original.isControlled && (
+            {row.original.is_controlled && (
               <Badge variant="destructive" className="text-xs gap-1">
                 <Shield className="h-3 w-3" />
                 Controlled
@@ -497,63 +522,6 @@ function InventoryComponent() {
           </PageHeaderDescription>
         </PageHeaderContent>
         <PageHeaderActions>
-          {isDev && (
-            <>
-              {/* Desktop: Show all dev buttons */}
-              <Button
-                onClick={() => resetInventory.mutate()}
-                variant="outline"
-                size="lg"
-                className="gap-2 hidden lg:flex"
-              >
-                <Database className="h-5 w-5" />
-                <span>Reset Data</span>
-              </Button>
-              {items.length > 0 && (
-                <Button
-                  onClick={() => clearInventory.mutate()}
-                  variant="outline"
-                  size="lg"
-                  className="gap-2 text-destructive hover:text-destructive hidden lg:flex"
-                >
-                  <Trash2 className="h-5 w-5" />
-                  <span>Clear All</span>
-                </Button>
-              )}
-
-              {/* Mobile/Tablet: Dropdown menu for dev actions */}
-              <DropdownMenu>
-                <DropdownMenuTrigger
-                  render={
-                    <Button
-                      variant="outline"
-                      size="lg"
-                      className="gap-2 lg:hidden"
-                    >
-                      <Database className="h-5 w-5" />
-                      <span className="hidden sm:inline">Dev Tools</span>
-                    </Button>
-                  }
-                />
-                <DropdownMenuContent align="end">
-                  <DropdownMenuItem onClick={() => resetInventory.mutate()}>
-                    <Database className="h-4 w-4" />
-                    <span>Reset Data</span>
-                  </DropdownMenuItem>
-                  {items.length > 0 && (
-                    <DropdownMenuItem
-                      variant="destructive"
-                      onClick={() => clearInventory.mutate()}
-                    >
-                      <Trash2 className="h-4 w-4" />
-                      <span>Clear All</span>
-                    </DropdownMenuItem>
-                  )}
-                </DropdownMenuContent>
-              </DropdownMenu>
-            </>
-          )}
-
           {/* View toggle - responsive sizing */}
           <Button
             onClick={toggleViewMode}
@@ -601,31 +569,31 @@ function InventoryComponent() {
               <div className="grid gap-3 grid-cols-2 md:grid-cols-3 lg:grid-cols-5">
                 <StatsCard
                   title="Total Items"
-                  value={stats.total}
+                  value={stats.total_items}
                   icon={Package}
                   color="bg-blue-500"
                 />
                 <StatsCard
                   title="In Stock"
-                  value={stats.inStock}
+                  value={stats.active_items}
                   icon={Package}
                   color="bg-green-500"
                 />
                 <StatsCard
                   title="Low Stock"
-                  value={stats.lowStock}
+                  value={stats.low_stock_count}
                   icon={AlertTriangle}
                   color="bg-yellow-500"
                 />
                 <StatsCard
                   title="Out of Stock"
-                  value={stats.outOfStock}
+                  value={stats.out_of_stock_count}
                   icon={XCircle}
                   color="bg-red-500"
                 />
                 <StatsCard
                   title="Total Value"
-                  value={`$${stats.totalValue.toFixed(2)}`}
+                  value={`$${stats.total_inventory_value.toFixed(2)}`}
                   icon={Package}
                   color="bg-purple-500"
                 />
@@ -1247,7 +1215,7 @@ interface InventoryItemCardProps {
 }
 
 function InventoryItemCard({ item }: InventoryItemCardProps) {
-  const stockStatus = getStockStatus(item.stockQuantity, item.minStockLevel);
+  const stockStatus = getStockStatus(item.stock_quantity, item.min_stock_level);
   const stockColor = getStockStatusColor(stockStatus);
   const stockLabel = getStockStatusLabel(stockStatus);
 
@@ -1259,9 +1227,9 @@ function InventoryItemCard({ item }: InventoryItemCardProps) {
             <CardTitle className="text-base line-clamp-1">
               {item.name}
             </CardTitle>
-            {item.genericName && (
+            {item.generic_name && (
               <CardDescription className="text-xs line-clamp-1">
-                {item.genericName}
+                {item.generic_name}
               </CardDescription>
             )}
           </div>
@@ -1368,26 +1336,26 @@ function InventoryItemCard({ item }: InventoryItemCardProps) {
         <div className="space-y-1">
           <div className="flex justify-between text-sm">
             <span className="text-muted-foreground">Stock:</span>
-            <span className="font-medium">{item.stockQuantity} units</span>
+            <span className="font-medium">{item.stock_quantity} units</span>
           </div>
           <div className="flex justify-between text-sm">
             <span className="text-muted-foreground">Min Level:</span>
-            <span className="font-medium">{item.minStockLevel} units</span>
+            <span className="font-medium">{item.min_stock_level} units</span>
           </div>
           <div className="flex justify-between text-sm">
             <span className="text-muted-foreground">Price:</span>
-            <span className="font-medium">${item.unitPrice.toFixed(2)}</span>
+            <span className="font-medium">${item.unit_price.toFixed(2)}</span>
           </div>
         </div>
 
         {/* Badges */}
         <div className="flex flex-wrap gap-1">
-          {item.requiresPrescription && (
+          {item.requires_prescription && (
             <Badge variant="secondary" className="text-xs">
               Rx Required
             </Badge>
           )}
-          {item.isControlled && (
+          {item.is_controlled && (
             <Badge variant="destructive" className="text-xs gap-1">
               <Shield className="h-3 w-3" />
               Controlled

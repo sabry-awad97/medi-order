@@ -425,12 +425,12 @@ impl InventoryService {
 
     /// Get low stock items (optimized with database-level filtering)
     pub async fn get_low_stock(&self) -> ServiceResult<Vec<InventoryItemWithStockResponse>> {
-        // Use inner join with WHERE clause for efficient database-level filtering
+        // Use find_also_related with filter for efficient database-level filtering
         // WHERE stock_quantity <= min_stock_level
         let results = InventoryItem::find()
             .filter(inventory_item::Column::IsActive.eq(true))
             .filter(inventory_item::Column::DeletedAt.is_null())
-            .inner_join(InventoryStock)
+            .find_also_related(InventoryStock)
             .filter(
                 Expr::col((
                     inventory_stock::Entity,
@@ -441,7 +441,6 @@ impl InventoryService {
                     inventory_stock::Column::MinStockLevel,
                 ))),
             )
-            .find_also_related(InventoryStock)
             .all(&*self.db)
             .await
             .tap_err(|e| tracing::error!("Failed to get low stock items: {}", e))?;
@@ -459,9 +458,8 @@ impl InventoryService {
         let results = InventoryItem::find()
             .filter(inventory_item::Column::IsActive.eq(true))
             .filter(inventory_item::Column::DeletedAt.is_null())
-            .inner_join(InventoryStock)
-            .filter(inventory_stock::Column::StockQuantity.eq(0))
             .find_also_related(InventoryStock)
+            .filter(inventory_stock::Column::StockQuantity.eq(0))
             .all(&*self.db)
             .await
             .tap_err(|e| tracing::error!("Failed to get out of stock items: {}", e))?;

@@ -131,18 +131,24 @@ export { useAutoArchive, useArchivableOrdersStats } from "./use-auto-archive";
 
 // Hooks للمخزون (Inventory)
 export {
+  // Query Hooks
   useInventoryItems,
   useInventoryItem,
+  useInventoryItemByBarcode,
+  useSearchInventoryItems,
   useInventoryStatistics,
   useLowStockItems,
   useOutOfStockItems,
-  useControlledSubstances,
+  // Mutation Hooks
   useCreateInventoryItem,
   useUpdateInventoryItem,
   useDeleteInventoryItem,
-  useUpdateStock,
-  useAdjustStock,
-  useResetInventory,
-  useClearInventory,
+  useRestoreInventoryItem,
+  useUpdateInventoryStock,
+  useAdjustInventoryStock,
+  // Utility Hooks
+  usePrefetchInventoryItem,
+  useInvalidateInventory,
+  // Query Keys
   inventoryKeys,
 } from "./use-inventory";

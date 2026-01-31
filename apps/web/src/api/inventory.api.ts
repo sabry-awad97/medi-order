@@ -1,20 +1,15 @@
 /**
  * Inventory API
  *
- * Provides type-safe access to inventory-related operations.
- * Currently uses mock data for frontend development.
- * Ready for Tauri backend integration in the future.
+ * Provides type-safe access to inventory-related Tauri commands.
+ * All functions handle both Tauri and browser environments gracefully.
  *
  * @module api/inventory
  */
 
 import { z } from "zod";
+import { invokeCommand } from "@/lib/tauri-api";
 import { createLogger } from "@/lib/logger";
-import { mockInventoryItems } from "@/lib/inventory-mock-data";
-import type {
-  InventoryItem,
-  InventoryItemFormData,
-} from "@/lib/inventory-types";
 
 const logger = createLogger("InventoryAPI");
 
@@ -29,83 +24,139 @@ export const InventoryItemIdSchema = z.string().uuid();
 export type InventoryItemId = z.infer<typeof InventoryItemIdSchema>;
 
 /**
- * Inventory item response schema (matches backend entity)
+ * Inventory item with stock response schema (matches backend InventoryItemWithStockResponse)
  */
-export const InventoryItemResponseSchema = z.object({
+export const InventoryItemWithStockResponseSchema = z.object({
+  // Catalog fields
   id: InventoryItemIdSchema,
   name: z.string(),
-  genericName: z.string().nullable(),
+  generic_name: z.string().nullable(),
   concentration: z.string(),
   form: z.string(),
   manufacturer: z.string().nullable(),
   barcode: z.string().nullable(),
-  stockQuantity: z.number().int().nonnegative(),
-  minStockLevel: z.number().int().nonnegative(),
-  unitPrice: z.number().nonnegative(),
-  requiresPrescription: z.boolean(),
-  isControlled: z.boolean(),
-  storageInstructions: z.string().nullable(),
+  requires_prescription: z.boolean(),
+  is_controlled: z.boolean(),
+  storage_instructions: z.string().nullable(),
   notes: z.string().nullable(),
-  isActive: z.boolean(),
-  createdAt: z.date(),
-  updatedAt: z.date(),
+  is_active: z.boolean(),
+  created_by: InventoryItemIdSchema.nullable(),
+  updated_by: InventoryItemIdSchema.nullable(),
+  created_at: z.string(),
+  updated_at: z.string(),
+  // Stock fields
+  stock_id: InventoryItemIdSchema,
+  stock_quantity: z.number().int(),
+  min_stock_level: z.number().int(),
+  unit_price: z.number(),
+  last_restocked_at: z.string().nullable(),
+  stock_updated_at: z.string(),
+});
+export type InventoryItemWithStockResponse = z.infer<
+  typeof InventoryItemWithStockResponseSchema
+>;
+
+/**
+ * Inventory item response schema (catalog only, matches backend InventoryItemResponse)
+ */
+export const InventoryItemResponseSchema = z.object({
+  id: InventoryItemIdSchema,
+  name: z.string(),
+  generic_name: z.string().nullable(),
+  concentration: z.string(),
+  form: z.string(),
+  manufacturer: z.string().nullable(),
+  barcode: z.string().nullable(),
+  requires_prescription: z.boolean(),
+  is_controlled: z.boolean(),
+  storage_instructions: z.string().nullable(),
+  notes: z.string().nullable(),
+  is_active: z.boolean(),
+  created_by: InventoryItemIdSchema.nullable(),
+  updated_by: InventoryItemIdSchema.nullable(),
+  created_at: z.string(),
+  updated_at: z.string(),
 });
 export type InventoryItemResponse = z.infer<typeof InventoryItemResponseSchema>;
 
 /**
- * Create inventory item DTO schema
+ * Inventory stock response schema (matches backend InventoryStockResponse)
  */
-export const CreateInventoryItemSchema = z.object({
+export const InventoryStockResponseSchema = z.object({
+  id: InventoryItemIdSchema,
+  inventory_item_id: InventoryItemIdSchema,
+  stock_quantity: z.number().int(),
+  min_stock_level: z.number().int(),
+  unit_price: z.number(),
+  last_restocked_at: z.string().nullable(),
+  created_at: z.string(),
+  updated_at: z.string(),
+});
+export type InventoryStockResponse = z.infer<
+  typeof InventoryStockResponseSchema
+>;
+
+/**
+ * Create inventory item with stock DTO schema (matches backend CreateInventoryItemWithStock)
+ */
+export const CreateInventoryItemWithStockSchema = z.object({
+  // Catalog fields
   name: z.string().min(1),
-  genericName: z.string().optional(),
+  generic_name: z.string().optional(),
   concentration: z.string().min(1),
   form: z.string().min(1),
   manufacturer: z.string().optional(),
   barcode: z.string().optional(),
-  stockQuantity: z.number().int().nonnegative(),
-  minStockLevel: z.number().int().nonnegative(),
-  unitPrice: z.number().nonnegative(),
-  requiresPrescription: z.boolean(),
-  isControlled: z.boolean(),
-  storageInstructions: z.string().optional(),
+  requires_prescription: z.boolean(),
+  is_controlled: z.boolean(),
+  storage_instructions: z.string().optional(),
   notes: z.string().optional(),
+  // Stock fields
+  stock_quantity: z.number().int().nonnegative(),
+  min_stock_level: z.number().int().nonnegative(),
+  unit_price: z.number().nonnegative(),
 });
-export type CreateInventoryItem = z.infer<typeof CreateInventoryItemSchema>;
+export type CreateInventoryItemWithStock = z.infer<
+  typeof CreateInventoryItemWithStockSchema
+>;
 
 /**
- * Update inventory item DTO schema
+ * Update inventory item DTO schema (matches backend UpdateInventoryItem)
  */
 export const UpdateInventoryItemSchema = z.object({
   name: z.string().min(1).optional(),
-  genericName: z.string().optional(),
+  generic_name: z.string().optional(),
   concentration: z.string().min(1).optional(),
   form: z.string().min(1).optional(),
   manufacturer: z.string().optional(),
   barcode: z.string().optional(),
-  stockQuantity: z.number().int().nonnegative().optional(),
-  minStockLevel: z.number().int().nonnegative().optional(),
-  unitPrice: z.number().nonnegative().optional(),
-  requiresPrescription: z.boolean().optional(),
-  isControlled: z.boolean().optional(),
-  storageInstructions: z.string().optional(),
+  requires_prescription: z.boolean().optional(),
+  is_controlled: z.boolean().optional(),
+  storage_instructions: z.string().optional(),
   notes: z.string().optional(),
-  isActive: z.boolean().optional(),
+  is_active: z.boolean().optional(),
+  updated_by: InventoryItemIdSchema.optional(),
 });
 export type UpdateInventoryItem = z.infer<typeof UpdateInventoryItemSchema>;
 
 /**
- * Inventory query filters schema
+ * Update inventory stock DTO schema (matches backend UpdateInventoryStock)
  */
-export const InventoryQuerySchema = z.object({
-  search: z.string().optional(),
-  form: z.string().optional(),
-  requiresPrescription: z.boolean().optional(),
-  isControlled: z.boolean().optional(),
-  isActive: z.boolean().optional(),
-  lowStock: z.boolean().optional(),
-  outOfStock: z.boolean().optional(),
+export const UpdateInventoryStockSchema = z.object({
+  stock_quantity: z.number().int().nonnegative().optional(),
+  min_stock_level: z.number().int().nonnegative().optional(),
+  unit_price: z.number().nonnegative().optional(),
 });
-export type InventoryQuery = z.infer<typeof InventoryQuerySchema>;
+export type UpdateInventoryStock = z.infer<typeof UpdateInventoryStockSchema>;
+
+/**
+ * Adjust stock DTO schema (matches backend AdjustStock)
+ */
+export const AdjustStockSchema = z.object({
+  adjustment: z.number().int(), // Positive for add, negative for subtract
+  reason: z.string().optional(),
+});
+export type AdjustStock = z.infer<typeof AdjustStockSchema>;
 
 /**
  * Mutation result schema
@@ -116,288 +167,189 @@ export const MutationResultSchema = z.object({
 export type MutationResult = z.infer<typeof MutationResultSchema>;
 
 /**
- * Inventory statistics schema
+ * Inventory statistics schema (matches backend InventoryStatistics)
  */
 export const InventoryStatisticsSchema = z.object({
-  total: z.number(),
-  inStock: z.number(),
-  lowStock: z.number(),
-  outOfStock: z.number(),
-  totalValue: z.number(),
+  total_items: z.number(),
+  active_items: z.number(),
+  inactive_items: z.number(),
+  low_stock_count: z.number(),
+  out_of_stock_count: z.number(),
+  total_inventory_value: z.number(),
 });
 export type InventoryStatistics = z.infer<typeof InventoryStatisticsSchema>;
 
 // ============================================================================
-// Mock Data Store (simulates database)
-// ============================================================================
-
-let inventoryStore: InventoryItem[] = [...mockInventoryItems];
-
-/**
- * Simulate async delay for realistic API behavior
- */
-const delay = (ms: number = 300) =>
-  new Promise((resolve) => setTimeout(resolve, ms));
-
-// ============================================================================
-// CRUD Operations (Mock Implementation)
+// CRUD Operations (Catalog + Stock Combined)
 // ============================================================================
 
 /**
- * Create a new inventory item
- * TODO: Replace with Tauri command when backend is ready
+ * Create a new inventory item with stock
  */
 export async function createInventoryItem(
-  data: CreateInventoryItem,
+  data: CreateInventoryItemWithStock,
 ): Promise<MutationResult> {
   logger.info("Creating inventory item:", data.name);
-  await delay();
-
-  const newItem: InventoryItem = {
-    id: crypto.randomUUID(),
-    name: data.name,
-    genericName: data.genericName || null,
-    concentration: data.concentration,
-    form: data.form,
-    manufacturer: data.manufacturer || null,
-    barcode: data.barcode || null,
-    stockQuantity: data.stockQuantity,
-    minStockLevel: data.minStockLevel,
-    unitPrice: data.unitPrice,
-    requiresPrescription: data.requiresPrescription,
-    isControlled: data.isControlled,
-    storageInstructions: data.storageInstructions || null,
-    notes: data.notes || null,
-    isActive: true,
-    createdAt: new Date(),
-    updatedAt: new Date(),
-  };
-
-  inventoryStore.push(newItem);
-  logger.info("Inventory item created:", newItem.id);
-
-  return { id: newItem.id };
+  return invokeCommand("create_inventory_item", MutationResultSchema, {
+    params: { data },
+  });
 }
 
 /**
- * Get inventory item by ID
- * TODO: Replace with Tauri command when backend is ready
+ * Get inventory item with stock by ID
  */
 export async function getInventoryItem(
   id: InventoryItemId,
-): Promise<InventoryItemResponse> {
+): Promise<InventoryItemWithStockResponse> {
   logger.info("Getting inventory item:", id);
-  await delay();
-
-  const item = inventoryStore.find((i) => i.id === id);
-  if (!item) {
-    throw new Error(`Inventory item not found: ${id}`);
-  }
-
-  return item;
+  return invokeCommand(
+    "get_inventory_item",
+    InventoryItemWithStockResponseSchema,
+    { params: { id } },
+  );
 }
 
 /**
- * Update inventory item
- * TODO: Replace with Tauri command when backend is ready
+ * Get inventory item by barcode
+ */
+export async function getInventoryItemByBarcode(
+  barcode: string,
+): Promise<InventoryItemWithStockResponse> {
+  logger.info("Getting inventory item by barcode:", barcode);
+  return invokeCommand(
+    "get_inventory_item_by_barcode",
+    InventoryItemWithStockResponseSchema,
+    { barcode },
+  );
+}
+
+/**
+ * Update inventory item (catalog only)
  */
 export async function updateInventoryItem(
   id: InventoryItemId,
   data: UpdateInventoryItem,
 ): Promise<MutationResult> {
   logger.info("Updating inventory item:", id);
-  await delay();
-
-  const index = inventoryStore.findIndex((i) => i.id === id);
-  if (index === -1) {
-    throw new Error(`Inventory item not found: ${id}`);
-  }
-
-  inventoryStore[index] = {
-    ...inventoryStore[index],
-    ...data,
-    updatedAt: new Date(),
-  };
-
-  logger.info("Inventory item updated:", id);
-  return { id };
+  return invokeCommand("update_inventory_item", MutationResultSchema, {
+    params: { id, data },
+  });
 }
 
 /**
  * Delete inventory item (soft delete)
- * TODO: Replace with Tauri command when backend is ready
  */
 export async function deleteInventoryItem(
   id: InventoryItemId,
 ): Promise<MutationResult> {
   logger.info("Deleting inventory item:", id);
-  await delay();
-
-  const index = inventoryStore.findIndex((i) => i.id === id);
-  if (index === -1) {
-    throw new Error(`Inventory item not found: ${id}`);
-  }
-
-  inventoryStore[index] = {
-    ...inventoryStore[index],
-    isActive: false,
-    updatedAt: new Date(),
-  };
-
-  logger.info("Inventory item deleted:", id);
-  return { id };
+  return invokeCommand("delete_inventory_item", MutationResultSchema, {
+    params: { id },
+  });
 }
 
 /**
- * List inventory items with filtering
- * TODO: Replace with Tauri command when backend is ready
+ * Restore soft-deleted inventory item
  */
-export async function listInventoryItems(
-  filter?: InventoryQuery,
-): Promise<InventoryItemResponse[]> {
-  logger.info("Listing inventory items with filter:", filter);
-  await delay();
-
-  let items = [...inventoryStore];
-
-  // Apply filters
-  if (filter) {
-    if (filter.search) {
-      const searchLower = filter.search.toLowerCase();
-      items = items.filter(
-        (item) =>
-          item.name.toLowerCase().includes(searchLower) ||
-          item.genericName?.toLowerCase().includes(searchLower) ||
-          item.barcode?.toLowerCase().includes(searchLower),
-      );
-    }
-
-    if (filter.form) {
-      items = items.filter((item) => item.form === filter.form);
-    }
-
-    if (filter.requiresPrescription !== undefined) {
-      items = items.filter(
-        (item) => item.requiresPrescription === filter.requiresPrescription,
-      );
-    }
-
-    if (filter.isControlled !== undefined) {
-      items = items.filter((item) => item.isControlled === filter.isControlled);
-    }
-
-    if (filter.isActive !== undefined) {
-      items = items.filter((item) => item.isActive === filter.isActive);
-    }
-
-    if (filter.lowStock) {
-      items = items.filter(
-        (item) =>
-          item.stockQuantity > 0 && item.stockQuantity <= item.minStockLevel,
-      );
-    }
-
-    if (filter.outOfStock) {
-      items = items.filter((item) => item.stockQuantity === 0);
-    }
-  }
-
-  logger.info(`Found ${items.length} inventory items`);
-  return items;
-}
-
-// ============================================================================
-// Stock Management
-// ============================================================================
-
-/**
- * Update stock quantity
- * TODO: Replace with Tauri command when backend is ready
- */
-export async function updateStock(
+export async function restoreInventoryItem(
   id: InventoryItemId,
-  quantity: number,
 ): Promise<MutationResult> {
-  logger.info(`Updating stock for item: ${id}, quantity: ${quantity}`);
-  await delay();
+  logger.info("Restoring inventory item:", id);
+  return invokeCommand("restore_inventory_item", MutationResultSchema, {
+    params: { id },
+  });
+}
 
-  const index = inventoryStore.findIndex((i) => i.id === id);
-  if (index === -1) {
-    throw new Error(`Inventory item not found: ${id}`);
-  }
+// ============================================================================
+// Stock Management Operations
+// ============================================================================
 
-  inventoryStore[index] = {
-    ...inventoryStore[index],
-    stockQuantity: quantity,
-    updatedAt: new Date(),
-  };
-
-  logger.info("Stock updated for item:", id);
-  return { id };
+/**
+ * Update stock (set absolute values)
+ */
+export async function updateInventoryStock(
+  id: InventoryItemId,
+  data: UpdateInventoryStock,
+): Promise<MutationResult> {
+  logger.info("Updating stock for item:", id);
+  return invokeCommand("update_inventory_stock", MutationResultSchema, {
+    params: { id, data },
+  });
 }
 
 /**
  * Adjust stock (add or subtract)
- * TODO: Replace with Tauri command when backend is ready
  */
-export async function adjustStock(
+export async function adjustInventoryStock(
   id: InventoryItemId,
-  adjustment: number,
+  data: AdjustStock,
 ): Promise<MutationResult> {
-  logger.info(`Adjusting stock for item: ${id}, adjustment: ${adjustment}`);
-  await delay();
-
-  const index = inventoryStore.findIndex((i) => i.id === id);
-  if (index === -1) {
-    throw new Error(`Inventory item not found: ${id}`);
-  }
-
-  const newQuantity = Math.max(
-    0,
-    inventoryStore[index].stockQuantity + adjustment,
+  logger.info(
+    `Adjusting stock for item: ${id}, adjustment: ${data.adjustment}`,
   );
-
-  inventoryStore[index] = {
-    ...inventoryStore[index],
-    stockQuantity: newQuantity,
-    updatedAt: new Date(),
-  };
-
-  logger.info(`Stock adjusted for item: ${id}, new quantity: ${newQuantity}`);
-  return { id };
+  return invokeCommand("adjust_inventory_stock", MutationResultSchema, {
+    params: { id, data },
+  });
 }
 
 // ============================================================================
-// Specialized Queries
+// Listing & Filtering Operations
 // ============================================================================
 
 /**
- * Get low stock items
- * TODO: Replace with Tauri command when backend is ready
+ * List all active inventory items with stock
  */
-export async function getLowStockItems(): Promise<InventoryItemResponse[]> {
+export async function listActiveInventoryItems(): Promise<
+  InventoryItemWithStockResponse[]
+> {
+  logger.info("Listing active inventory items");
+  return invokeCommand(
+    "list_active_inventory_items",
+    z.array(InventoryItemWithStockResponseSchema),
+    {},
+  );
+}
+
+/**
+ * Get low stock items
+ */
+export async function getLowStockItems(): Promise<
+  InventoryItemWithStockResponse[]
+> {
   logger.info("Getting low stock items");
-  return listInventoryItems({ lowStock: true, isActive: true });
+  return invokeCommand(
+    "get_low_stock_items",
+    z.array(InventoryItemWithStockResponseSchema),
+    {},
+  );
 }
 
 /**
  * Get out of stock items
- * TODO: Replace with Tauri command when backend is ready
  */
-export async function getOutOfStockItems(): Promise<InventoryItemResponse[]> {
+export async function getOutOfStockItems(): Promise<
+  InventoryItemWithStockResponse[]
+> {
   logger.info("Getting out of stock items");
-  return listInventoryItems({ outOfStock: true, isActive: true });
+  return invokeCommand(
+    "get_out_of_stock_items",
+    z.array(InventoryItemWithStockResponseSchema),
+    {},
+  );
 }
 
 /**
- * Get controlled substances
- * TODO: Replace with Tauri command when backend is ready
+ * Search inventory items by name, generic name, or barcode
  */
-export async function getControlledSubstances(): Promise<
-  InventoryItemResponse[]
-> {
-  logger.info("Getting controlled substances");
-  return listInventoryItems({ isControlled: true, isActive: true });
+export async function searchInventoryItems(
+  searchTerm: string,
+): Promise<InventoryItemWithStockResponse[]> {
+  logger.info("Searching inventory items:", searchTerm);
+  return invokeCommand(
+    "search_inventory_items",
+    z.array(InventoryItemWithStockResponseSchema),
+    { search_term: searchTerm },
+  );
 }
 
 // ============================================================================
@@ -406,56 +358,14 @@ export async function getControlledSubstances(): Promise<
 
 /**
  * Get inventory statistics
- * TODO: Replace with Tauri command when backend is ready
  */
 export async function getInventoryStatistics(): Promise<InventoryStatistics> {
   logger.info("Getting inventory statistics");
-  await delay();
-
-  const activeItems = inventoryStore.filter((item) => item.isActive);
-
-  const stats: InventoryStatistics = {
-    total: activeItems.length,
-    inStock: activeItems.filter(
-      (item) => item.stockQuantity > item.minStockLevel,
-    ).length,
-    lowStock: activeItems.filter(
-      (item) =>
-        item.stockQuantity > 0 && item.stockQuantity <= item.minStockLevel,
-    ).length,
-    outOfStock: activeItems.filter((item) => item.stockQuantity === 0).length,
-    totalValue: activeItems.reduce(
-      (sum, item) => sum + item.stockQuantity * item.unitPrice,
-      0,
-    ),
-  };
-
-  logger.info("Inventory statistics:", stats);
-  return stats;
-}
-
-// ============================================================================
-// Development Utilities
-// ============================================================================
-
-/**
- * Reset inventory to mock data (development only)
- */
-export async function resetInventory(): Promise<void> {
-  logger.warn("Resetting inventory to mock data");
-  await delay();
-  inventoryStore = [...mockInventoryItems];
-  logger.info("Inventory reset complete");
-}
-
-/**
- * Clear all inventory items (development only)
- */
-export async function clearInventory(): Promise<void> {
-  logger.warn("Clearing all inventory items");
-  await delay();
-  inventoryStore = [];
-  logger.info("Inventory cleared");
+  return invokeCommand(
+    "get_inventory_statistics",
+    InventoryStatisticsSchema,
+    {},
+  );
 }
 
 // ============================================================================
@@ -466,23 +376,21 @@ export const inventoryApi = {
   // CRUD
   create: createInventoryItem,
   get: getInventoryItem,
+  getByBarcode: getInventoryItemByBarcode,
   update: updateInventoryItem,
   delete: deleteInventoryItem,
-  list: listInventoryItems,
+  restore: restoreInventoryItem,
 
   // Stock Management
-  updateStock,
-  adjustStock,
+  updateStock: updateInventoryStock,
+  adjustStock: adjustInventoryStock,
 
-  // Specialized Queries
+  // Listing & Filtering
+  listActive: listActiveInventoryItems,
   getLowStock: getLowStockItems,
   getOutOfStock: getOutOfStockItems,
-  getControlled: getControlledSubstances,
+  search: searchInventoryItems,
 
   // Statistics
   getStatistics: getInventoryStatistics,
-
-  // Development
-  reset: resetInventory,
-  clear: clearInventory,
 } as const;
