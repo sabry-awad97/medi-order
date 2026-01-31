@@ -215,6 +215,7 @@ export function useSetting(id: SettingId) {
       q
         .from({ setting: settingsCollection })
         .where(({ setting }) => eq(setting.id, id))
+        .orderBy(({ setting }) => setting.created_at)
         .limit(1),
     [id],
   );
@@ -241,6 +242,7 @@ export function useSettingByKey(key: string) {
       q
         .from({ setting: settingsCollection })
         .where(({ setting }) => eq(setting.key, key))
+        .orderBy(({ setting }) => setting.created_at)
         .limit(1),
     [key],
   );

@@ -4,7 +4,6 @@ import userEvent from "@testing-library/user-event";
 import { render } from "@/test/utils";
 import { mockSuppliers, mockSettings } from "@/test/mockData";
 import type { Supplier } from "@/lib/types";
-import type { Settings } from "@/lib/types-settings";
 
 // Mock hooks
 vi.mock("@/hooks", () => ({

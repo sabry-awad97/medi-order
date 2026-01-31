@@ -1,5 +1,5 @@
 import type { Order, Supplier, Medicine } from "@/lib/types";
-import type { Settings } from "@/lib/types-settings";
+import type { SettingResponse } from "@/api/settings.api";
 
 // Mock Medicine Data
 export const mockMedicine: Medicine = {
@@ -92,46 +92,109 @@ export const mockSuppliers: Supplier[] = [
   },
 ];
 
-// Mock Settings Data
-export const mockSettings: Settings = {
+// Mock Settings Data (individual setting records)
+export const mockSettings: SettingResponse[] = [
   // General
-  pharmacyName: "صيدلية الاختبار",
-  pharmacyPhone: "0501234567",
-  pharmacyAddress: "الرياض، حي النخيل",
-  workingHours: "من 9 صباحاً إلى 10 مساءً",
-
+  {
+    id: "setting-1",
+    key: "pharmacyName",
+    value: "صيدلية الاختبار",
+    category: "general",
+    description: null,
+    updated_by: null,
+    created_at: new Date("2026-01-01").toISOString(),
+    updated_at: new Date("2026-01-01").toISOString(),
+  },
+  {
+    id: "setting-2",
+    key: "pharmacyPhone",
+    value: "0501234567",
+    category: "general",
+    description: null,
+    updated_by: null,
+    created_at: new Date("2026-01-01").toISOString(),
+    updated_at: new Date("2026-01-01").toISOString(),
+  },
+  {
+    id: "setting-3",
+    key: "pharmacyAddress",
+    value: "الرياض، حي النخيل",
+    category: "general",
+    description: null,
+    updated_by: null,
+    created_at: new Date("2026-01-01").toISOString(),
+    updated_at: new Date("2026-01-01").toISOString(),
+  },
+  {
+    id: "setting-4",
+    key: "workingHours",
+    value: "من 9 صباحاً إلى 10 مساءً",
+    category: "general",
+    description: null,
+    updated_by: null,
+    created_at: new Date("2026-01-01").toISOString(),
+    updated_at: new Date("2026-01-01").toISOString(),
+  },
   // Orders
-  defaultOrderStatus: "pending",
-  autoArchiveDays: 30,
-  requireCustomerPhone: true,
-  allowedMedicineForms: ["أقراص", "كبسولات", "شراب"],
-  maxMedicinesPerOrder: 10,
-
-  // Suppliers
-  minSupplierRating: 3,
-  maxDeliveryDays: 7,
-  requireSupplierEmail: false,
-
-  // Alerts
-  enableAlerts: true,
-  oldOrderThreshold: 7,
-  pickupReminderDays: 3,
-  alertCheckInterval: 30,
-
-  // Notifications
-  enableNotifications: true,
-  notificationSound: true,
-  notifyOnNewOrder: true,
-  notifyOnStatusChange: true,
-
+  {
+    id: "setting-5",
+    key: "defaultOrderStatus",
+    value: "pending",
+    category: "orders",
+    description: null,
+    updated_by: null,
+    created_at: new Date("2026-01-01").toISOString(),
+    updated_at: new Date("2026-01-01").toISOString(),
+  },
+  {
+    id: "setting-6",
+    key: "autoArchiveDays",
+    value: 30,
+    category: "orders",
+    description: null,
+    updated_by: null,
+    created_at: new Date("2026-01-01").toISOString(),
+    updated_at: new Date("2026-01-01").toISOString(),
+  },
+  {
+    id: "setting-7",
+    key: "requireCustomerPhone",
+    value: true,
+    category: "orders",
+    description: null,
+    updated_by: null,
+    created_at: new Date("2026-01-01").toISOString(),
+    updated_at: new Date("2026-01-01").toISOString(),
+  },
+  {
+    id: "setting-8",
+    key: "maxMedicinesPerOrder",
+    value: 10,
+    category: "orders",
+    description: null,
+    updated_by: null,
+    created_at: new Date("2026-01-01").toISOString(),
+    updated_at: new Date("2026-01-01").toISOString(),
+  },
   // Appearance
-  defaultTheme: "system",
-  defaultLanguage: "en",
-  sidebarDefaultState: "open",
-  itemsPerPage: 20,
-
-  // System
-  enableDevMode: false,
-  autoBackup: true,
-  backupIntervalDays: 7,
-};
+  {
+    id: "setting-9",
+    key: "defaultTheme",
+    value: "system",
+    category: "appearance",
+    description: null,
+    updated_by: null,
+    created_at: new Date("2026-01-01").toISOString(),
+    updated_at: new Date("2026-01-01").toISOString(),
+  },
+  {
+    id: "setting-10",
+    key: "defaultLanguage",
+    value: "en",
+    category: "appearance",
+    description: null,
+    updated_by: null,
+    created_at: new Date("2026-01-01").toISOString(),
+    updated_at: new Date("2026-01-01").toISOString(),
+  },
+];

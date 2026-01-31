@@ -4,7 +4,6 @@ import userEvent from "@testing-library/user-event";
 import { render } from "@/test/utils";
 import { mockOrders, mockSettings } from "@/test/mockData";
 import type { Order } from "@/lib/types";
-import type { Settings } from "@/lib/types-settings";
 
 // Mock hooks
 vi.mock("@/hooks", () => ({
