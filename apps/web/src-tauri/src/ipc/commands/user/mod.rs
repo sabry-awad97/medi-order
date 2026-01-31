@@ -136,25 +136,47 @@ pub async fn delete_user(app: AppHandle, params: DeleteParams) -> IpcResponse<Mu
 // Authentication & Security Commands
 // ============================================================================
 
-/// Authenticate user and get JWT token
+/// Authenticate user and create session
 #[tauri::command]
 pub async fn login_user(
     app: AppHandle,
     params: CreateParams<LoginDto>,
 ) -> IpcResponse<LoginResponseDto> {
     let result: AppResult<LoginResponseDto> = async {
-        get_user_service(&app)
+        // Authenticate user
+        let mut login_response = get_user_service(&app)
             .login(params.data().clone())
             .await
             .tap_ok(|response| {
                 tracing::info!(
-                    "User logged in: {} ({})",
+                    "User authenticated: {} ({})",
                     response.user.username,
                     response.user.id
                 )
             })
-            .tap_err(|e| tracing::warn!("Login failed: {}", e))
-            .map_err(Into::into)
+            .tap_err(|e| tracing::warn!("Login failed: {}", e))?;
+
+        // Create session for the user
+        let state = app.state::<AppState>();
+        let service_manager = state.service_manager();
+        let session_service = service_manager.session();
+
+        let session = session_service
+            .create_session(login_response.user.id, None, None)
+            .await
+            .tap_ok(|session| {
+                tracing::info!(
+                    "Session created for user: {} (session expires at: {})",
+                    login_response.user.id,
+                    session.expires_at
+                )
+            })
+            .tap_err(|e| tracing::error!("Failed to create session: {}", e))?;
+
+        // Replace JWT token with session token
+        login_response.token = Some(session.token);
+
+        Ok(login_response)
     }
     .await;
     result.into()

@@ -19,16 +19,15 @@ import { toast } from "sonner";
 import { createLogger } from "@/lib/logger";
 import {
   getAuthState,
-  setAuthTokens,
+  setAuthSession,
   setAuthUser,
   clearAuth,
-  isTokenExpired,
-  getTokenTimeToExpiry,
+  getSessionToken,
   type AuthState,
   type AuthUser,
-  type AuthTokens,
 } from "@/lib/auth";
 import { userApi, type Login, type LoginResponse } from "@/api/user.api";
+import { sessionApi } from "@/api/session.api";
 
 const logger = createLogger("AuthContext");
 
@@ -77,53 +76,30 @@ export function AuthProvider({ children }: AuthProviderProps) {
    * Validate session on mount and periodically
    */
   useEffect(() => {
-    const validateSession = () => {
-      if (authState.isAuthenticated && isTokenExpired()) {
-        logger.warn("Session expired, logging out");
+    const validateCurrentSession = async () => {
+      const token = getSessionToken();
+
+      if (!token || !authState.isAuthenticated) {
+        return;
+      }
+
+      try {
+        // Validate session with backend
+        await sessionApi.validate(token);
+        logger.info("Session validated successfully");
+      } catch (error) {
+        logger.warn("Session validation failed:", error);
         toast.error("Your session has expired. Please login again.");
         handleLogout();
       }
     };
 
-    // Validate immediately
-    validateSession();
-
-    // Validate every minute
-    const interval = setInterval(validateSession, 60 * 1000);
+    // Skip immediate validation on mount - session was just created or loaded
+    // Only validate periodically after initial mount
+    const interval = setInterval(validateCurrentSession, 5 * 60 * 1000);
 
     return () => clearInterval(interval);
   }, [authState.isAuthenticated]);
-
-  // ============================================================================
-  // Auto Token Refresh
-  // ============================================================================
-
-  /**
-   * Automatically refresh token before expiry
-   */
-  useEffect(() => {
-    if (!authState.isAuthenticated) {
-      return;
-    }
-
-    const timeToExpiry = getTokenTimeToExpiry();
-
-    if (!timeToExpiry) {
-      return;
-    }
-
-    // Refresh 5 minutes before expiry
-    const refreshTime = Math.max(0, timeToExpiry - 5 * 60 * 1000);
-
-    logger.info(`Token will be refreshed in ${refreshTime / 1000} seconds`);
-
-    const timeout = setTimeout(() => {
-      logger.info("Auto-refreshing token");
-      refreshSession();
-    }, refreshTime);
-
-    return () => clearTimeout(timeout);
-  }, [authState.isAuthenticated, authState.token]);
 
   // ============================================================================
   // Login
@@ -135,16 +111,14 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
       setAuthState((prev) => ({ ...prev, isLoading: true }));
 
-      // Call login API
+      // Call login API (now returns session token instead of JWT)
       const response: LoginResponse = await userApi.login(credentials);
 
       logger.info("Login successful:", response.user.username);
 
-      // Store tokens
+      // Store session token
       if (response.token) {
-        setAuthTokens({
-          accessToken: response.token,
-        });
+        setAuthSession(response.token);
       }
 
       // Store user data
@@ -189,6 +163,19 @@ export function AuthProvider({ children }: AuthProviderProps) {
     try {
       logger.info("Logging out user:", authState.user?.username);
 
+      const token = getSessionToken();
+
+      // Delete session from backend
+      if (token) {
+        try {
+          await sessionApi.logout(token);
+          logger.info("Session deleted from backend");
+        } catch (error) {
+          logger.error("Failed to delete session from backend:", error);
+          // Continue with local logout even if backend fails
+        }
+      }
+
       // Clear auth data
       clearAuth();
 
@@ -215,22 +202,17 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
   const refreshSession = useCallback(async () => {
     try {
-      if (!authState.user) {
-        logger.warn("Cannot refresh session: no user");
+      const token = getSessionToken();
+
+      if (!token || !authState.user) {
+        logger.warn("Cannot refresh session: no token or user");
         return;
       }
 
       logger.info("Refreshing session for user:", authState.user.username);
 
-      // In a real app, you would call a refresh token endpoint
-      // For now, we'll just validate the current session
-      const currentState = getAuthState();
-
-      if (!currentState.isAuthenticated) {
-        logger.warn("Session is no longer valid");
-        handleLogout();
-        return;
-      }
+      // Validate session (this also updates last_activity_at)
+      await sessionApi.validate(token);
 
       logger.info("Session refreshed successfully");
     } catch (error) {

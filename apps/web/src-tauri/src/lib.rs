@@ -145,6 +145,12 @@ pub async fn run() {
         ipc::commands::manufacturer::list_active_manufacturers,
         // Manufacturer Management
         ipc::commands::manufacturer::hard_delete_manufacturer,
+        // Session Management
+        ipc::commands::session::validate_session,
+        ipc::commands::session::logout_session,
+        ipc::commands::session::logout_all_sessions,
+        ipc::commands::session::get_user_sessions,
+        ipc::commands::session::cleanup_expired_sessions,
     ]);
 
     builder

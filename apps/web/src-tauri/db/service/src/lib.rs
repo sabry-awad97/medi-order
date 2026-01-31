@@ -9,6 +9,7 @@ use db_migration::run_migrations;
 mod inventory;
 mod manufacturer;
 mod onboarding;
+mod session;
 mod settings;
 mod staff;
 mod user;
@@ -30,6 +31,9 @@ pub use user::{UserService, UserStatistics};
 
 // Export Onboarding service
 pub use onboarding::OnboardingService;
+
+// Export Session service
+pub use session::SessionService;
 
 // Export Settings service
 pub use settings::{SettingsService, SettingsStatistics};
@@ -78,6 +82,10 @@ pub struct ServiceManager {
     /// Onboarding service
     #[builder(setter(into))]
     onboarding: Arc<OnboardingService>,
+
+    /// Session service
+    #[builder(setter(into))]
+    session: Arc<SessionService>,
 
     /// Settings service
     #[builder(setter(into))]
@@ -144,6 +152,7 @@ impl ServiceManager {
             jwt_service.clone(),
         ));
         let onboarding = Arc::new(OnboardingService::new(user.clone()));
+        let session = Arc::new(SessionService::new(db.clone()));
         let settings = Arc::new(SettingsService::new(db.clone()));
         let inventory = Arc::new(InventoryService::new(db.clone()));
         let manufacturer = Arc::new(ManufacturerService::new(db.clone()));
@@ -154,6 +163,7 @@ impl ServiceManager {
             .staff(staff)
             .user(user)
             .onboarding(onboarding)
+            .session(session)
             .settings(settings)
             .inventory(inventory)
             .manufacturer(manufacturer)

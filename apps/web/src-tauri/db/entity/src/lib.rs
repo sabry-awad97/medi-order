@@ -8,6 +8,7 @@ pub mod inventory_price_history;
 pub mod inventory_stock;
 pub mod manufacturer;
 pub mod role;
+pub mod session;
 pub mod setting;
 pub mod special_order;
 pub mod special_order_item;
@@ -39,6 +40,9 @@ pub mod prelude {
     pub use super::role;
     pub use super::role::Entity as Role;
     pub use super::role::dto as role_dto;
+    pub use super::session;
+    pub use super::session::Entity as Session;
+    pub use super::session::dto as session_dto;
     pub use super::setting;
     pub use super::setting::Entity as Setting;
     pub use super::setting::dto as setting_dto;

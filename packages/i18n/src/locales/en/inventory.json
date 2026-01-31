@@ -98,6 +98,7 @@
       "formPlaceholder": "Select form",
       "manufacturer": "Manufacturer",
       "manufacturerPlaceholder": "e.g., Pfizer",
+      "noManufacturer": "No Manufacturer",
       "barcode": "Barcode",
       "barcodePlaceholder": "e.g., 1234567890123",
       "currentStock": "Current Stock",

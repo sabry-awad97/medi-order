@@ -1,6 +1,7 @@
 pub mod inventory;
 pub mod manufacturer;
 pub mod onboarding;
+pub mod session;
 pub mod settings;
 pub mod user;
 
@@ -87,4 +88,9 @@ pub use inventory::{
 pub use manufacturer::{
     create_manufacturer, delete_manufacturer, get_manufacturer, get_manufacturer_by_name,
     hard_delete_manufacturer, list_active_manufacturers, list_manufacturers, update_manufacturer,
+};
+
+pub use session::{
+    cleanup_expired_sessions, get_user_sessions, logout_all_sessions, logout_session,
+    validate_session,
 };

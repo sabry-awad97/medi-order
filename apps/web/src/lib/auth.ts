@@ -16,23 +16,12 @@ const logger = createLogger("Auth");
 // Constants
 // ============================================================================
 
-const TOKEN_KEY = "auth_token";
+const SESSION_TOKEN_KEY = "session_token";
 const USER_KEY = "auth_user";
-const TOKEN_EXPIRY_KEY = "auth_token_expiry";
-const REFRESH_TOKEN_KEY = "auth_refresh_token";
-
-// Token expiry buffer (5 minutes before actual expiry)
-const TOKEN_EXPIRY_BUFFER = 5 * 60 * 1000;
 
 // ============================================================================
 // Types
 // ============================================================================
-
-export interface AuthTokens {
-  accessToken: string;
-  refreshToken?: string;
-  expiresAt?: number;
-}
 
 export interface AuthUser extends UserWithStaff {
   permissions?: string[];
@@ -114,123 +103,43 @@ class SecureStorage {
 const storage = new SecureStorage();
 
 // ============================================================================
-// Token Management
+// Session Token Management
 // ============================================================================
 
 /**
- * Store authentication tokens securely
+ * Store session token securely
  */
-export function setAuthTokens(tokens: AuthTokens): void {
+export function setAuthSession(token: string): void {
   try {
-    storage.set(TOKEN_KEY, tokens.accessToken);
-
-    if (tokens.refreshToken) {
-      storage.set(REFRESH_TOKEN_KEY, tokens.refreshToken);
-    }
-
-    if (tokens.expiresAt) {
-      storage.set(TOKEN_EXPIRY_KEY, tokens.expiresAt.toString());
-    }
-
-    logger.info("Auth tokens stored successfully");
+    storage.set(SESSION_TOKEN_KEY, token);
+    logger.info("Session token stored successfully");
   } catch (error) {
-    logger.error("Failed to store auth tokens:", error);
-    throw new Error("Failed to store authentication tokens");
+    logger.error("Failed to store session token:", error);
+    throw new Error("Failed to store session token");
   }
 }
 
 /**
- * Retrieve authentication token
+ * Retrieve session token
  */
-export function getAuthToken(): string | null {
+export function getSessionToken(): string | null {
   try {
-    const token = storage.get(TOKEN_KEY);
-
-    if (!token) {
-      return null;
-    }
-
-    // Check if token is expired
-    if (isTokenExpired()) {
-      logger.warn("Token is expired");
-      clearAuthTokens();
-      return null;
-    }
-
-    return token;
+    return storage.get(SESSION_TOKEN_KEY);
   } catch (error) {
-    logger.error("Failed to retrieve auth token:", error);
+    logger.error("Failed to retrieve session token:", error);
     return null;
   }
 }
 
 /**
- * Retrieve refresh token
+ * Clear session token
  */
-export function getRefreshToken(): string | null {
+export function clearSessionToken(): void {
   try {
-    return storage.get(REFRESH_TOKEN_KEY);
+    storage.remove(SESSION_TOKEN_KEY);
+    logger.info("Session token cleared");
   } catch (error) {
-    logger.error("Failed to retrieve refresh token:", error);
-    return null;
-  }
-}
-
-/**
- * Check if token is expired
- */
-export function isTokenExpired(): boolean {
-  try {
-    const expiryStr = storage.get(TOKEN_EXPIRY_KEY);
-
-    if (!expiryStr) {
-      // If no expiry is set, assume token is valid
-      return false;
-    }
-
-    const expiry = parseInt(expiryStr, 10);
-    const now = Date.now();
-
-    // Add buffer to refresh before actual expiry
-    return now >= expiry - TOKEN_EXPIRY_BUFFER;
-  } catch (error) {
-    logger.error("Failed to check token expiry:", error);
-    return true;
-  }
-}
-
-/**
- * Get time until token expires (in milliseconds)
- */
-export function getTokenTimeToExpiry(): number | null {
-  try {
-    const expiryStr = storage.get(TOKEN_EXPIRY_KEY);
-
-    if (!expiryStr) {
-      return null;
-    }
-
-    const expiry = parseInt(expiryStr, 10);
-    const now = Date.now();
-
-    return Math.max(0, expiry - now);
-  } catch (error) {
-    logger.error("Failed to get token time to expiry:", error);
-    return null;
-  }
-}
-
-/**
- * Clear all authentication tokens
- */
-export function clearAuthTokens(): void {
-  try {
-    storage.remove(TOKEN_KEY);
-    storage.remove(REFRESH_TOKEN_KEY);
-    storage.remove(TOKEN_EXPIRY_KEY);
-    logger.info("Auth tokens cleared");
-  } catch (error) {
-    logger.error("Failed to clear auth tokens:", error);
+    logger.error("Failed to clear session token:", error);
   }
 }
 
@@ -286,7 +195,7 @@ export function clearAuthUser(): void {
  * Clear all authentication data
  */
 export function clearAuth(): void {
-  clearAuthTokens();
+  clearSessionToken();
   clearAuthUser();
   logger.info("All auth data cleared");
 }
@@ -299,7 +208,7 @@ export function clearAuth(): void {
  * Check if user is authenticated
  */
 export function isAuthenticated(): boolean {
-  const token = getAuthToken();
+  const token = getSessionToken();
   const user = getAuthUser();
   return !!(token && user);
 }
@@ -308,7 +217,7 @@ export function isAuthenticated(): boolean {
  * Get current authentication state
  */
 export function getAuthState(): AuthState {
-  const token = getAuthToken();
+  const token = getSessionToken();
   const user = getAuthUser();
 
   return {
@@ -317,69 +226,6 @@ export function getAuthState(): AuthState {
     isAuthenticated: !!(token && user),
     isLoading: false,
   };
-}
-
-// ============================================================================
-// JWT Utilities
-// ============================================================================
-
-/**
- * Decode JWT token (without verification)
- * Note: This is for reading claims only, not for security validation
- */
-export function decodeJWT(token: string): Record<string, unknown> | null {
-  try {
-    const parts = token.split(".");
-
-    if (parts.length !== 3) {
-      logger.error("Invalid JWT format");
-      return null;
-    }
-
-    const payload = parts[1];
-    const decoded = atob(payload);
-    return JSON.parse(decoded);
-  } catch (error) {
-    logger.error("Failed to decode JWT:", error);
-    return null;
-  }
-}
-
-/**
- * Extract expiry time from JWT token
- */
-export function getJWTExpiry(token: string): number | null {
-  try {
-    const decoded = decodeJWT(token);
-
-    if (!decoded || typeof decoded.exp !== "number") {
-      return null;
-    }
-
-    // Convert from seconds to milliseconds
-    return decoded.exp * 1000;
-  } catch (error) {
-    logger.error("Failed to get JWT expiry:", error);
-    return null;
-  }
-}
-
-/**
- * Extract user ID from JWT token
- */
-export function getJWTUserId(token: string): string | null {
-  try {
-    const decoded = decodeJWT(token);
-
-    if (!decoded || typeof decoded.sub !== "string") {
-      return null;
-    }
-
-    return decoded.sub;
-  } catch (error) {
-    logger.error("Failed to get JWT user ID:", error);
-    return null;
-  }
 }
 
 // ============================================================================
@@ -478,7 +324,7 @@ export function getSessionDuration(): number | null {
  * Check if session is active
  */
 export function isSessionActive(): boolean {
-  return isAuthenticated() && !isTokenExpired();
+  return isAuthenticated();
 }
 
 /**

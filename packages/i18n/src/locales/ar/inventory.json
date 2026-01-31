@@ -98,6 +98,7 @@
       "formPlaceholder": "اختر الشكل",
       "manufacturer": "الشركة المصنعة",
       "manufacturerPlaceholder": "مثال: فايزر",
+      "noManufacturer": "بدون شركة مصنعة",
       "barcode": "الباركود",
       "barcodePlaceholder": "مثال: 1234567890123",
       "currentStock": "المخزون الحالي",
