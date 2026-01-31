@@ -40,7 +40,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { useTheme } from "@/components/theme-provider";
-import { useAlertStats, useSettingValue, useUpdateSettingValue } from "@/hooks";
+import { useAlertStats, useSettingValue, useUpsertSettingValue } from "@/hooks";
 import {
   useLocale,
   LOCALES,
@@ -55,7 +55,7 @@ export function AppSidebar() {
     "sidebarDefaultState",
     "open",
   );
-  const updateSettingValue = useUpdateSettingValue();
+  const upsertSettingValue = useUpsertSettingValue();
   const routerState = useRouterState();
   const currentPath = routerState.location.pathname;
   const { theme, setTheme } = useTheme();
@@ -138,12 +138,13 @@ export function AppSidebar() {
 
     const newState = open ? "open" : "collapsed";
     if (sidebarDefaultState !== newState) {
-      updateSettingValue.mutate({
+      upsertSettingValue.mutate({
         key: "sidebarDefaultState",
         value: newState,
+        category: "appearance",
       });
     }
-  }, [open, sidebarDefaultState, updateSettingValue]);
+  }, [open, sidebarDefaultState, upsertSettingValue]);
 
   return (
     <Sidebar
@@ -248,9 +249,10 @@ export function AppSidebar() {
                     const newTheme = theme === "dark" ? "light" : "dark";
                     setTheme(newTheme);
                     // Save to database
-                    updateSettingValue.mutate({
+                    upsertSettingValue.mutate({
                       key: "defaultTheme",
                       value: newTheme,
+                      category: "appearance",
                     });
                   }}
                   tooltip={
@@ -285,9 +287,10 @@ export function AppSidebar() {
                     setLocale(newLocale);
                     // Save to database
                     console.log("💾 Saving language to database...");
-                    updateSettingValue.mutate({
+                    upsertSettingValue.mutate({
                       key: "defaultLanguage",
                       value: newLocale,
+                      category: "appearance",
                     });
                   }}
                   tooltip={

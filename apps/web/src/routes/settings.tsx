@@ -64,12 +64,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { cn } from "@/lib/utils";
-import {
-  useSettings,
-  useSetSetting,
-  useUpdateSettingValue,
-  useSettingValue,
-} from "@/hooks";
+import { useSettings, useSettingValue, useUpsertSettingValue } from "@/hooks";
 import {
   SETTINGS_DEFINITIONS,
   SETTINGS_CATEGORIES,
@@ -160,7 +155,7 @@ function SettingsPage() {
   const { locale, setLocale } = useLocale();
   const { theme, setTheme } = useTheme();
   const { data: settings, isLoading } = useSettings();
-  const updateSettingValue = useUpdateSettingValue();
+  const upsertSettingValue = useUpsertSettingValue();
 
   const [searchQuery, setSearchQuery] = useState("");
 
@@ -198,9 +193,9 @@ function SettingsPage() {
     }
   }, [defaultTheme, theme, setTheme]);
 
-  const handleChange = (key: string, value: unknown) => {
-    // Update setting immediately
-    updateSettingValue.mutate({ key, value });
+  const handleChange = (key: string, value: unknown, category?: string) => {
+    // Update setting immediately (upsert: create if not exists, update if exists)
+    upsertSettingValue.mutate({ key, value, category });
 
     // If language is changed, update i18n immediately for better UX
     if (key === "defaultLanguage" && (value === "en" || value === "ar")) {
@@ -346,7 +341,7 @@ function SettingsPage() {
                             key={setting.id}
                             setting={setting}
                             onChange={(value) =>
-                              handleChange(setting.key, value)
+                              handleChange(setting.key, value, setting.category)
                             }
                             searchQuery={searchQuery}
                           />

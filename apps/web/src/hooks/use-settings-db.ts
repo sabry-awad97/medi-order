@@ -503,40 +503,54 @@ export function useUpdateSetting() {
 }
 
 /**
- * Update a setting value by key
+ * Set or update a setting value by key (upsert operation)
+ * Creates the setting if it doesn't exist, updates if it does
  *
  * @example
  * ```tsx
- * const updateValue = useUpdateSettingValue();
+ * const upsertValue = useUpsertSettingValue();
  *
- * updateValue.mutate({ key: 'app.theme', value: 'dark' });
+ * upsertValue.mutate({ key: 'app.theme', value: 'dark' });
  * ```
  */
-export function useUpdateSettingValue() {
+export function useUpsertSettingValue() {
   const { data: settings } = useSettings();
+  const setSetting = useSetSetting();
 
   return {
     mutate: (
-      { key, value }: { key: string; value: any },
-      options?: { onSuccess?: () => void },
+      { key, value, category }: { key: string; value: any; category?: string },
+      options?: { onSuccess?: () => void; onError?: (error: Error) => void },
     ) => {
       try {
         // Find setting by key from query results
         const setting = settings?.find((s: SettingResponse) => s.key === key);
 
-        if (!setting) {
-          throw new Error(`Setting with key "${key}" not found`);
+        if (setting) {
+          // Update existing setting
+          settingsCollection.update(setting.id, (draft) => {
+            draft.value = value;
+            draft.updated_at = new Date().toISOString();
+          });
+        } else {
+          // Create new setting
+          setSetting.mutate(
+            {
+              key,
+              value,
+              category,
+            },
+            {
+              onSuccess: options?.onSuccess,
+              onError: options?.onError,
+            },
+          );
         }
-
-        // Update value
-        settingsCollection.update(setting.id, (draft) => {
-          draft.value = value;
-          draft.updated_at = new Date().toISOString();
-        });
 
         options?.onSuccess?.();
       } catch (error) {
-        logger.error("Error updating setting value:", error);
+        logger.error("Error upserting setting value:", error);
+        options?.onError?.(error as Error);
         throw error;
       }
     },

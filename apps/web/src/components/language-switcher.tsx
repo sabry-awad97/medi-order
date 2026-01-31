@@ -8,11 +8,11 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { useUpdateSettingValue } from "@/hooks";
+import { useUpsertSettingValue } from "@/hooks";
 
 export function LanguageSwitcher() {
   const { locale, setLocale, availableLocales } = useLocale();
-  const updateSettingValue = useUpdateSettingValue();
+  const upsertSettingValue = useUpsertSettingValue();
 
   const handleLanguageChange = async (newLocale: Locale) => {
     console.log("🌍 Language change requested:", {
@@ -26,7 +26,11 @@ export function LanguageSwitcher() {
 
       // Also save to settings database for persistence
       console.log("💾 Saving to settings database...");
-      updateSettingValue.mutate({ key: "defaultLanguage", value: newLocale });
+      upsertSettingValue.mutate({
+        key: "defaultLanguage",
+        value: newLocale,
+        category: "appearance",
+      });
       console.log("✅ Settings database updated");
     } catch (error) {
       console.error("❌ Failed to change language:", error);

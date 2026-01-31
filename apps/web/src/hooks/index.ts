@@ -115,7 +115,7 @@ export {
   useSettingValue,
   useSetSetting,
   useUpdateSetting,
-  useUpdateSettingValue,
+  useUpsertSettingValue,
   useDeleteSetting,
   useDeleteSettingByKey,
   useRefreshSettings,
