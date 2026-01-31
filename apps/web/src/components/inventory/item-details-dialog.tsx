@@ -27,7 +27,10 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { cn } from "@/lib/utils";
-import type { InventoryItemWithStockResponse, PriceHistoryEntry } from "@/api/inventory.api";
+import type {
+  InventoryItemWithStockResponse,
+  PriceHistoryEntry,
+} from "@/api/inventory.api";
 import { PriceHistoryChart } from "./price-history-chart";
 
 interface ItemDetailsDialogProps {
@@ -144,18 +147,20 @@ export function ItemDetailsDialog({
                   transition={{ delay: 0.1 }}
                 >
                   <Card>
-                    <CardHeader>
+                    <CardHeader className={cn(isRTL && "text-right")}>
                       <CardTitle
                         className={cn(
                           "flex items-center gap-2 text-lg",
-                          isRTL && "flex-row-reverse",
+                          isRTL && "flex-row-reverse justify-end",
                         )}
                       >
                         <Package className="h-5 w-5 text-primary" />
                         {t("itemDetails.stockInfo")}
                       </CardTitle>
                     </CardHeader>
-                    <CardContent className="space-y-4">
+                    <CardContent
+                      className={cn("space-y-4", isRTL && "text-right")}
+                    >
                       <div className="grid grid-cols-3 gap-3">
                         <div className="text-center space-y-1">
                           <p className="text-xs text-muted-foreground">
@@ -186,7 +191,12 @@ export function ItemDetailsDialog({
                       <Separator />
 
                       <div className="space-y-2">
-                        <div className="flex items-center justify-between text-sm">
+                        <div
+                          className={cn(
+                            "flex items-center justify-between text-sm",
+                            isRTL && "flex-row-reverse",
+                          )}
+                        >
                           <span className="text-muted-foreground">
                             {t("itemDetails.stockLevel")}
                           </span>
@@ -216,18 +226,18 @@ export function ItemDetailsDialog({
                   transition={{ delay: 0.2 }}
                 >
                   <Card>
-                    <CardHeader>
+                    <CardHeader className={cn(isRTL && "text-right")}>
                       <CardTitle
                         className={cn(
                           "flex items-center gap-2 text-lg",
-                          isRTL && "flex-row-reverse",
+                          isRTL && "flex-row-reverse justify-end",
                         )}
                       >
                         <DollarSign className="h-5 w-5 text-green-600 dark:text-green-500" />
                         {t("itemDetails.pricing")}
                       </CardTitle>
                     </CardHeader>
-                    <CardContent>
+                    <CardContent className={cn(isRTL && "text-right")}>
                       <div className="grid grid-cols-2 gap-4">
                         <div className="space-y-1">
                           <p className="text-xs text-muted-foreground">
@@ -257,19 +267,24 @@ export function ItemDetailsDialog({
                   transition={{ delay: 0.3 }}
                 >
                   <Card>
-                    <CardHeader>
+                    <CardHeader className={cn(isRTL && "text-right")}>
                       <CardTitle
                         className={cn(
                           "flex items-center gap-2 text-lg",
-                          isRTL && "flex-row-reverse",
+                          isRTL && "flex-row-reverse justify-end",
                         )}
                       >
                         <Shield className="h-5 w-5 text-blue-600 dark:text-blue-500" />
                         {t("itemDetails.classification")}
                       </CardTitle>
                     </CardHeader>
-                    <CardContent>
-                      <div className="flex flex-wrap gap-2">
+                    <CardContent className={cn(isRTL && "text-right")}>
+                      <div
+                        className={cn(
+                          "flex flex-wrap gap-2",
+                          isRTL && "flex-row-reverse",
+                        )}
+                      >
                         <Badge
                           variant={
                             item.requires_prescription ? "default" : "secondary"
@@ -280,14 +295,17 @@ export function ItemDetailsDialog({
                             : t("itemDetails.overTheCounter")}
                         </Badge>
                         {item.is_controlled && (
-                          <Badge variant="destructive" className="gap-1">
+                          <Badge
+                            variant="destructive"
+                            className={cn("gap-1", isRTL && "flex-row-reverse")}
+                          >
                             <AlertTriangle className="h-3 w-3" />
                             {t("itemDetails.controlledSubstance")}
                           </Badge>
                         )}
                         <Badge
                           variant={item.is_active ? "default" : "outline"}
-                          className="gap-1"
+                          className={cn("gap-1", isRTL && "flex-row-reverse")}
                         >
                           {item.is_active ? (
                             <>
@@ -316,44 +334,42 @@ export function ItemDetailsDialog({
                   transition={{ delay: 0.1 }}
                 >
                   <Card>
-                    <CardHeader>
+                    <CardHeader className={cn(isRTL && "text-right")}>
                       <CardTitle
                         className={cn(
                           "flex items-center gap-2 text-lg",
-                          isRTL && "flex-row-reverse",
+                          isRTL && "flex-row-reverse justify-end",
                         )}
                       >
                         <FileText className="h-5 w-5 text-purple-600 dark:text-purple-500" />
                         {t("itemDetails.basicInfo")}
                       </CardTitle>
                     </CardHeader>
-                    <CardContent className="space-y-3">
+                    <CardContent
+                      className={cn("space-y-3", isRTL && "text-right")}
+                    >
                       <DetailField
                         icon={<FileText className="h-4 w-4" />}
                         label={t("itemDetails.concentration")}
                         value={item.concentration || t("table.na")}
-                        isRTL={isRTL}
                       />
                       <Separator />
                       <DetailField
                         icon={<Package className="h-4 w-4" />}
                         label={t("itemDetails.form")}
                         value={item.form}
-                        isRTL={isRTL}
                       />
                       <Separator />
                       <DetailField
                         icon={<Building2 className="h-4 w-4" />}
                         label={t("itemDetails.manufacturer")}
                         value={item.manufacturer || t("table.na")}
-                        isRTL={isRTL}
                       />
                       <Separator />
                       <DetailField
                         icon={<Barcode className="h-4 w-4" />}
                         label={t("itemDetails.barcode")}
                         value={item.barcode || t("table.na")}
-                        isRTL={isRTL}
                       />
                     </CardContent>
                   </Card>
@@ -367,18 +383,20 @@ export function ItemDetailsDialog({
                     transition={{ delay: 0.2 }}
                   >
                     <Card>
-                      <CardHeader>
+                      <CardHeader className={cn(isRTL && "text-right")}>
                         <CardTitle
                           className={cn(
                             "flex items-center gap-2 text-lg",
-                            isRTL && "flex-row-reverse",
+                            isRTL && "flex-row-reverse justify-end",
                           )}
                         >
                           <AlertTriangle className="h-5 w-5 text-orange-600 dark:text-orange-500" />
                           {t("itemDetails.storageInstructions")}
                         </CardTitle>
                       </CardHeader>
-                      <CardContent className="space-y-4">
+                      <CardContent
+                        className={cn("space-y-4", isRTL && "text-right")}
+                      >
                         {item.storage_instructions && (
                           <div className="space-y-2">
                             <p
@@ -399,7 +417,7 @@ export function ItemDetailsDialog({
                             <h4
                               className={cn(
                                 "font-medium text-sm flex items-center gap-2",
-                                isRTL && "flex-row-reverse",
+                                isRTL && "flex-row-reverse justify-end",
                               )}
                             >
                               <FileText className="h-4 w-4" />
@@ -427,18 +445,20 @@ export function ItemDetailsDialog({
                   transition={{ delay: 0.3 }}
                 >
                   <Card>
-                    <CardHeader>
+                    <CardHeader className={cn(isRTL && "text-right")}>
                       <CardTitle
                         className={cn(
                           "flex items-center gap-2 text-lg",
-                          isRTL && "flex-row-reverse",
+                          isRTL && "flex-row-reverse justify-end",
                         )}
                       >
                         <Calendar className="h-5 w-5 text-slate-600 dark:text-slate-400" />
                         {t("itemDetails.timeline")}
                       </CardTitle>
                     </CardHeader>
-                    <CardContent className="space-y-3">
+                    <CardContent
+                      className={cn("space-y-3", isRTL && "text-right")}
+                    >
                       <TimelineItem
                         icon={<Calendar className="h-4 w-4 text-primary" />}
                         label={t("itemDetails.created")}
@@ -491,27 +511,16 @@ interface DetailFieldProps {
   label: string;
   value: string;
   icon?: React.ReactNode;
-  isRTL?: boolean;
 }
 
-function DetailField({ label, value, icon, isRTL }: DetailFieldProps) {
+function DetailField({ label, value, icon }: DetailFieldProps) {
   return (
-    <div
-      className={cn(
-        "flex items-center justify-between gap-4",
-        isRTL && "flex-row-reverse",
-      )}
-    >
-      <p
-        className={cn(
-          "text-sm text-muted-foreground flex items-center gap-2",
-          isRTL && "flex-row-reverse",
-        )}
-      >
+    <div className="flex items-center justify-between gap-4">
+      <p className="text-sm text-muted-foreground flex items-center gap-2 shrink-0">
         {icon}
         {label}
       </p>
-      <p className="font-medium text-sm">{value}</p>
+      <p className="font-medium text-sm text-right">{value}</p>
     </div>
   );
 }
@@ -524,10 +533,25 @@ interface TimelineItemProps {
 }
 
 function TimelineItem({ icon, label, value, isRTL }: TimelineItemProps) {
+  if (isRTL) {
+    return (
+      <div
+        className="flex items-start gap-3"
+        style={{ flexDirection: "row-reverse" }}
+      >
+        <div className="p-2 rounded-lg bg-muted">{icon}</div>
+        <div className="flex-1 space-y-1 text-right">
+          <p className="text-xs text-muted-foreground">{label}</p>
+          <p className="text-sm font-medium">{value}</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div className={cn("flex items-start gap-3", isRTL && "flex-row-reverse")}>
+    <div className="flex items-start gap-3">
       <div className="p-2 rounded-lg bg-muted">{icon}</div>
-      <div className={cn("flex-1 space-y-1", isRTL && "text-right")}>
+      <div className="flex-1 space-y-1">
         <p className="text-xs text-muted-foreground">{label}</p>
         <p className="text-sm font-medium">{value}</p>
       </div>
