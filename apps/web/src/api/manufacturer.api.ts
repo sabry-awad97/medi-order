@@ -95,6 +95,20 @@ export async function createManufacturer(
 }
 
 /**
+ * Create multiple manufacturers in bulk (optimized for seeding/imports)
+ */
+export async function createManufacturersBulk(
+  data: CreateManufacturer[],
+): Promise<MutationResult[]> {
+  logger.info("Bulk creating manufacturers:", data.length);
+  return invokeCommand(
+    "create_manufacturers_bulk",
+    z.array(MutationResultSchema),
+    { data },
+  );
+}
+
+/**
  * Get manufacturer by ID
  */
 export async function getManufacturer(
@@ -198,6 +212,7 @@ export async function hardDeleteManufacturer(
 export const manufacturerApi = {
   // CRUD
   create: createManufacturer,
+  createBulk: createManufacturersBulk,
   get: getManufacturer,
   update: updateManufacturer,
   delete: deleteManufacturer,

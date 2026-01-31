@@ -29,14 +29,17 @@ impl ManufacturerService {
         }
 
         let manufacturer = db_entity::manufacturer::ActiveModel {
-            name: Set(data.name),
+            id: Set(Id::new()),
+            name: Set(data.name.clone()),
             short_name: Set(data.short_name),
             country: Set(data.country),
             phone: Set(data.phone),
             email: Set(data.email),
             website: Set(data.website),
             notes: Set(data.notes),
-            ..db_entity::manufacturer::ActiveModel::new()
+            is_active: Set(true),
+            created_at: Set(chrono::Utc::now().into()),
+            updated_at: Set(chrono::Utc::now().into()),
         };
 
         let result = manufacturer
@@ -46,6 +49,55 @@ impl ManufacturerService {
             .tap_err(|e| tracing::error!("Failed to create manufacturer: {}", e))?;
 
         Ok(result.into())
+    }
+
+    /// Create multiple manufacturers in bulk (optimized for seeding/imports)
+    /// Skips duplicate checks for performance - relies on database constraints
+    pub async fn create_bulk(
+        &self,
+        data: Vec<CreateManufacturer>,
+    ) -> ServiceResult<Vec<ManufacturerResponse>> {
+        if data.is_empty() {
+            return Ok(Vec::new());
+        }
+
+        let count = data.len();
+        tracing::info!("Bulk creating {} manufacturers", count);
+
+        // Prepare all active models
+        let active_models: Vec<db_entity::manufacturer::ActiveModel> = data
+            .into_iter()
+            .map(|d| db_entity::manufacturer::ActiveModel {
+                id: Set(Id::new()),
+                name: Set(d.name),
+                short_name: Set(d.short_name),
+                country: Set(d.country),
+                phone: Set(d.phone),
+                email: Set(d.email),
+                website: Set(d.website),
+                notes: Set(d.notes),
+                is_active: Set(true),
+                created_at: Set(chrono::Utc::now().into()),
+                updated_at: Set(chrono::Utc::now().into()),
+            })
+            .collect();
+
+        // Use insert_many for batch insert
+        Manufacturer::insert_many(active_models)
+            .exec(self.db.as_ref())
+            .await
+            .tap_err(|e| tracing::error!("Failed to bulk create manufacturers: {}", e))?;
+
+        tracing::info!("Successfully bulk created {} manufacturers", count);
+
+        // Fetch the inserted records (ordered by creation time, most recent first)
+        let results = Manufacturer::find()
+            .order_by_desc(db_entity::manufacturer::Column::CreatedAt)
+            .limit(count as u64)
+            .all(self.db.as_ref())
+            .await?;
+
+        Ok(results.into_iter().map(|m| m.into()).collect())
     }
 
     /// Get a manufacturer by ID
@@ -195,3 +247,6 @@ impl ManufacturerService {
         Ok(count > 0)
     }
 }
+
+#[cfg(test)]
+mod tests;

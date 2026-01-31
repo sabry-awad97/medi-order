@@ -52,6 +52,32 @@ pub async fn create_manufacturer(
     result.into()
 }
 
+/// Create multiple manufacturers in bulk (optimized for seeding/imports)
+#[tauri::command]
+pub async fn create_manufacturers_bulk(
+    app: AppHandle,
+    data: Vec<CreateManufacturer>,
+) -> IpcResponse<Vec<MutationResult>> {
+    let result: AppResult<Vec<MutationResult>> = async {
+        get_manufacturer_service(&app)
+            .create_bulk(data)
+            .await
+            .tap_ok(|manufacturers| {
+                tracing::info!("Bulk created {} manufacturers", manufacturers.len())
+            })
+            .tap_err(|e| tracing::error!("Failed to bulk create manufacturers: {}", e))
+            .map(|manufacturers| {
+                manufacturers
+                    .into_iter()
+                    .map(|m| MutationResult::from(m.id))
+                    .collect()
+            })
+            .map_err(Into::into)
+    }
+    .await;
+    result.into()
+}
+
 /// Get a manufacturer by ID
 #[tauri::command]
 pub async fn get_manufacturer(

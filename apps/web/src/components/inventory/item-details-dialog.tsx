@@ -363,7 +363,7 @@ export function ItemDetailsDialog({
                       <DetailField
                         icon={<Building2 className="h-4 w-4" />}
                         label={t("itemDetails.manufacturer")}
-                        value={item.manufacturer || t("table.na")}
+                        value={item.manufacturer_name || t("table.na")}
                       />
                       <Separator />
                       <DetailField

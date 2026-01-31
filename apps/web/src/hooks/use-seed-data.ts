@@ -5,10 +5,15 @@ import {
   generateSeedOrders,
   generateSeedSuppliers,
   generateSeedInventory,
+  generateSeedManufacturers,
+  generateManufacturerIds,
 } from "@/lib/seed-data";
 import { ordersCollection } from "./use-orders-db";
 import { suppliersCollection } from "./use-suppliers-db";
 import { inventoryApi } from "@/api/inventory.api";
+import { manufacturerApi } from "@/api/manufacturer.api";
+import { settingsApi } from "@/api/settings.api";
+import { clearAuth } from "@/lib/auth";
 
 // Helper to delay execution
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
@@ -25,10 +30,14 @@ export function useSeedData() {
     ) => {
       setIsPending(true);
       try {
+        // Generate manufacturer IDs first - these will be used consistently
+        const manufacturerIds = generateManufacturerIds();
+
         // توليد البيانات
         const orders = generateSeedOrders(15);
         const suppliers = generateSeedSuppliers(8);
-        const inventory = generateSeedInventory();
+        const manufacturers = generateSeedManufacturers(manufacturerIds);
+        const inventory = generateSeedInventory(manufacturerIds);
 
         // إضافة الطلبات
         for (const order of orders) {
@@ -40,13 +49,74 @@ export function useSeedData() {
           suppliersCollection.insert(supplier);
         }
 
-        // إضافة المخزون مع تاريخ الأسعار
+        // إضافة الشركات المصنعة أولاً (قبل المخزون)
+        logger.info("Seeding manufacturers...");
+        let manufacturersCount = 0;
+
+        // Create a map to store the actual IDs returned from the backend
+        const actualManufacturerIds: Record<string, string> = {};
+
+        try {
+          // Create manufacturers one by one to maintain the mapping
+          for (const manufacturer of manufacturers) {
+            const { id: _id, ...manufacturerData } = manufacturer; // Remove the id field
+            const result = await manufacturerApi.create(manufacturerData);
+
+            // Store the mapping: short_name -> actual_id
+            actualManufacturerIds[manufacturer.short_name] = result.id;
+            manufacturersCount++;
+
+            await delay(30);
+          }
+
+          logger.info(
+            `Successfully created ${manufacturersCount} manufacturers`,
+          );
+        } catch (error) {
+          logger.error("Error seeding manufacturers:", error);
+        }
+
+        // Now create inventory using the actual manufacturer IDs
+        logger.info("Seeding inventory items...");
         let inventoryCount = 0;
         const createdItems: string[] = [];
 
         for (const item of inventory) {
           try {
-            const result = await inventoryApi.create(item);
+            // Find the manufacturer short name from the original mapping
+            const manufacturerShortName = Object.entries(manufacturerIds).find(
+              ([_, id]) => id === item.manufacturer_id,
+            )?.[0];
+
+            if (!manufacturerShortName) {
+              logger.error(
+                "Could not find manufacturer short name for ID:",
+                item.manufacturer_id,
+              );
+              continue;
+            }
+
+            // Get the actual ID from the backend
+            const actualManufacturerId =
+              actualManufacturerIds[
+                manufacturers.find((m) => m.id === item.manufacturer_id)
+                  ?.short_name || ""
+              ];
+
+            if (!actualManufacturerId) {
+              logger.error(
+                "Could not find actual manufacturer ID for:",
+                manufacturerShortName,
+              );
+              continue;
+            }
+
+            // Create the item with the actual manufacturer ID
+            const result = await inventoryApi.create({
+              ...item,
+              manufacturer_id: actualManufacturerId,
+            });
+
             createdItems.push(result.id);
             inventoryCount++;
 
@@ -92,7 +162,7 @@ export function useSeedData() {
         }
 
         toast.success(
-          `تم إضافة ${orders.length} طلب، ${suppliers.length} مورد، و ${inventoryCount} صنف للمخزون مع تاريخ الأسعار بنجاح`,
+          `تم إضافة ${orders.length} طلب، ${suppliers.length} مورد، ${manufacturersCount} شركة مصنعة، و ${inventoryCount} صنف للمخزون مع تاريخ الأسعار بنجاح`,
         );
         options?.onSuccess?.();
       } catch (error) {
@@ -170,8 +240,58 @@ export function useClearData() {
           logger.error("Error clearing inventory:", error);
         }
 
+        // Clear manufacturers from PostgreSQL
+        logger.info("Clearing manufacturers from database...");
+        let manufacturersCount = 0;
+        try {
+          const manufacturers = await manufacturerApi.listActive();
+          manufacturersCount = manufacturers.length;
+
+          // Delete all manufacturers
+          for (const manufacturer of manufacturers) {
+            try {
+              await manufacturerApi.delete(manufacturer.id);
+              await delay(30);
+            } catch (error) {
+              logger.error("Error deleting manufacturer:", {
+                id: manufacturer.id,
+                error,
+              });
+            }
+          }
+        } catch (error) {
+          logger.error("Error clearing manufacturers:", error);
+        }
+
+        // Clear settings from PostgreSQL
+        logger.info("Clearing settings from database...");
+        let settingsCount = 0;
+        try {
+          const settings = await settingsApi.list();
+          settingsCount = settings.length;
+
+          // Delete all settings by ID
+          for (const setting of settings) {
+            try {
+              await settingsApi.deleteById(setting.id);
+              await delay(30);
+            } catch (error) {
+              logger.error("Error deleting setting:", {
+                id: setting.id,
+                error,
+              });
+            }
+          }
+        } catch (error) {
+          logger.error("Error clearing settings:", error);
+        }
+
+        // Clear authentication data from localStorage
+        logger.info("Clearing authentication data...");
+        clearAuth();
+
         toast.success(
-          `تم حذف ${ordersCount} طلب، ${suppliersCount} مورد، و ${inventoryCount} صنف من المخزون بنجاح`,
+          `تم حذف جميع البيانات بنجاح: ${ordersCount} طلب، ${suppliersCount} مورد، ${manufacturersCount} شركة مصنعة، ${inventoryCount} صنف من المخزون، و ${settingsCount} إعداد`,
         );
         options?.onSuccess?.();
       } catch (error) {

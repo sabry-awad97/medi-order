@@ -135,6 +135,7 @@ pub async fn run() {
         ipc::commands::inventory::get_price_statistics,
         // Manufacturer CRUD operations
         ipc::commands::manufacturer::create_manufacturer,
+        ipc::commands::manufacturer::create_manufacturers_bulk,
         ipc::commands::manufacturer::get_manufacturer,
         ipc::commands::manufacturer::update_manufacturer,
         ipc::commands::manufacturer::delete_manufacturer,

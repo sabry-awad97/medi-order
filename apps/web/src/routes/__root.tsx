@@ -94,7 +94,7 @@ function RootComponent() {
     }
   }, [isFirstRun, isCheckingFirstRun, isOnboarding, navigate]);
 
-  // Show loading while checking first run OR redirecting to onboarding
+  // Show loading while checking first run OR when first run is detected (to prevent layout flash)
   if (isCheckingFirstRun || (isFirstRun && !isOnboarding)) {
     return <Loading />;
   }
@@ -113,6 +113,10 @@ function RootComponent() {
   }
 
   // Regular layout with sidebar for authenticated routes
+  // Only render if NOT first run (prevents sidebar rendering during redirect)
+  if (isFirstRun) {
+    return <Loading />;
+  }
   return (
     <>
       <HeadContent />

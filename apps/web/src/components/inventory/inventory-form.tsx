@@ -37,6 +37,7 @@ import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
 import { MEDICINE_FORMS } from "@/lib/constants";
+import { useActiveManufacturers } from "@/hooks";
 import type { CreateInventoryItemWithStock } from "@/api/inventory.api";
 
 interface InventoryFormProps {
@@ -52,7 +53,7 @@ interface FormData {
   generic_name: string;
   concentration: string;
   form: string;
-  manufacturer: string;
+  manufacturer_id: string;
   barcode: string;
   // Step 2: Stock & Pricing
   stock_quantity: string;
@@ -108,12 +109,16 @@ export function InventoryForm({
   const [errors, setErrors] = useState<ValidationErrors>({});
   const STEPS = getSteps(t);
 
+  // Fetch active manufacturers for dropdown
+  const { data: manufacturers = [], isLoading: isLoadingManufacturers } =
+    useActiveManufacturers();
+
   const [formData, setFormData] = useState<FormData>({
     name: "",
     generic_name: "",
     concentration: "",
     form: "",
-    manufacturer: "",
+    manufacturer_id: "",
     barcode: "",
     stock_quantity: "0",
     min_stock_level: "10",
@@ -192,7 +197,7 @@ export function InventoryForm({
       generic_name: formData.generic_name.trim() || undefined,
       concentration: formData.concentration.trim(),
       form: formData.form,
-      manufacturer: formData.manufacturer.trim() || undefined,
+      manufacturer_id: formData.manufacturer_id || undefined,
       barcodes: formData.barcode.trim()
         ? [
             {
@@ -224,7 +229,7 @@ export function InventoryForm({
       generic_name: "",
       concentration: "",
       form: "",
-      manufacturer: "",
+      manufacturer_id: "",
       barcode: "",
       stock_quantity: "0",
       min_stock_level: "10",
@@ -451,17 +456,41 @@ export function InventoryForm({
 
                       {/* Manufacturer */}
                       <div className="space-y-2">
-                        <Label htmlFor="manufacturer">
+                        <Label htmlFor="manufacturer_id">
                           {t("form.fields.manufacturer")}
                         </Label>
-                        <Input
-                          id="manufacturer"
-                          value={formData.manufacturer}
-                          onChange={(e) =>
-                            updateField("manufacturer", e.target.value)
+                        <Select
+                          value={formData.manufacturer_id || ""}
+                          onValueChange={(value) =>
+                            updateField("manufacturer_id", value || "")
                           }
-                          placeholder={t("form.fields.manufacturerPlaceholder")}
-                        />
+                          disabled={isLoadingManufacturers}
+                        >
+                          <SelectTrigger>
+                            <SelectValue
+                              placeholder={
+                                isLoadingManufacturers
+                                  ? "Loading manufacturers..."
+                                  : t("form.fields.manufacturerPlaceholder")
+                              }
+                            />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="">
+                              {t("form.fields.noManufacturer") || "None"}
+                            </SelectItem>
+                            {manufacturers.map((manufacturer) => (
+                              <SelectItem
+                                key={manufacturer.id}
+                                value={manufacturer.id}
+                              >
+                                {manufacturer.name}
+                                {manufacturer.short_name &&
+                                  ` (${manufacturer.short_name})`}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
                       </div>
 
                       {/* Barcode */}
@@ -753,7 +782,11 @@ export function InventoryForm({
                         />
                         <ReviewField
                           label={t("form.fields.manufacturer")}
-                          value={formData.manufacturer || "—"}
+                          value={
+                            manufacturers.find(
+                              (m) => m.id === formData.manufacturer_id,
+                            )?.name || "—"
+                          }
                         />
                         <ReviewField
                           label={t("form.fields.barcode")}

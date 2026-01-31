@@ -459,12 +459,12 @@ function InventoryComponent() {
         ),
       },
       {
-        accessorKey: "manufacturer",
+        accessorKey: "manufacturer_name",
         header: t("table.manufacturer"),
         cell: ({ row }) =>
-          row.original.manufacturer ? (
+          row.original.manufacturer_name ? (
             <Badge variant="outline" className="font-normal">
-              {row.original.manufacturer}
+              {row.original.manufacturer_name}
             </Badge>
           ) : (
             <span className="text-muted-foreground text-xs">
@@ -1539,9 +1539,9 @@ function InventoryItemCard({
               Controlled
             </Badge>
           )}
-          {item.manufacturer && (
+          {item.manufacturer_name && (
             <Badge variant="outline" className="text-xs">
-              {item.manufacturer}
+              {item.manufacturer_name}
             </Badge>
           )}
         </div>

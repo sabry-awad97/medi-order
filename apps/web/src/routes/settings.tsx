@@ -1,5 +1,6 @@
 import { useLocale, useTranslation } from "@meditrack/i18n";
 import { createFileRoute } from "@tanstack/react-router";
+import { useQueryClient } from "@tanstack/react-query";
 import { cva, type VariantProps } from "class-variance-authority";
 import {
   Bell,
@@ -162,6 +163,7 @@ function SettingsPage() {
   const upsertSettingValue = useUpsertSettingValue();
   const seedData = useSeedData();
   const clearData = useClearData();
+  const queryClient = useQueryClient();
 
   const [searchQuery, setSearchQuery] = useState("");
 
@@ -425,20 +427,26 @@ function SettingsPage() {
                     <AlertDialogContent>
                       <AlertDialogHeader>
                         <AlertDialogTitle>Seed Test Data?</AlertDialogTitle>
-                        <AlertDialogDescription>
-                          This will add sample data to your database:
-                          <ul className="list-disc list-inside mt-2 space-y-1">
-                            <li>15 sample orders</li>
-                            <li>8 suppliers</li>
-                            <li>
-                              30+ inventory items (including low-stock and
-                              out-of-stock items)
-                            </li>
-                          </ul>
-                          <p className="mt-2 text-sm">
-                            This is useful for testing and development purposes.
-                          </p>
-                        </AlertDialogDescription>
+                        <AlertDialogDescription
+                          render={(props) => (
+                            <div {...props}>
+                              <p>This will add sample data to your database:</p>
+                              <ul className="list-disc list-inside mt-2 space-y-1">
+                                <li>15 sample orders</li>
+                                <li>8 suppliers</li>
+                                <li>19 manufacturers</li>
+                                <li>
+                                  30+ inventory items (including low-stock and
+                                  out-of-stock items)
+                                </li>
+                              </ul>
+                              <p className="mt-2 text-sm">
+                                This is useful for testing and development
+                                purposes.
+                              </p>
+                            </div>
+                          )}
+                        />
                       </AlertDialogHeader>
                       <AlertDialogFooter>
                         <AlertDialogCancel>Cancel</AlertDialogCancel>
@@ -446,7 +454,8 @@ function SettingsPage() {
                           onClick={() => {
                             seedData.mutate(undefined, {
                               onSuccess: () => {
-                                window.location.reload();
+                                // Invalidate all queries to refetch data
+                                queryClient.invalidateQueries();
                               },
                             });
                           }}
@@ -463,7 +472,7 @@ function SettingsPage() {
                       render={(props) => (
                         <button
                           {...props}
-                          className="inline-flex items-center justify-start gap-2 w-full rounded-md border border-input bg-background px-3 py-2 text-sm hover:bg-accent hover:text-accent-foreground disabled:pointer-events-none disabled:opacity-50 text-destructive hover:text-destructive"
+                          className="inline-flex items-center justify-start gap-2 w-full rounded-md border border-input bg-background px-3 py-2 text-sm hover:bg-accent hover:text-accent-foreground disabled:pointer-events-none disabled:opacity-50 text-destructive"
                           disabled={clearData.isPending}
                         >
                           <Trash2 className="h-4 w-4" />
@@ -481,18 +490,27 @@ function SettingsPage() {
                     <AlertDialogContent>
                       <AlertDialogHeader>
                         <AlertDialogTitle>Clear All Data?</AlertDialogTitle>
-                        <AlertDialogDescription>
-                          This will permanently delete all data from your
-                          database:
-                          <ul className="list-disc list-inside mt-2 space-y-1">
-                            <li>All orders</li>
-                            <li>All suppliers</li>
-                            <li>All inventory items and their price history</li>
-                          </ul>
-                          <p className="mt-2 font-semibold text-destructive">
-                            This action cannot be undone!
-                          </p>
-                        </AlertDialogDescription>
+                        <AlertDialogDescription
+                          render={(props) => (
+                            <div {...props}>
+                              <p>
+                                This will permanently delete all data from your
+                                database:
+                              </p>
+                              <ul className="list-disc list-inside mt-2 space-y-1">
+                                <li>All orders</li>
+                                <li>All suppliers</li>
+                                <li>All manufacturers</li>
+                                <li>
+                                  All inventory items and their price history
+                                </li>
+                              </ul>
+                              <p className="mt-2 font-semibold text-destructive">
+                                This action cannot be undone!
+                              </p>
+                            </div>
+                          )}
+                        />
                       </AlertDialogHeader>
                       <AlertDialogFooter>
                         <AlertDialogCancel>Cancel</AlertDialogCancel>
@@ -500,7 +518,8 @@ function SettingsPage() {
                           onClick={() => {
                             clearData.mutate(undefined, {
                               onSuccess: () => {
-                                window.location.reload();
+                                // Invalidate all queries to refetch data
+                                queryClient.invalidateQueries();
                               },
                             });
                           }}
