@@ -34,6 +34,7 @@ import {
   type ColumnDef,
   type SortingState,
 } from "@tanstack/react-table";
+import type { PriceHistoryEntry } from "@/components/inventory";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -111,6 +112,7 @@ import {
   useCreateInventoryItem,
   useAdjustInventoryStock,
   useDeleteInventoryItem,
+  usePriceHistory,
   useSettingValue,
   useUpsertSettingValue,
 } from "@/hooks";
@@ -295,6 +297,13 @@ function InventoryComponent() {
     setIsDeleteDialogOpen(false);
     setItemToDelete(null);
   };
+
+  // Fetch price history for selected item
+  const { data: priceHistory = [] } = usePriceHistory(
+    selectedItem?.id ?? "",
+    12, // Last 12 entries
+    { enabled: !!selectedItem },
+  );
 
   // Handle view details
   const handleViewDetails = (item: InventoryItemWithStockResponse) => {
@@ -1305,6 +1314,7 @@ function InventoryComponent() {
         open={isDetailsOpen}
         onOpenChange={setIsDetailsOpen}
         item={selectedItem}
+        priceHistory={priceHistory}
       />
 
       <StockAdjustmentDialog

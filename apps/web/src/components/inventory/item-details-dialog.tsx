@@ -28,17 +28,23 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { cn } from "@/lib/utils";
 import type { InventoryItemWithStockResponse } from "@/api/inventory.api";
+import {
+  PriceHistoryChart,
+  type PriceHistoryEntry,
+} from "./price-history-chart";
 
 interface ItemDetailsDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   item: InventoryItemWithStockResponse | null;
+  priceHistory?: PriceHistoryEntry[];
 }
 
 export function ItemDetailsDialog({
   open,
   onOpenChange,
   item,
+  priceHistory = [],
 }: ItemDetailsDialogProps) {
   const { t } = useTranslation("inventory");
   const { isRTL } = useDirection();
@@ -115,6 +121,21 @@ export function ItemDetailsDialog({
 
         <ScrollArea className="flex-1 h-0">
           <div className="p-6">
+            {/* Price History Chart - Full Width */}
+            {priceHistory && priceHistory.length > 0 && (
+              <motion.div
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.05 }}
+                className="mb-6"
+              >
+                <PriceHistoryChart
+                  data={priceHistory}
+                  currentPrice={unitPrice}
+                />
+              </motion.div>
+            )}
+
             {/* Two Column Layout */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               {/* Left Column - Stock & Pricing */}

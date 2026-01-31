@@ -1,6 +1,9 @@
 use db_entity::inventory_item::dto::{
     CreateInventoryItemWithStock, InventoryItemWithStockResponse, UpdateInventoryItem,
 };
+use db_entity::inventory_price_history::dto::{
+    PriceHistoryQueryDto, PriceHistoryResponse, PriceStatistics,
+};
 use db_entity::inventory_stock::dto::{AdjustStock, UpdateInventoryStock};
 use db_service::InventoryStatistics;
 use tap::TapFallible;
@@ -9,7 +12,7 @@ use tauri::{AppHandle, Manager};
 use crate::{
     error::AppResult,
     ipc::{
-        params::{CreateParams, GetParams, UpdateParams},
+        params::{CreateParams, GetParams, ListParams, UpdateParams},
         response::{IpcResponse, MutationResult},
     },
     state::AppState,
@@ -303,6 +306,108 @@ pub async fn get_inventory_statistics(app: AppHandle) -> IpcResponse<InventorySt
                 )
             })
             .tap_err(|e| tracing::error!("Failed to get inventory statistics: {}", e))
+            .map_err(Into::into)
+    }
+    .await;
+    result.into()
+}
+
+// ============================================================================
+// Price History Operations
+// ============================================================================
+
+/// Helper to get price history service from app state
+#[inline]
+fn get_price_history_service(app: &AppHandle) -> std::sync::Arc<db_service::PriceHistoryService> {
+    let state = app.state::<AppState>();
+    let service_manager = state.service_manager();
+    service_manager.price_history().clone()
+}
+
+/// Get price history for an inventory item
+#[tauri::command]
+pub async fn get_price_history(
+    app: AppHandle,
+    params: ListParams<PriceHistoryQueryDto>,
+) -> IpcResponse<Vec<PriceHistoryResponse>> {
+    let result: AppResult<Vec<PriceHistoryResponse>> = async {
+        let query = params.filter().clone().unwrap_or_default();
+
+        get_price_history_service(&app)
+            .get_price_history(query.inventory_item_id, query.limit)
+            .await
+            .tap_ok(|entries| {
+                tracing::debug!(
+                    "Retrieved {} price history entries for item {}",
+                    entries.len(),
+                    query.inventory_item_id
+                )
+            })
+            .tap_err(|e| {
+                tracing::error!(
+                    "Failed to get price history for item {}: {}",
+                    query.inventory_item_id,
+                    e
+                )
+            })
+            .map_err(Into::into)
+    }
+    .await;
+    result.into()
+}
+
+/// Get the latest price for an inventory item
+#[tauri::command]
+pub async fn get_latest_price(
+    app: AppHandle,
+    params: GetParams,
+) -> IpcResponse<Option<PriceHistoryResponse>> {
+    let result: AppResult<Option<PriceHistoryResponse>> = async {
+        get_price_history_service(&app)
+            .get_latest_price(*params.id())
+            .await
+            .tap_ok(|entry| {
+                if entry.is_some() {
+                    tracing::debug!("Retrieved latest price for item {}", params.id());
+                } else {
+                    tracing::debug!("No price history found for item {}", params.id());
+                }
+            })
+            .tap_err(|e| {
+                tracing::error!("Failed to get latest price for item {}: {}", params.id(), e)
+            })
+            .map_err(Into::into)
+    }
+    .await;
+    result.into()
+}
+
+/// Get price statistics for an inventory item
+#[tauri::command]
+pub async fn get_price_statistics(
+    app: AppHandle,
+    params: GetParams,
+) -> IpcResponse<PriceStatistics> {
+    let result: AppResult<PriceStatistics> = async {
+        get_price_history_service(&app)
+            .get_price_statistics(*params.id())
+            .await
+            .tap_ok(|stats| {
+                tracing::debug!(
+                    "Retrieved price statistics for item {}: min={}, max={}, avg={}",
+                    params.id(),
+                    stats.min_price,
+                    stats.max_price,
+                    stats.avg_price
+                )
+            })
+            .tap_err(|e| {
+                tracing::error!(
+                    "Failed to get price statistics for item {}: {}",
+                    params.id(),
+                    e
+                )
+            })
             .map_err(Into::into)
     }
     .await;

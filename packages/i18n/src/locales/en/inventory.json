@@ -192,7 +192,13 @@
     "timeline": "Timeline",
     "created": "Created",
     "lastUpdated": "Last Updated",
-    "lastRestocked": "Last Restocked"
+    "lastRestocked": "Last Restocked",
+    "priceHistory": "Price History",
+    "noPriceHistory": "No price history available",
+    "minPrice": "Min",
+    "maxPrice": "Max",
+    "avgPrice": "Avg",
+    "stable": "Stable"
   },
   "stockStatus": {
     "inStock": "In Stock",

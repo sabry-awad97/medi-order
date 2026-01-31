@@ -1,3 +1,5 @@
+pub mod price_history;
+
 use std::sync::Arc;
 
 use db_entity::id::Id;

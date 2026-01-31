@@ -3,6 +3,7 @@
 pub mod customer;
 pub mod id;
 pub mod inventory_item;
+pub mod inventory_price_history;
 pub mod inventory_stock;
 pub mod role;
 pub mod setting;
@@ -21,6 +22,9 @@ pub mod prelude {
     pub use super::inventory_item;
     pub use super::inventory_item::Entity as InventoryItem;
     pub use super::inventory_item::dto as inventory_item_dto;
+    pub use super::inventory_price_history;
+    pub use super::inventory_price_history::Entity as InventoryPriceHistory;
+    pub use super::inventory_price_history::dto as inventory_price_history_dto;
     pub use super::inventory_stock;
     pub use super::inventory_stock::Entity as InventoryStock;
     pub use super::inventory_stock::dto as inventory_stock_dto;

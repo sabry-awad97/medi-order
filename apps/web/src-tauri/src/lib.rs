@@ -123,6 +123,10 @@ pub async fn run() {
         ipc::commands::inventory::search_inventory_items,
         // Inventory Statistics
         ipc::commands::inventory::get_inventory_statistics,
+        // Inventory Price History
+        ipc::commands::inventory::get_price_history,
+        ipc::commands::inventory::get_latest_price,
+        ipc::commands::inventory::get_price_statistics,
     ]);
 
     builder

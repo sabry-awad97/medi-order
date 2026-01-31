@@ -36,6 +36,9 @@ pub use settings::{SettingsService, SettingsStatistics};
 // Export Inventory service
 pub use inventory::{InventoryService, InventoryStatistics};
 
+// Export Price History service
+pub use inventory::price_history::PriceHistoryService;
+
 /// Database connection configuration
 pub struct DatabaseConfig {
     pub url: String,
@@ -79,6 +82,10 @@ pub struct ServiceManager {
     /// Inventory service
     #[builder(setter(into))]
     inventory: Arc<InventoryService>,
+
+    /// Price history service
+    #[builder(setter(into))]
+    price_history: Arc<PriceHistoryService>,
 }
 
 impl ServiceManager {
@@ -131,6 +138,7 @@ impl ServiceManager {
         let onboarding = Arc::new(OnboardingService::new(user.clone()));
         let settings = Arc::new(SettingsService::new(db.clone()));
         let inventory = Arc::new(InventoryService::new(db.clone()));
+        let price_history = Arc::new(PriceHistoryService::new(db.clone()));
 
         Ok(Self::builder()
             .db(db.clone())
@@ -139,6 +147,7 @@ impl ServiceManager {
             .onboarding(onboarding)
             .settings(settings)
             .inventory(inventory)
+            .price_history(price_history)
             .build())
     }
 }

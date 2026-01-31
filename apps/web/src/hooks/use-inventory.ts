@@ -39,6 +39,12 @@ export const inventoryKeys = {
   statistics: () => [...inventoryKeys.all, "statistics"] as const,
   lowStock: () => [...inventoryKeys.all, "lowStock"] as const,
   outOfStock: () => [...inventoryKeys.all, "outOfStock"] as const,
+  priceHistory: (id: InventoryItemId, limit?: number) =>
+    [...inventoryKeys.all, "priceHistory", id, limit] as const,
+  latestPrice: (id: InventoryItemId) =>
+    [...inventoryKeys.all, "latestPrice", id] as const,
+  priceStatistics: (id: InventoryItemId) =>
+    [...inventoryKeys.all, "priceStatistics", id] as const,
 };
 
 // ============================================================================
@@ -131,6 +137,56 @@ export function useOutOfStockItems() {
     queryKey: inventoryKeys.outOfStock(),
     queryFn: () => inventoryApi.getOutOfStock(),
     staleTime: 1000 * 60 * 2, // 2 minutes
+  });
+}
+
+// ============================================================================
+// Price History Query Hooks
+// ============================================================================
+
+/**
+ * Get price history for an inventory item
+ */
+export function usePriceHistory(
+  id: InventoryItemId,
+  limit?: number,
+  options?: { enabled?: boolean },
+) {
+  return useQuery({
+    queryKey: inventoryKeys.priceHistory(id, limit),
+    queryFn: () => inventoryApi.getPriceHistory(id, limit),
+    enabled: options?.enabled ?? !!id,
+    staleTime: 1000 * 30, // 30 seconds
+  });
+}
+
+/**
+ * Get the latest price for an inventory item
+ */
+export function useLatestPrice(
+  id: InventoryItemId,
+  options?: { enabled?: boolean },
+) {
+  return useQuery({
+    queryKey: inventoryKeys.latestPrice(id),
+    queryFn: () => inventoryApi.getLatestPrice(id),
+    enabled: options?.enabled ?? !!id,
+    staleTime: 1000 * 30, // 30 seconds
+  });
+}
+
+/**
+ * Get price statistics for an inventory item
+ */
+export function usePriceStatistics(
+  id: InventoryItemId,
+  options?: { enabled?: boolean },
+) {
+  return useQuery({
+    queryKey: inventoryKeys.priceStatistics(id),
+    queryFn: () => inventoryApi.getPriceStatistics(id),
+    enabled: options?.enabled ?? !!id,
+    staleTime: 1000 * 30, // 30 seconds
   });
 }
 
@@ -258,6 +314,16 @@ export function useUpdateInventoryStock() {
       queryClient.invalidateQueries({ queryKey: inventoryKeys.statistics() });
       queryClient.invalidateQueries({ queryKey: inventoryKeys.lowStock() });
       queryClient.invalidateQueries({ queryKey: inventoryKeys.outOfStock() });
+      // Invalidate price history if price was updated
+      queryClient.invalidateQueries({
+        queryKey: inventoryKeys.priceHistory(id),
+      });
+      queryClient.invalidateQueries({
+        queryKey: inventoryKeys.latestPrice(id),
+      });
+      queryClient.invalidateQueries({
+        queryKey: inventoryKeys.priceStatistics(id),
+      });
       toast.success(t("messages.stockUpdated"));
       logger.info("Stock updated for item:", id);
     },

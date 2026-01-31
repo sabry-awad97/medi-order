@@ -192,7 +192,13 @@
     "timeline": "الجدول الزمني",
     "created": "تاريخ الإنشاء",
     "lastUpdated": "آخر تحديث",
-    "lastRestocked": "آخر تجديد للمخزون"
+    "lastRestocked": "آخر تجديد للمخزون",
+    "priceHistory": "سجل الأسعار",
+    "noPriceHistory": "لا يوجد سجل أسعار متاح",
+    "minPrice": "الأدنى",
+    "maxPrice": "الأعلى",
+    "avgPrice": "المتوسط",
+    "stable": "مستقر"
   },
   "stockStatus": {
     "inStock": "متوفر",

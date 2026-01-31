@@ -179,6 +179,30 @@ export const InventoryStatisticsSchema = z.object({
 });
 export type InventoryStatistics = z.infer<typeof InventoryStatisticsSchema>;
 
+/**
+ * Price history entry schema (matches backend PriceHistoryResponse)
+ */
+export const PriceHistoryEntrySchema = z.object({
+  id: z.string().uuid(),
+  inventory_item_id: z.string().uuid(),
+  unit_price: z.number(),
+  recorded_at: z.string(),
+  changed_by: z.string().uuid().nullable().optional(),
+  reason: z.string().nullable().optional(),
+});
+export type PriceHistoryEntry = z.infer<typeof PriceHistoryEntrySchema>;
+
+/**
+ * Price statistics schema (matches backend PriceStatistics)
+ */
+export const PriceStatisticsSchema = z.object({
+  min_price: z.number(),
+  max_price: z.number(),
+  avg_price: z.number(),
+  entry_count: z.number(),
+});
+export type PriceStatistics = z.infer<typeof PriceStatisticsSchema>;
+
 // ============================================================================
 // CRUD Operations (Catalog + Stock Combined)
 // ============================================================================
@@ -369,6 +393,52 @@ export async function getInventoryStatistics(): Promise<InventoryStatistics> {
 }
 
 // ============================================================================
+// Price History Operations
+// ============================================================================
+
+/**
+ * Get price history for an inventory item
+ */
+export async function getPriceHistory(
+  id: InventoryItemId,
+  limit?: number,
+): Promise<PriceHistoryEntry[]> {
+  logger.info("Getting price history for item:", { id, limit });
+  return invokeCommand("get_price_history", z.array(PriceHistoryEntrySchema), {
+    params: {
+      filter: {
+        inventory_item_id: id,
+        limit: limit,
+      },
+    },
+  });
+}
+
+/**
+ * Get the latest price for an inventory item
+ */
+export async function getLatestPrice(
+  id: InventoryItemId,
+): Promise<PriceHistoryEntry | null> {
+  logger.info("Getting latest price for item:", id);
+  return invokeCommand("get_latest_price", PriceHistoryEntrySchema.nullable(), {
+    params: { id },
+  });
+}
+
+/**
+ * Get price statistics for an inventory item
+ */
+export async function getPriceStatistics(
+  id: InventoryItemId,
+): Promise<PriceStatistics> {
+  logger.info("Getting price statistics for item:", id);
+  return invokeCommand("get_price_statistics", PriceStatisticsSchema, {
+    params: { id },
+  });
+}
+
+// ============================================================================
 // Exports
 // ============================================================================
 
@@ -393,4 +463,9 @@ export const inventoryApi = {
 
   // Statistics
   getStatistics: getInventoryStatistics,
+
+  // Price History
+  getPriceHistory: getPriceHistory,
+  getLatestPrice: getLatestPrice,
+  getPriceStatistics: getPriceStatistics,
 } as const;
