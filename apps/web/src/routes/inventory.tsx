@@ -98,11 +98,22 @@ import {
 import {
   useInventoryItems,
   useInventoryStatistics,
+  useCreateInventoryItem,
+  useAdjustInventoryStock,
+  useDeleteInventoryItem,
   useSettingValue,
   useUpsertSettingValue,
 } from "@/hooks";
 import { MEDICINE_FORMS, SETTING_INVENTORY_VIEW_MODE } from "@/lib/constants";
-import type { InventoryItemWithStockResponse } from "@/api/inventory.api";
+import type {
+  InventoryItemWithStockResponse,
+  CreateInventoryItemWithStock,
+} from "@/api/inventory.api";
+import {
+  InventoryForm,
+  StockAdjustmentDialog,
+  ItemDetailsDialog,
+} from "@/components/inventory";
 
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
@@ -198,6 +209,7 @@ function InventoryComponent() {
   // Fetch data
   const { data: items = [], isLoading } = useInventoryItems();
   const { data: stats } = useInventoryStatistics();
+  const createInventoryItem = useCreateInventoryItem();
 
   // Direction for RTL/LTR support
   const { isRTL } = useDirection();
@@ -219,6 +231,13 @@ function InventoryComponent() {
     "all" | "prescription" | "otc" | null
   >(null);
   const [sorting, setSorting] = useState<SortingState>([]);
+  const [isFormOpen, setIsFormOpen] = useState(false);
+
+  // Handle create inventory item
+  const handleCreateItem = (data: CreateInventoryItemWithStock) => {
+    createInventoryItem.mutate(data);
+    setIsFormOpen(false);
+  };
 
   // Toggle view mode
   const toggleViewMode = () => {
@@ -554,7 +573,11 @@ function InventoryComponent() {
           </Button>
 
           {/* Add Item - always prominent */}
-          <Button size="lg" className="gap-2 rounded-md">
+          <Button
+            size="lg"
+            className="gap-2 rounded-md"
+            onClick={() => setIsFormOpen(true)}
+          >
             <Plus className="h-5 w-5" />
             <span className="hidden sm:inline">Add Item</span>
           </Button>
@@ -1179,6 +1202,14 @@ function InventoryComponent() {
           </div>
         </PageContentInner>
       </PageContent>
+
+      {/* Inventory Form Dialog */}
+      <InventoryForm
+        open={isFormOpen}
+        onOpenChange={setIsFormOpen}
+        onSubmit={handleCreateItem}
+        mode="create"
+      />
     </Page>
   );
 }
