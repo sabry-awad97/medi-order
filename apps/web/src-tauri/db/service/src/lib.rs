@@ -6,6 +6,7 @@ use typed_builder::TypedBuilder;
 
 use db_migration::run_migrations;
 
+mod inventory;
 mod onboarding;
 mod settings;
 mod staff;
@@ -31,6 +32,9 @@ pub use onboarding::OnboardingService;
 
 // Export Settings service
 pub use settings::{SettingsService, SettingsStatistics};
+
+// Export Inventory service
+pub use inventory::{InventoryService, InventoryStatistics};
 
 /// Database connection configuration
 pub struct DatabaseConfig {
@@ -71,6 +75,10 @@ pub struct ServiceManager {
     /// Settings service
     #[builder(setter(into))]
     settings: Arc<SettingsService>,
+
+    /// Inventory service
+    #[builder(setter(into))]
+    inventory: Arc<InventoryService>,
 }
 
 impl ServiceManager {
@@ -122,6 +130,7 @@ impl ServiceManager {
         ));
         let onboarding = Arc::new(OnboardingService::new(user.clone()));
         let settings = Arc::new(SettingsService::new(db.clone()));
+        let inventory = Arc::new(InventoryService::new(db.clone()));
 
         Ok(Self::builder()
             .db(db.clone())
@@ -129,6 +138,7 @@ impl ServiceManager {
             .user(user)
             .onboarding(onboarding)
             .settings(settings)
+            .inventory(inventory)
             .build())
     }
 }

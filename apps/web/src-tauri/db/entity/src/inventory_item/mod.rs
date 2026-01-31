@@ -6,7 +6,7 @@ use serde::{Deserialize, Serialize};
 
 /// Inventory item entity - represents medicine catalog
 /// Optimized for PostgreSQL with native types
-#[derive(Clone, Debug, PartialEq, DeriveEntityModel, Serialize, Deserialize)]
+#[derive(Clone, Debug, PartialEq, Eq, DeriveEntityModel, Serialize, Deserialize)]
 #[sea_orm(table_name = "inventory_items")]
 pub struct Model {
     /// Primary key - PostgreSQL UUID type
@@ -36,18 +36,6 @@ pub struct Model {
     /// Barcode/SKU - VARCHAR(100) (nullable, unique)
     #[sea_orm(column_type = "String(StringLen::N(100))", nullable, unique)]
     pub barcode: Option<String>,
-
-    /// Current stock quantity - INTEGER
-    #[sea_orm(column_type = "Integer")]
-    pub stock_quantity: i32,
-
-    /// Minimum stock level for alerts - INTEGER
-    #[sea_orm(column_type = "Integer")]
-    pub min_stock_level: i32,
-
-    /// Unit price - DECIMAL(10,2)
-    #[sea_orm(column_type = "Decimal(Some((10, 2)))")]
-    pub unit_price: Decimal,
 
     /// Whether item requires prescription - BOOLEAN
     pub requires_prescription: bool,
@@ -97,6 +85,10 @@ pub enum Relation {
     /// One-to-many: Inventory item has many supplier-inventory item relationships
     #[sea_orm(has_many = "super::supplier_inventory_item::Entity")]
     SupplierInventoryItems,
+
+    /// One-to-one: Inventory item has one stock record
+    #[sea_orm(has_one = "super::inventory_stock::Entity")]
+    InventoryStock,
 }
 
 impl Related<super::special_order_item::Entity> for Entity {
@@ -108,6 +100,12 @@ impl Related<super::special_order_item::Entity> for Entity {
 impl Related<super::supplier_inventory_item::Entity> for Entity {
     fn to() -> RelationDef {
         Relation::SupplierInventoryItems.def()
+    }
+}
+
+impl Related<super::inventory_stock::Entity> for Entity {
+    fn to() -> RelationDef {
+        Relation::InventoryStock.def()
     }
 }
 
@@ -132,8 +130,6 @@ impl ActiveModelBehavior for ActiveModel {
     fn new() -> Self {
         Self {
             id: sea_orm::ActiveValue::Set(Id::new()),
-            stock_quantity: sea_orm::ActiveValue::Set(0),
-            min_stock_level: sea_orm::ActiveValue::Set(10),
             requires_prescription: sea_orm::ActiveValue::Set(false),
             is_controlled: sea_orm::ActiveValue::Set(false),
             is_active: sea_orm::ActiveValue::Set(true),

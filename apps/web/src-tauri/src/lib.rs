@@ -106,6 +106,23 @@ pub async fn run() {
         ipc::commands::settings::setting_exists,
         // Settings Statistics
         ipc::commands::settings::get_settings_statistics,
+        // Inventory CRUD operations
+        ipc::commands::inventory::create_inventory_item,
+        ipc::commands::inventory::get_inventory_item,
+        ipc::commands::inventory::get_inventory_item_by_barcode,
+        ipc::commands::inventory::update_inventory_item,
+        ipc::commands::inventory::delete_inventory_item,
+        ipc::commands::inventory::restore_inventory_item,
+        // Inventory Stock management
+        ipc::commands::inventory::update_inventory_stock,
+        ipc::commands::inventory::adjust_inventory_stock,
+        // Inventory Listing & filtering
+        ipc::commands::inventory::list_active_inventory_items,
+        ipc::commands::inventory::get_low_stock_items,
+        ipc::commands::inventory::get_out_of_stock_items,
+        ipc::commands::inventory::search_inventory_items,
+        // Inventory Statistics
+        ipc::commands::inventory::get_inventory_statistics,
     ]);
 
     builder

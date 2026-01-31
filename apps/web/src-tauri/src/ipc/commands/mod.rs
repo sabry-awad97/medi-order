@@ -1,3 +1,4 @@
+pub mod inventory;
 pub mod onboarding;
 pub mod settings;
 pub mod user;
@@ -50,4 +51,24 @@ pub use settings::{
     // Existence checks
     setting_exists,
     update_setting,
+};
+
+pub use inventory::{
+    // Stock management
+    adjust_inventory_stock,
+    // CRUD operations
+    create_inventory_item,
+    delete_inventory_item,
+    get_inventory_item,
+    get_inventory_item_by_barcode,
+    // Statistics
+    get_inventory_statistics,
+    // Listing & filtering
+    get_low_stock_items,
+    get_out_of_stock_items,
+    list_active_inventory_items,
+    restore_inventory_item,
+    search_inventory_items,
+    update_inventory_item,
+    update_inventory_stock,
 };
