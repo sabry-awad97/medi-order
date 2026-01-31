@@ -253,8 +253,24 @@ export function AppSidebar() {
               <SidebarMenuItem>
                 <SidebarMenuButton
                   onClick={() => {
-                    const newTheme = theme === "dark" ? "light" : "dark";
+                    // Cycle through: light -> dark -> system -> light
+                    let newTheme: "light" | "dark" | "system";
+                    if (theme === "light") {
+                      newTheme = "dark";
+                    } else if (theme === "dark") {
+                      newTheme = "system";
+                    } else {
+                      newTheme = "light";
+                    }
+
+                    console.log("🎨 Theme change:", {
+                      from: theme,
+                      to: newTheme,
+                    });
+
+                    // Update theme provider immediately
                     setTheme(newTheme);
+
                     // Save to database
                     const def = getSettingDefinition(SETTING_DEFAULT_THEME);
                     upsertSettingValue.mutate({
@@ -265,22 +281,30 @@ export function AppSidebar() {
                   }}
                   tooltip={
                     state === "collapsed"
-                      ? theme === "dark"
-                        ? t("theme.light")
-                        : t("theme.dark")
+                      ? theme === "light"
+                        ? t("theme.dark")
+                        : theme === "dark"
+                          ? t("theme.system")
+                          : t("theme.light")
                       : undefined
                   }
                   className="flex items-center gap-2"
                 >
-                  {theme === "dark" ? (
-                    <Sun className="shrink-0 size-4" />
-                  ) : (
+                  {theme === "light" ? (
                     <Moon className="shrink-0 size-4" />
+                  ) : theme === "dark" ? (
+                    <Settings className="shrink-0 size-4" />
+                  ) : (
+                    <Sun className="shrink-0 size-4" />
                   )}
                   <span
                     className={`flex-1 ${isRTL ? "text-right" : "text-left"}`}
                   >
-                    {theme === "dark" ? t("theme.light") : t("theme.dark")}
+                    {theme === "light"
+                      ? t("theme.dark")
+                      : theme === "dark"
+                        ? t("theme.system")
+                        : t("theme.light")}
                   </span>
                 </SidebarMenuButton>
               </SidebarMenuItem>

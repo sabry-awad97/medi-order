@@ -20,6 +20,7 @@
   "theme": {
     "light": "Light Mode",
     "dark": "Dark Mode",
+    "system": "System",
     "toggle": "Toggle Theme"
   },
   "language": {

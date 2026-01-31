@@ -99,7 +99,7 @@ export const settingsCollection = createCollection(
         const result = await settingsApi.set(setData);
 
         logger.info("Setting created successfully:", result.id);
-        toast.success(`Setting "${newSetting.key}" created successfully`);
+        // Don't show toast for settings creation - they happen automatically
 
         // Invalidate statistics and categories
         queryClient.invalidateQueries({ queryKey: settingKeys.statistics });
@@ -135,7 +135,7 @@ export const settingsCollection = createCollection(
         await settingsApi.update(modified.id, updates);
 
         logger.info("Setting updated successfully:", modified.id);
-        toast.success(`Setting "${modified.key}" updated successfully`);
+        // Don't show toast for settings updates - they happen frequently and would be annoying
 
         // Invalidate statistics if category changed
         if (modified.category !== original.category) {
@@ -395,7 +395,7 @@ export function useSettingValue<T = any>(
     if (isLoading) return defaultValue;
     if (!setting) return defaultValue;
     return setting.value as T;
-  }, [setting, defaultValue, isLoading]);
+  }, [setting?.value, setting?.id, defaultValue, isLoading]);
 }
 
 // ============================================================================
@@ -542,6 +542,8 @@ export function useUpsertSettingValue() {
             draft.value = value;
             draft.updated_at = new Date().toISOString();
           });
+          // Call onSuccess after update is applied
+          options?.onSuccess?.();
         } else {
           // Create new setting
           setSetting.mutate(
@@ -557,8 +559,6 @@ export function useUpsertSettingValue() {
             },
           );
         }
-
-        options?.onSuccess?.();
       } catch (error) {
         logger.error("Error upserting setting value:", error);
         options?.onError?.(error as Error);
