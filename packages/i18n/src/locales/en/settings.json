@@ -146,6 +146,13 @@
     "itemsPerPage": {
       "label": "Items Per Page"
     },
+    "inventoryViewMode": {
+      "label": "Inventory View Mode",
+      "options": {
+        "table": "Table",
+        "grid": "Grid"
+      }
+    },
     "enableDevMode": {
       "label": "Enable Developer Mode"
     },

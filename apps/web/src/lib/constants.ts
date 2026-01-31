@@ -157,6 +157,7 @@ export const SETTING_DEFAULT_THEME = "defaultTheme" as const;
 export const SETTING_DEFAULT_LANGUAGE = "defaultLanguage" as const;
 export const SETTING_SIDEBAR_DEFAULT_STATE = "sidebarDefaultState" as const;
 export const SETTING_ITEMS_PER_PAGE = "itemsPerPage" as const;
+export const SETTING_INVENTORY_VIEW_MODE = "inventoryViewMode" as const;
 
 // ========== System Settings ==========
 export const SETTING_ENABLE_DEV_MODE = "enableDevMode" as const;
@@ -189,6 +190,7 @@ export type SettingKey =
   | typeof SETTING_DEFAULT_LANGUAGE
   | typeof SETTING_SIDEBAR_DEFAULT_STATE
   | typeof SETTING_ITEMS_PER_PAGE
+  | typeof SETTING_INVENTORY_VIEW_MODE
   | typeof SETTING_ENABLE_DEV_MODE
   | typeof SETTING_AUTO_BACKUP
   | typeof SETTING_BACKUP_INTERVAL_DAYS;
@@ -544,6 +546,22 @@ export const SETTINGS_DEFINITIONS: SettingDefinition[] = [
     defaultValue: 20,
     min: 10,
     max: 100,
+  },
+  {
+    id: "inventory-view-mode",
+    category: "appearance",
+    key: SETTING_INVENTORY_VIEW_MODE,
+    label: "fields.inventoryViewMode.label",
+    description: {
+      en: "Default view mode for inventory page (table or grid)",
+      ar: "وضع العرض الافتراضي لصفحة المخزون (جدول أو شبكة)",
+    },
+    type: "select",
+    defaultValue: "table",
+    options: [
+      { value: "table", label: "fields.inventoryViewMode.options.table" },
+      { value: "grid", label: "fields.inventoryViewMode.options.grid" },
+    ],
   },
 
   // ========== System Settings ==========

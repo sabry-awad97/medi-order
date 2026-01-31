@@ -146,6 +146,13 @@
     "itemsPerPage": {
       "label": "عدد العناصر في الصفحة"
     },
+    "inventoryViewMode": {
+      "label": "وضع عرض المخزون",
+      "options": {
+        "table": "جدول",
+        "grid": "شبكة"
+      }
+    },
     "enableDevMode": {
       "label": "تفعيل وضع المطور"
     },

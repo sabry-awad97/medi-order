@@ -10,9 +10,19 @@ import {
   Database,
   Trash2,
   Filter,
-  Download,
-  Upload,
+  LayoutGrid,
+  Table as TableIcon,
 } from "lucide-react";
+import {
+  useReactTable,
+  getCoreRowModel,
+  getSortedRowModel,
+  getFilteredRowModel,
+  getPaginationRowModel,
+  flexRender,
+  type ColumnDef,
+  type SortingState,
+} from "@tanstack/react-table";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -45,13 +55,22 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import {
   useInventoryItems,
   useInventoryStatistics,
   useResetInventory,
   useClearInventory,
   useSettingValue,
+  useUpsertSettingValue,
 } from "@/hooks";
-import { MEDICINE_FORMS } from "@/lib/constants";
+import { MEDICINE_FORMS, SETTING_INVENTORY_VIEW_MODE } from "@/lib/constants";
 import {
   getStockStatus,
   getStockStatusColor,
@@ -75,6 +94,13 @@ function InventoryComponent() {
   const enableDevMode = useSettingValue<boolean>("enableDevMode", false);
   const isDev = enableDevMode ?? import.meta.env.DEV;
 
+  // View mode setting
+  const viewMode = useSettingValue<"table" | "grid">(
+    SETTING_INVENTORY_VIEW_MODE,
+    "table",
+  );
+  const upsertViewMode = useUpsertSettingValue();
+
   // Local state
   const [searchQuery, setSearchQuery] = useState("");
   const [formFilter, setFormFilter] = useState<string | "all" | null>(null);
@@ -84,6 +110,16 @@ function InventoryComponent() {
   const [prescriptionFilter, setPrescriptionFilter] = useState<
     "all" | "prescription" | "otc" | null
   >(null);
+  const [sorting, setSorting] = useState<SortingState>([]);
+
+  // Toggle view mode
+  const toggleViewMode = () => {
+    const newMode = viewMode === "table" ? "grid" : "table";
+    upsertViewMode.mutate({
+      key: SETTING_INVENTORY_VIEW_MODE,
+      value: newMode,
+    });
+  };
 
   // Filter items
   const filteredItems = useMemo(() => {
@@ -119,6 +155,158 @@ function InventoryComponent() {
       );
     });
   }, [items, searchQuery, formFilter, stockFilter, prescriptionFilter]);
+
+  // Table columns definition
+  const columns = useMemo<ColumnDef<InventoryItem>[]>(
+    () => [
+      {
+        accessorKey: "name",
+        header: "Medicine Name",
+        cell: ({ row }) => (
+          <div className="min-w-[200px]">
+            <div className="font-medium">{row.original.name}</div>
+            {row.original.genericName && (
+              <div className="text-xs text-muted-foreground">
+                {row.original.genericName}
+              </div>
+            )}
+          </div>
+        ),
+      },
+      {
+        accessorKey: "concentration",
+        header: "Concentration",
+        cell: ({ row }) => (
+          <Badge variant="outline" className="font-normal">
+            {row.original.concentration}
+          </Badge>
+        ),
+      },
+      {
+        accessorKey: "form",
+        header: "Form",
+        cell: ({ row }) => (
+          <Badge variant="outline" className="font-normal">
+            {row.original.form}
+          </Badge>
+        ),
+      },
+      {
+        accessorKey: "stockQuantity",
+        header: "Stock",
+        cell: ({ row }) => {
+          const stockStatus = getStockStatus(
+            row.original.stockQuantity,
+            row.original.minStockLevel,
+          );
+          const stockColor = getStockStatusColor(stockStatus);
+          const stockLabel = getStockStatusLabel(stockStatus);
+          const percentage = Math.min(
+            (row.original.stockQuantity / row.original.minStockLevel) * 100,
+            100,
+          );
+
+          return (
+            <div className="min-w-[150px]">
+              <div className="flex items-center justify-between mb-1">
+                <span className="text-sm font-medium">
+                  {row.original.stockQuantity} units
+                </span>
+                <Badge className={cn("text-xs", stockColor)}>
+                  {stockLabel}
+                </Badge>
+              </div>
+              <div className="w-full bg-muted rounded-full h-1.5">
+                <div
+                  className={cn(
+                    "h-1.5 rounded-full transition-all",
+                    stockStatus === "out_of_stock"
+                      ? "bg-red-500"
+                      : stockStatus === "low_stock"
+                        ? "bg-yellow-500"
+                        : "bg-green-500",
+                  )}
+                  style={{ width: `${percentage}%` }}
+                />
+              </div>
+            </div>
+          );
+        },
+      },
+      {
+        accessorKey: "unitPrice",
+        header: "Unit Price",
+        cell: ({ row }) => (
+          <span className="font-medium">
+            ${row.original.unitPrice.toFixed(2)}
+          </span>
+        ),
+      },
+      {
+        accessorKey: "manufacturer",
+        header: "Manufacturer",
+        cell: ({ row }) =>
+          row.original.manufacturer ? (
+            <Badge variant="outline" className="font-normal">
+              {row.original.manufacturer}
+            </Badge>
+          ) : (
+            <span className="text-muted-foreground text-xs">N/A</span>
+          ),
+      },
+      {
+        id: "badges",
+        header: "Type",
+        cell: ({ row }) => (
+          <div className="flex flex-wrap gap-1 min-w-[120px]">
+            {row.original.requiresPrescription && (
+              <Badge variant="secondary" className="text-xs">
+                Rx
+              </Badge>
+            )}
+            {row.original.isControlled && (
+              <Badge variant="destructive" className="text-xs gap-1">
+                <Shield className="h-3 w-3" />
+                Controlled
+              </Badge>
+            )}
+          </div>
+        ),
+      },
+      {
+        accessorKey: "barcode",
+        header: "Barcode",
+        cell: ({ row }) =>
+          row.original.barcode ? (
+            <span className="font-mono text-xs text-muted-foreground">
+              {row.original.barcode}
+            </span>
+          ) : (
+            <span className="text-muted-foreground text-xs">N/A</span>
+          ),
+      },
+    ],
+    [],
+  );
+
+  // Table instance
+  const table = useReactTable({
+    data: filteredItems,
+    columns,
+    state: {
+      sorting,
+    },
+    onSortingChange: setSorting,
+    getCoreRowModel: getCoreRowModel(),
+    getSortedRowModel: getSortedRowModel(),
+    getFilteredRowModel: getFilteredRowModel(),
+    getPaginationRowModel: getPaginationRowModel(),
+    initialState: {
+      pagination: {
+        pageSize: 20,
+      },
+    },
+  });
 
   // Loading state
   if (isLoading) {
@@ -160,6 +348,35 @@ function InventoryComponent() {
               )}
             </>
           )}
+          <Button
+            onClick={toggleViewMode}
+            variant="outline"
+            size="lg"
+            className="gap-2 relative overflow-hidden group"
+          >
+            <div className="relative w-5 h-5">
+              <LayoutGrid
+                className={cn(
+                  "absolute inset-0 h-5 w-5 transition-all duration-300",
+                  viewMode === "table"
+                    ? "opacity-100 scale-100 rotate-0"
+                    : "opacity-0 scale-50 rotate-90",
+                )}
+              />
+              <TableIcon
+                className={cn(
+                  "absolute inset-0 h-5 w-5 transition-all duration-300",
+                  viewMode === "grid"
+                    ? "opacity-100 scale-100 rotate-0"
+                    : "opacity-0 scale-50 -rotate-90",
+                )}
+              />
+            </div>
+            <span className="relative">
+              {viewMode === "table" ? "Grid View" : "Table View"}
+            </span>
+            <div className="absolute inset-0 bg-primary/5 translate-y-full group-hover:translate-y-0 transition-transform duration-300" />
+          </Button>
           <Button size="lg" className="gap-2 rounded-md">
             <Plus className="h-5 w-5" />
             Add Item
@@ -202,7 +419,6 @@ function InventoryComponent() {
                   value={`$${stats.totalValue.toFixed(2)}`}
                   icon={Package}
                   color="bg-purple-500"
-                  isValue
                 />
               </div>
             </PageSection>
@@ -211,6 +427,50 @@ function InventoryComponent() {
           {/* Filters */}
           {items.length > 0 && (
             <div className="mb-6 flex flex-col gap-4 shrink-0">
+              {/* View Mode Indicator */}
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <button
+                    onClick={toggleViewMode}
+                    className="relative flex items-center gap-2 px-3 py-1.5 bg-muted/50 rounded-full border border-border/50 hover:bg-muted/70 transition-colors cursor-pointer group"
+                    aria-label="Toggle view mode"
+                  >
+                    <div
+                      className={cn(
+                        "absolute inset-y-1 left-1 w-[calc(50%-4px)] bg-primary rounded-full transition-all duration-300 ease-out group-hover:shadow-md",
+                        viewMode === "grid" && "translate-x-[calc(100%+4px)]",
+                      )}
+                    />
+                    <div
+                      className={cn(
+                        "relative z-10 flex items-center gap-1.5 px-2 py-0.5 rounded-full transition-all duration-200",
+                        viewMode === "table"
+                          ? "text-primary-foreground"
+                          : "text-muted-foreground hover:text-foreground",
+                      )}
+                    >
+                      <TableIcon className="h-3.5 w-3.5" />
+                      <span className="text-xs font-medium">Table</span>
+                    </div>
+                    <div
+                      className={cn(
+                        "relative z-10 flex items-center gap-1.5 px-2 py-0.5 rounded-full transition-all duration-200",
+                        viewMode === "grid"
+                          ? "text-primary-foreground"
+                          : "text-muted-foreground hover:text-foreground",
+                      )}
+                    >
+                      <LayoutGrid className="h-3.5 w-3.5" />
+                      <span className="text-xs font-medium">Grid</span>
+                    </div>
+                  </button>
+                  <div className="text-sm text-muted-foreground">
+                    {filteredItems.length}{" "}
+                    {filteredItems.length === 1 ? "item" : "items"}
+                  </div>
+                </div>
+              </div>
+
               <div className="flex flex-col sm:flex-row gap-4">
                 {/* Search */}
                 <div className="relative flex-1">
@@ -309,7 +569,7 @@ function InventoryComponent() {
             </div>
           )}
 
-          {/* Items Grid */}
+          {/* Items Display */}
           <div className="flex-1 min-h-0">
             {filteredItems.length === 0 ? (
               <div className="h-full flex items-center justify-center border border-dashed rounded-lg">
@@ -342,8 +602,100 @@ function InventoryComponent() {
                     )}
                 </div>
               </div>
+            ) : viewMode === "table" ? (
+              <div
+                key="table-view"
+                className="h-full flex flex-col animate-in fade-in-0 slide-in-from-bottom-2 duration-300"
+              >
+                <div className="flex-1 overflow-auto border rounded-lg">
+                  <Table>
+                    <TableHeader>
+                      {table.getHeaderGroups().map((headerGroup) => (
+                        <TableRow key={headerGroup.id}>
+                          {headerGroup.headers.map((header) => (
+                            <TableHead key={header.id}>
+                              {header.isPlaceholder
+                                ? null
+                                : flexRender(
+                                    header.column.columnDef.header,
+                                    header.getContext(),
+                                  )}
+                            </TableHead>
+                          ))}
+                        </TableRow>
+                      ))}
+                    </TableHeader>
+                    <TableBody>
+                      {table.getRowModel().rows.length ? (
+                        table.getRowModel().rows.map((row) => (
+                          <TableRow
+                            key={row.id}
+                            data-state={row.getIsSelected() && "selected"}
+                            className="cursor-pointer"
+                          >
+                            {row.getVisibleCells().map((cell) => (
+                              <TableCell key={cell.id}>
+                                {flexRender(
+                                  cell.column.columnDef.cell,
+                                  cell.getContext(),
+                                )}
+                              </TableCell>
+                            ))}
+                          </TableRow>
+                        ))
+                      ) : (
+                        <TableRow>
+                          <TableCell
+                            colSpan={columns.length}
+                            className="h-24 text-center"
+                          >
+                            No results.
+                          </TableCell>
+                        </TableRow>
+                      )}
+                    </TableBody>
+                  </Table>
+                </div>
+                {/* Pagination */}
+                <div className="flex items-center justify-between py-4 shrink-0">
+                  <div className="text-sm text-muted-foreground">
+                    Showing{" "}
+                    {table.getState().pagination.pageIndex *
+                      table.getState().pagination.pageSize +
+                      1}{" "}
+                    to{" "}
+                    {Math.min(
+                      (table.getState().pagination.pageIndex + 1) *
+                        table.getState().pagination.pageSize,
+                      filteredItems.length,
+                    )}{" "}
+                    of {filteredItems.length} items
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => table.previousPage()}
+                      disabled={!table.getCanPreviousPage()}
+                    >
+                      Previous
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => table.nextPage()}
+                      disabled={!table.getCanNextPage()}
+                    >
+                      Next
+                    </Button>
+                  </div>
+                </div>
+              </div>
             ) : (
-              <div className="h-full overflow-y-auto pb-6">
+              <div
+                key="grid-view"
+                className="h-full overflow-y-auto pb-6 animate-in fade-in-0 slide-in-from-bottom-2 duration-300"
+              >
                 <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
                   {filteredItems.map((item) => (
                     <InventoryItemCard key={item.id} item={item} />
@@ -364,16 +716,9 @@ interface StatsCardProps {
   value: number | string;
   icon: React.ElementType;
   color: string;
-  isValue?: boolean;
 }
 
-function StatsCard({
-  title,
-  value,
-  icon: Icon,
-  color,
-  isValue,
-}: StatsCardProps) {
+function StatsCard({ title, value, icon: Icon, color }: StatsCardProps) {
   return (
     <Card>
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
