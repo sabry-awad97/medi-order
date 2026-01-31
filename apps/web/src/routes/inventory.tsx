@@ -23,7 +23,7 @@ import {
   TrendingDown,
   BarChart3,
 } from "lucide-react";
-import { useDirection } from "@meditrack/i18n";
+import { useDirection, useTranslation } from "@meditrack/i18n";
 import {
   useReactTable,
   getCoreRowModel,
@@ -80,6 +80,16 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import {
   Sheet,
   SheetContent,
@@ -206,6 +216,8 @@ function generatePaginationItems(
 }
 
 function InventoryComponent() {
+  const { t } = useTranslation("inventory");
+
   // Fetch data
   const { data: items = [], isLoading } = useInventoryItems();
   const { data: stats } = useInventoryStatistics();
@@ -238,6 +250,9 @@ function InventoryComponent() {
     useState<InventoryItemWithStockResponse | null>(null);
   const [isDetailsOpen, setIsDetailsOpen] = useState(false);
   const [isStockAdjustOpen, setIsStockAdjustOpen] = useState(false);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [itemToDelete, setItemToDelete] =
+    useState<InventoryItemWithStockResponse | null>(null);
 
   // Handle create inventory item
   const handleCreateItem = (data: CreateInventoryItemWithStock) => {
@@ -261,9 +276,23 @@ function InventoryComponent() {
 
   // Handle delete
   const handleDelete = (item: InventoryItemWithStockResponse) => {
-    if (confirm(`Are you sure you want to archive "${item.name}"?`)) {
-      deleteItem.mutate(item.id);
+    setItemToDelete(item);
+    setIsDeleteDialogOpen(true);
+  };
+
+  // Confirm delete
+  const confirmDelete = () => {
+    if (itemToDelete) {
+      deleteItem.mutate(itemToDelete.id);
+      setIsDeleteDialogOpen(false);
+      setItemToDelete(null);
     }
+  };
+
+  // Cancel delete
+  const cancelDelete = () => {
+    setIsDeleteDialogOpen(false);
+    setItemToDelete(null);
   };
 
   // Handle view details
@@ -556,10 +585,8 @@ function InventoryComponent() {
       <PageHeader>
         <PageHeaderTrigger />
         <PageHeaderContent>
-          <PageHeaderTitle>Inventory Management</PageHeaderTitle>
-          <PageHeaderDescription>
-            Manage your pharmacy's medicine inventory
-          </PageHeaderDescription>
+          <PageHeaderTitle>{t("page.title")}</PageHeaderTitle>
+          <PageHeaderDescription>{t("page.description")}</PageHeaderDescription>
         </PageHeaderContent>
         <PageHeaderActions className="flex gap-2">
           {/* View toggle - responsive sizing */}
@@ -571,7 +598,7 @@ function InventoryComponent() {
           >
             <LayoutGrid className="h-4 w-4" />
             <span className="hidden sm:inline">
-              {viewMode === "table" ? "Grid View" : "Table View"}
+              {viewMode === "table" ? t("page.gridView") : t("page.tableView")}
             </span>
           </Button>
 
@@ -582,7 +609,7 @@ function InventoryComponent() {
             onClick={() => setIsFormOpen(true)}
           >
             <Plus className="h-4 w-4" />
-            <span className="hidden sm:inline">Add Item</span>
+            <span className="hidden sm:inline">{t("page.addItem")}</span>
           </Button>
         </PageHeaderActions>
       </PageHeader>
@@ -594,31 +621,31 @@ function InventoryComponent() {
             <PageSection className="mb-4 border-b border-dashed pb-4 shrink-0">
               <div className="grid gap-3 grid-cols-2 md:grid-cols-3 lg:grid-cols-5">
                 <StatsCard
-                  title="Total Items"
+                  title={t("stats.totalItems")}
                   value={stats.total_items}
                   icon={Package}
                   color="bg-blue-500"
                 />
                 <StatsCard
-                  title="In Stock"
+                  title={t("stats.inStock")}
                   value={stats.active_items}
                   icon={Package}
                   color="bg-green-500"
                 />
                 <StatsCard
-                  title="Low Stock"
+                  title={t("stats.lowStock")}
                   value={stats.low_stock_count}
                   icon={AlertTriangle}
                   color="bg-yellow-500"
                 />
                 <StatsCard
-                  title="Out of Stock"
+                  title={t("stats.outOfStock")}
                   value={stats.out_of_stock_count}
                   icon={XCircle}
                   color="bg-red-500"
                 />
                 <StatsCard
-                  title="Total Value"
+                  title={t("stats.totalValue")}
                   value={`$${stats.total_inventory_value.toFixed(2)}`}
                   icon={Package}
                   color="bg-purple-500"
@@ -902,24 +929,27 @@ function InventoryComponent() {
                     (formFilter && formFilter !== "all") ||
                     (stockFilter && stockFilter !== "all") ||
                     (prescriptionFilter && prescriptionFilter !== "all")
-                      ? "No items found"
-                      : "No inventory items"}
+                      ? t("page.noItemsFound")
+                      : t("page.noItems")}
                   </h3>
                   <p className="text-sm sm:text-base text-muted-foreground mb-4 sm:mb-6">
                     {searchQuery ||
                     (formFilter && formFilter !== "all") ||
                     (stockFilter && stockFilter !== "all") ||
                     (prescriptionFilter && prescriptionFilter !== "all")
-                      ? "Try adjusting your filters"
-                      : "Start by adding your first inventory item"}
+                      ? t("page.tryDifferentSearch")
+                      : t("page.startAdding")}
                   </p>
                   {!searchQuery &&
                     (!formFilter || formFilter === "all") &&
                     (!stockFilter || stockFilter === "all") &&
                     (!prescriptionFilter || prescriptionFilter === "all") && (
-                      <Button className="gap-2">
+                      <Button
+                        className="gap-2"
+                        onClick={() => setIsFormOpen(true)}
+                      >
                         <Plus className="h-4 w-4" />
-                        <span>Add Item</span>
+                        <span>{t("page.addItem")}</span>
                       </Button>
                     )}
                 </div>
@@ -1232,6 +1262,34 @@ function InventoryComponent() {
         item={selectedItem}
         onAdjust={handleStockAdjust}
       />
+
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog
+        open={isDeleteDialogOpen}
+        onOpenChange={setIsDeleteDialogOpen}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle className={cn(isRTL && "text-right")}>
+              {t("messages.confirmDelete", { name: itemToDelete?.name || "" })}
+            </AlertDialogTitle>
+            <AlertDialogDescription className={cn(isRTL && "text-right")}>
+              {t("messages.deleteDescription")}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter className={cn(isRTL && "flex-row-reverse")}>
+            <AlertDialogCancel onClick={cancelDelete}>
+              {t("messages.cancel")}
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={confirmDelete}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {t("messages.archive")}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </Page>
   );
 }

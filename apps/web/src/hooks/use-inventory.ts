@@ -9,6 +9,7 @@
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
+import { useTranslation } from "@meditrack/i18n";
 import { inventoryApi } from "@/api/inventory.api";
 import { createLogger } from "@/lib/logger";
 import type {
@@ -142,15 +143,16 @@ export function useOutOfStockItems() {
  */
 export function useCreateInventoryItem() {
   const queryClient = useQueryClient();
+  const { t } = useTranslation("inventory");
 
   return useMutation({
     mutationFn: (data: CreateInventoryItemWithStock) =>
       inventoryApi.create(data),
-    onSuccess: (result, variables) => {
+    onSuccess: (_result, variables) => {
       queryClient.invalidateQueries({ queryKey: inventoryKeys.lists() });
       queryClient.invalidateQueries({ queryKey: inventoryKeys.statistics() });
-      toast.success(`Item "${variables.name}" created successfully`);
-      logger.info("Inventory item created:", result.id);
+      toast.success(t("messages.itemCreated", { name: variables.name }));
+      logger.info("Inventory item created:", _result.id);
     },
     onError: (error: Error) => {
       toast.error(`Failed to create item: ${error.message}`);
@@ -164,6 +166,7 @@ export function useCreateInventoryItem() {
  */
 export function useUpdateInventoryItem() {
   const queryClient = useQueryClient();
+  const { t } = useTranslation("inventory");
 
   return useMutation({
     mutationFn: ({
@@ -173,11 +176,11 @@ export function useUpdateInventoryItem() {
       id: InventoryItemId;
       data: UpdateInventoryItem;
     }) => inventoryApi.update(id, data),
-    onSuccess: (result, { id }) => {
+    onSuccess: (_result, { id }) => {
       queryClient.invalidateQueries({ queryKey: inventoryKeys.lists() });
       queryClient.invalidateQueries({ queryKey: inventoryKeys.detail(id) });
       queryClient.invalidateQueries({ queryKey: inventoryKeys.statistics() });
-      toast.success("Inventory item updated successfully");
+      toast.success(t("messages.itemUpdated"));
       logger.info("Inventory item updated:", id);
     },
     onError: (error: Error) => {
@@ -192,15 +195,16 @@ export function useUpdateInventoryItem() {
  */
 export function useDeleteInventoryItem() {
   const queryClient = useQueryClient();
+  const { t } = useTranslation("inventory");
 
   return useMutation({
     mutationFn: (id: InventoryItemId) => inventoryApi.delete(id),
-    onSuccess: (result, id) => {
+    onSuccess: (_result, id) => {
       queryClient.invalidateQueries({ queryKey: inventoryKeys.lists() });
       queryClient.invalidateQueries({ queryKey: inventoryKeys.statistics() });
       queryClient.invalidateQueries({ queryKey: inventoryKeys.lowStock() });
       queryClient.invalidateQueries({ queryKey: inventoryKeys.outOfStock() });
-      toast.success("Inventory item deleted successfully");
+      toast.success(t("messages.itemDeleted"));
       logger.info("Inventory item deleted:", id);
     },
     onError: (error: Error) => {
@@ -215,14 +219,15 @@ export function useDeleteInventoryItem() {
  */
 export function useRestoreInventoryItem() {
   const queryClient = useQueryClient();
+  const { t } = useTranslation("inventory");
 
   return useMutation({
     mutationFn: (id: InventoryItemId) => inventoryApi.restore(id),
-    onSuccess: (result, id) => {
+    onSuccess: (_result, id) => {
       queryClient.invalidateQueries({ queryKey: inventoryKeys.lists() });
       queryClient.invalidateQueries({ queryKey: inventoryKeys.detail(id) });
       queryClient.invalidateQueries({ queryKey: inventoryKeys.statistics() });
-      toast.success("Inventory item restored successfully");
+      toast.success(t("messages.itemRestored"));
       logger.info("Inventory item restored:", id);
     },
     onError: (error: Error) => {
@@ -237,6 +242,7 @@ export function useRestoreInventoryItem() {
  */
 export function useUpdateInventoryStock() {
   const queryClient = useQueryClient();
+  const { t } = useTranslation("inventory");
 
   return useMutation({
     mutationFn: ({
@@ -246,13 +252,13 @@ export function useUpdateInventoryStock() {
       id: InventoryItemId;
       data: UpdateInventoryStock;
     }) => inventoryApi.updateStock(id, data),
-    onSuccess: (result, { id }) => {
+    onSuccess: (_result, { id }) => {
       queryClient.invalidateQueries({ queryKey: inventoryKeys.lists() });
       queryClient.invalidateQueries({ queryKey: inventoryKeys.detail(id) });
       queryClient.invalidateQueries({ queryKey: inventoryKeys.statistics() });
       queryClient.invalidateQueries({ queryKey: inventoryKeys.lowStock() });
       queryClient.invalidateQueries({ queryKey: inventoryKeys.outOfStock() });
-      toast.success("Stock updated successfully");
+      toast.success(t("messages.stockUpdated"));
       logger.info("Stock updated for item:", id);
     },
     onError: (error: Error) => {
@@ -267,18 +273,18 @@ export function useUpdateInventoryStock() {
  */
 export function useAdjustInventoryStock() {
   const queryClient = useQueryClient();
+  const { t } = useTranslation("inventory");
 
   return useMutation({
     mutationFn: ({ id, data }: { id: InventoryItemId; data: AdjustStock }) =>
       inventoryApi.adjustStock(id, data),
-    onSuccess: (result, { id, data }) => {
+    onSuccess: (_result, { id }) => {
       queryClient.invalidateQueries({ queryKey: inventoryKeys.lists() });
       queryClient.invalidateQueries({ queryKey: inventoryKeys.detail(id) });
       queryClient.invalidateQueries({ queryKey: inventoryKeys.statistics() });
       queryClient.invalidateQueries({ queryKey: inventoryKeys.lowStock() });
       queryClient.invalidateQueries({ queryKey: inventoryKeys.outOfStock() });
-      const action = data.adjustment > 0 ? "added to" : "removed from";
-      toast.success(`Stock ${action} successfully`);
+      toast.success(t("messages.stockAdjusted"));
       logger.info("Stock adjusted for item:", id);
     },
     onError: (error: Error) => {

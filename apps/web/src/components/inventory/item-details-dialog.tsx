@@ -12,6 +12,7 @@ import {
   XCircle,
 } from "lucide-react";
 import { format } from "date-fns";
+import { useTranslation } from "@meditrack/i18n";
 
 import {
   Dialog,
@@ -36,6 +37,8 @@ export function ItemDetailsDialog({
   onOpenChange,
   item,
 }: ItemDetailsDialogProps) {
+  const { t } = useTranslation("inventory");
+
   if (!item) return null;
 
   const stockStatus =
@@ -49,6 +52,12 @@ export function ItemDetailsDialog({
     (item.stock_quantity / item.min_stock_level) * 100,
     100,
   );
+
+  const getStockStatusLabel = () => {
+    if (stockStatus === "out_of_stock") return t("stockStatus.outOfStock");
+    if (stockStatus === "low_stock") return t("stockStatus.lowStock");
+    return t("stockStatus.inStock");
+  };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -73,11 +82,7 @@ export function ItemDetailsDialog({
               }
               className="text-sm px-3 py-1"
             >
-              {stockStatus === "out_of_stock"
-                ? "Out of Stock"
-                : stockStatus === "low_stock"
-                  ? "Low Stock"
-                  : "In Stock"}
+              {getStockStatusLabel()}
             </Badge>
           </div>
         </DialogHeader>
@@ -92,19 +97,25 @@ export function ItemDetailsDialog({
           >
             <h3 className="font-semibold mb-4 flex items-center gap-2">
               <Package className="h-5 w-5" />
-              Stock Information
+              {t("itemDetails.stockInfo")}
             </h3>
             <div className="grid grid-cols-3 gap-4">
               <div className="space-y-1">
-                <p className="text-sm text-muted-foreground">Current Stock</p>
+                <p className="text-sm text-muted-foreground">
+                  {t("itemDetails.currentStock")}
+                </p>
                 <p className="text-3xl font-bold">{item.stock_quantity}</p>
               </div>
               <div className="space-y-1">
-                <p className="text-sm text-muted-foreground">Min Level</p>
+                <p className="text-sm text-muted-foreground">
+                  {t("itemDetails.minLevel")}
+                </p>
                 <p className="text-3xl font-bold">{item.min_stock_level}</p>
               </div>
               <div className="space-y-1">
-                <p className="text-sm text-muted-foreground">Total Value</p>
+                <p className="text-sm text-muted-foreground">
+                  {t("itemDetails.totalValue")}
+                </p>
                 <p className="text-3xl font-bold">
                   ${(item.stock_quantity * item.unit_price).toFixed(2)}
                 </p>
@@ -112,7 +123,9 @@ export function ItemDetailsDialog({
             </div>
             <div className="mt-4">
               <div className="flex items-center justify-between mb-2 text-sm">
-                <span className="text-muted-foreground">Stock Level</span>
+                <span className="text-muted-foreground">
+                  {t("itemDetails.stockLevel")}
+                </span>
                 <span className="font-medium">
                   {stockPercentage.toFixed(0)}%
                 </span>
@@ -144,21 +157,24 @@ export function ItemDetailsDialog({
           >
             <h3 className="font-semibold flex items-center gap-2">
               <FileText className="h-5 w-5" />
-              Basic Information
+              {t("itemDetails.basicInfo")}
             </h3>
             <div className="grid grid-cols-2 gap-4">
-              <DetailField label="Concentration" value={item.concentration} />
-              <DetailField label="Form" value={item.form} />
+              <DetailField
+                label={t("itemDetails.concentration")}
+                value={item.concentration}
+              />
+              <DetailField label={t("itemDetails.form")} value={item.form} />
               {item.manufacturer && (
                 <DetailField
-                  label="Manufacturer"
+                  label={t("itemDetails.manufacturer")}
                   value={item.manufacturer}
                   icon={Building2}
                 />
               )}
               {item.barcode && (
                 <DetailField
-                  label="Barcode"
+                  label={t("itemDetails.barcode")}
                   value={item.barcode}
                   icon={Barcode}
                   className="font-mono"
@@ -178,15 +194,15 @@ export function ItemDetailsDialog({
           >
             <h3 className="font-semibold flex items-center gap-2">
               <DollarSign className="h-5 w-5" />
-              Pricing
+              {t("itemDetails.pricing")}
             </h3>
             <div className="grid grid-cols-2 gap-4">
               <DetailField
-                label="Unit Price"
+                label={t("itemDetails.unitPrice")}
                 value={`$${item.unit_price.toFixed(2)}`}
               />
               <DetailField
-                label="Total Inventory Value"
+                label={t("itemDetails.totalInventoryValue")}
                 value={`$${(item.stock_quantity * item.unit_price).toFixed(2)}`}
               />
             </div>
@@ -203,7 +219,7 @@ export function ItemDetailsDialog({
           >
             <h3 className="font-semibold flex items-center gap-2">
               <Shield className="h-5 w-5" />
-              Classification
+              {t("itemDetails.classification")}
             </h3>
             <div className="flex flex-wrap gap-2">
               <Badge
@@ -216,17 +232,19 @@ export function ItemDetailsDialog({
                   <XCircle className="h-3 w-3" />
                 )}
                 {item.requires_prescription
-                  ? "Prescription Required"
-                  : "Over-the-Counter"}
+                  ? t("itemDetails.prescriptionRequired")
+                  : t("itemDetails.overTheCounter")}
               </Badge>
               {item.is_controlled && (
                 <Badge variant="destructive" className="gap-1">
                   <AlertTriangle className="h-3 w-3" />
-                  Controlled Substance
+                  {t("itemDetails.controlledSubstance")}
                 </Badge>
               )}
               <Badge variant={item.is_active ? "default" : "outline"}>
-                {item.is_active ? "Active" : "Inactive"}
+                {item.is_active
+                  ? t("itemDetails.active")
+                  : t("itemDetails.inactive")}
               </Badge>
             </div>
           </motion.div>
@@ -244,7 +262,7 @@ export function ItemDetailsDialog({
                 {item.storage_instructions && (
                   <div className="space-y-2">
                     <h4 className="font-medium text-sm">
-                      Storage Instructions
+                      {t("itemDetails.storageInstructions")}
                     </h4>
                     <p className="text-sm text-muted-foreground p-3 rounded-lg bg-muted/50">
                       {item.storage_instructions}
@@ -253,7 +271,9 @@ export function ItemDetailsDialog({
                 )}
                 {item.notes && (
                   <div className="space-y-2">
-                    <h4 className="font-medium text-sm">Additional Notes</h4>
+                    <h4 className="font-medium text-sm">
+                      {t("itemDetails.additionalNotes")}
+                    </h4>
                     <p className="text-sm text-muted-foreground p-3 rounded-lg bg-muted/50">
                       {item.notes}
                     </p>
@@ -274,24 +294,30 @@ export function ItemDetailsDialog({
           >
             <h3 className="font-semibold flex items-center gap-2">
               <Calendar className="h-5 w-5" />
-              Timeline
+              {t("itemDetails.timeline")}
             </h3>
             <div className="grid grid-cols-2 gap-4 text-sm">
               <div className="space-y-1">
-                <p className="text-muted-foreground">Created</p>
+                <p className="text-muted-foreground">
+                  {t("itemDetails.created")}
+                </p>
                 <p className="font-medium">
                   {format(new Date(item.created_at), "PPp")}
                 </p>
               </div>
               <div className="space-y-1">
-                <p className="text-muted-foreground">Last Updated</p>
+                <p className="text-muted-foreground">
+                  {t("itemDetails.lastUpdated")}
+                </p>
                 <p className="font-medium">
                   {format(new Date(item.updated_at), "PPp")}
                 </p>
               </div>
               {item.last_restocked_at && (
                 <div className="space-y-1">
-                  <p className="text-muted-foreground">Last Restocked</p>
+                  <p className="text-muted-foreground">
+                    {t("itemDetails.lastRestocked")}
+                  </p>
                   <p className="font-medium">
                     {format(new Date(item.last_restocked_at), "PPp")}
                   </p>

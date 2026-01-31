@@ -1,0 +1,214 @@
+{
+  "page": {
+    "title": "Inventory Management",
+    "description": "Manage your pharmacy's medicine inventory",
+    "addItem": "Add Item",
+    "gridView": "Grid View",
+    "tableView": "Table View",
+    "searchPlaceholder": "Search by name, generic name, or barcode...",
+    "noItems": "No inventory items",
+    "noItemsFound": "No items found",
+    "startAdding": "Start by adding a new medicine",
+    "tryDifferentSearch": "Try searching with different words",
+    "loadingInventory": "Loading inventory..."
+  },
+  "stats": {
+    "totalItems": "Total Items",
+    "inStock": "In Stock",
+    "lowStock": "Low Stock",
+    "outOfStock": "Out of Stock",
+    "totalValue": "Total Value"
+  },
+  "filters": {
+    "allForms": "All Forms",
+    "allStock": "All Stock",
+    "inStock": "In Stock",
+    "lowStock": "Low Stock",
+    "outOfStock": "Out of Stock",
+    "allTypes": "All Types",
+    "prescription": "Prescription",
+    "otc": "OTC",
+    "clearFilters": "Clear ({{count}})",
+    "filters": "Filters",
+    "filterByForm": "Filter by Form",
+    "filterByStock": "Filter by Stock",
+    "filterByType": "Filter by Type",
+    "medicineForm": "Medicine Form",
+    "stockStatus": "Stock Status",
+    "medicineType": "Medicine Type"
+  },
+  "table": {
+    "medicineName": "Medicine Name",
+    "concentration": "Concentration",
+    "form": "Form",
+    "stock": "Stock",
+    "unitPrice": "Unit Price",
+    "manufacturer": "Manufacturer",
+    "type": "Type",
+    "barcode": "Barcode",
+    "actions": "Actions",
+    "units": "units",
+    "rx": "Rx",
+    "controlled": "Controlled",
+    "na": "N/A"
+  },
+  "card": {
+    "stock": "Stock:",
+    "minLevel": "Min Level:",
+    "price": "Price:",
+    "rxRequired": "Rx Required",
+    "controlled": "Controlled"
+  },
+  "actions": {
+    "viewDetails": "View Details",
+    "editItem": "Edit Item",
+    "duplicate": "Duplicate",
+    "adjustStock": "Adjust Stock",
+    "stockHistory": "Stock History",
+    "archive": "Archive"
+  },
+  "form": {
+    "addTitle": "Add New Medicine",
+    "editTitle": "Edit Medicine",
+    "step1": {
+      "title": "Basic Information",
+      "description": "Medicine details and identification"
+    },
+    "step2": {
+      "title": "Stock & Pricing",
+      "description": "Inventory levels and cost"
+    },
+    "step3": {
+      "title": "Classification",
+      "description": "Regulatory and storage details"
+    },
+    "step4": {
+      "title": "Review",
+      "description": "Confirm all details"
+    },
+    "stepProgress": "Step {{current}} of {{total}}",
+    "fields": {
+      "medicineName": "Medicine Name",
+      "medicineNamePlaceholder": "e.g., Paracetamol",
+      "genericName": "Generic Name",
+      "genericNamePlaceholder": "e.g., Acetaminophen",
+      "concentration": "Concentration",
+      "concentrationPlaceholder": "e.g., 500mg",
+      "form": "Medicine Form",
+      "formPlaceholder": "Select form",
+      "manufacturer": "Manufacturer",
+      "manufacturerPlaceholder": "e.g., Pfizer",
+      "barcode": "Barcode",
+      "barcodePlaceholder": "e.g., 1234567890123",
+      "currentStock": "Current Stock",
+      "minStockLevel": "Min Stock Level",
+      "unitPrice": "Unit Price ($)",
+      "requiresPrescription": "Requires Prescription",
+      "requiresPrescriptionDesc": "This medicine requires a doctor's prescription",
+      "controlledSubstance": "Controlled Substance",
+      "controlledSubstanceDesc": "Subject to special regulations and tracking",
+      "storageInstructions": "Storage Instructions",
+      "storageInstructionsPlaceholder": "e.g., Store in a cool, dry place away from direct sunlight",
+      "notes": "Additional Notes",
+      "notesPlaceholder": "Any additional information about this medicine"
+    },
+    "preview": {
+      "stockStatus": "Stock Status Preview",
+      "currentStock": "Current Stock",
+      "minLevel": "Min Level",
+      "totalValue": "Total Value",
+      "newStockLevel": "New Stock Level"
+    },
+    "review": {
+      "title": "Review Your Information",
+      "description": "Please review all details before submitting",
+      "basicInfo": "Basic Information",
+      "stockPricing": "Stock & Pricing",
+      "classification": "Classification",
+      "prescriptionRequired": "Prescription Required",
+      "overTheCounter": "Over-the-Counter",
+      "controlledSubstance": "Controlled Substance"
+    },
+    "buttons": {
+      "cancel": "Cancel",
+      "previous": "Previous",
+      "next": "Next",
+      "submit": "Submit"
+    },
+    "validation": {
+      "nameRequired": "Medicine name is required",
+      "concentrationRequired": "Concentration is required",
+      "formRequired": "Medicine form is required",
+      "stockQuantityRequired": "Valid stock quantity is required",
+      "minStockRequired": "Valid minimum stock level is required",
+      "unitPriceRequired": "Valid unit price is required"
+    }
+  },
+  "stockAdjustment": {
+    "title": "Adjust Stock",
+    "description": "Modify stock levels for {{name}}",
+    "currentStock": "Current Stock",
+    "minLevel": "Min Level",
+    "adjustmentType": "Adjustment Type",
+    "addStock": "Add Stock",
+    "removeStock": "Remove Stock",
+    "quantity": "Quantity",
+    "quantityPlaceholder": "Enter quantity",
+    "reason": "Reason (Optional)",
+    "reasonPlaceholder": "e.g., Received new shipment, Damaged items, etc.",
+    "preview": "Preview",
+    "newStockLevel": "New Stock Level",
+    "change": "Change",
+    "confirmAdjustment": "Confirm Adjustment",
+    "cancel": "Cancel",
+    "validation": {
+      "validQuantity": "Please enter a valid quantity",
+      "cannotSubtract": "Cannot subtract more than current stock ({{stock}})"
+    }
+  },
+  "itemDetails": {
+    "title": "Item Details",
+    "stockInfo": "Stock Information",
+    "currentStock": "Current Stock",
+    "minLevel": "Min Level",
+    "totalValue": "Total Value",
+    "stockLevel": "Stock Level",
+    "basicInfo": "Basic Information",
+    "concentration": "Concentration",
+    "form": "Form",
+    "manufacturer": "Manufacturer",
+    "barcode": "Barcode",
+    "pricing": "Pricing",
+    "unitPrice": "Unit Price",
+    "totalInventoryValue": "Total Inventory Value",
+    "classification": "Classification",
+    "prescriptionRequired": "Prescription Required",
+    "overTheCounter": "Over-the-Counter",
+    "controlledSubstance": "Controlled Substance",
+    "active": "Active",
+    "inactive": "Inactive",
+    "storageInstructions": "Storage Instructions",
+    "additionalNotes": "Additional Notes",
+    "timeline": "Timeline",
+    "created": "Created",
+    "lastUpdated": "Last Updated",
+    "lastRestocked": "Last Restocked"
+  },
+  "stockStatus": {
+    "inStock": "In Stock",
+    "lowStock": "Low Stock",
+    "outOfStock": "Out of Stock"
+  },
+  "messages": {
+    "itemCreated": "Item \"{{name}}\" created successfully",
+    "itemUpdated": "Item updated successfully",
+    "itemDeleted": "Item deleted successfully",
+    "itemRestored": "Item restored successfully",
+    "stockUpdated": "Stock updated successfully",
+    "stockAdjusted": "Stock adjusted successfully",
+    "confirmDelete": "Archive \"{{name}}\"?",
+    "deleteDescription": "This action will archive the item. You can restore it later if needed.",
+    "cancel": "Cancel",
+    "archive": "Archive"
+  }
+}

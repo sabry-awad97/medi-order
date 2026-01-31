@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { motion } from "motion/react";
 import { TrendingUp, TrendingDown, Package, AlertCircle } from "lucide-react";
+import { useTranslation } from "@meditrack/i18n";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -31,6 +32,7 @@ export function StockAdjustmentDialog({
   item,
   onAdjust,
 }: StockAdjustmentDialogProps) {
+  const { t } = useTranslation("inventory");
   const [adjustmentType, setAdjustmentType] = useState<"add" | "subtract">(
     "add",
   );
@@ -43,13 +45,15 @@ export function StockAdjustmentDialog({
 
     const qty = parseInt(quantity);
     if (isNaN(qty) || qty <= 0) {
-      setError("Please enter a valid quantity");
+      setError(t("stockAdjustment.validation.validQuantity"));
       return;
     }
 
     if (adjustmentType === "subtract" && item && qty > item.stock_quantity) {
       setError(
-        `Cannot subtract more than current stock (${item.stock_quantity})`,
+        t("stockAdjustment.validation.cannotSubtract", {
+          stock: item.stock_quantity,
+        }),
       );
       return;
     }
@@ -81,16 +85,22 @@ export function StockAdjustmentDialog({
         ? "low_stock"
         : "in_stock";
 
+  const getStockStatusLabel = () => {
+    if (stockStatus === "out_of_stock") return t("stockStatus.outOfStock");
+    if (stockStatus === "low_stock") return t("stockStatus.lowStock");
+    return t("stockStatus.inStock");
+  };
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-lg">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Package className="h-5 w-5" />
-            Adjust Stock
+            {t("stockAdjustment.title")}
           </DialogTitle>
           <DialogDescription>
-            Modify stock levels for {item.name}
+            {t("stockAdjustment.description", { name: item.name })}
           </DialogDescription>
         </DialogHeader>
 
@@ -99,19 +109,21 @@ export function StockAdjustmentDialog({
           <div className="p-4 rounded-lg bg-muted/50 space-y-2">
             <div className="flex items-center justify-between">
               <span className="text-sm text-muted-foreground">
-                Current Stock
+                {t("stockAdjustment.currentStock")}
               </span>
               <span className="text-2xl font-bold">{item.stock_quantity}</span>
             </div>
             <div className="flex items-center justify-between text-sm">
-              <span className="text-muted-foreground">Min Level</span>
+              <span className="text-muted-foreground">
+                {t("stockAdjustment.minLevel")}
+              </span>
               <span className="font-medium">{item.min_stock_level}</span>
             </div>
           </div>
 
           {/* Adjustment Type */}
           <div className="space-y-3">
-            <Label>Adjustment Type</Label>
+            <Label>{t("stockAdjustment.adjustmentType")}</Label>
             <div className="grid grid-cols-2 gap-3">
               <Button
                 type="button"
@@ -127,7 +139,7 @@ export function StockAdjustmentDialog({
                 }}
               >
                 <TrendingUp className="h-4 w-4" />
-                Add Stock
+                {t("stockAdjustment.addStock")}
               </Button>
               <Button
                 type="button"
@@ -143,7 +155,7 @@ export function StockAdjustmentDialog({
                 }}
               >
                 <TrendingDown className="h-4 w-4" />
-                Remove Stock
+                {t("stockAdjustment.removeStock")}
               </Button>
             </div>
           </div>
@@ -151,7 +163,8 @@ export function StockAdjustmentDialog({
           {/* Quantity Input */}
           <div className="space-y-2">
             <Label htmlFor="quantity">
-              Quantity <span className="text-destructive">*</span>
+              {t("stockAdjustment.quantity")}{" "}
+              <span className="text-destructive">*</span>
             </Label>
             <Input
               id="quantity"
@@ -162,7 +175,7 @@ export function StockAdjustmentDialog({
                 setQuantity(e.target.value);
                 setError("");
               }}
-              placeholder="Enter quantity"
+              placeholder={t("stockAdjustment.quantityPlaceholder")}
               className={cn(error && "border-destructive")}
             />
             {error && (
@@ -179,12 +192,12 @@ export function StockAdjustmentDialog({
 
           {/* Reason */}
           <div className="space-y-2">
-            <Label htmlFor="reason">Reason (Optional)</Label>
+            <Label htmlFor="reason">{t("stockAdjustment.reason")}</Label>
             <Textarea
               id="reason"
               value={reason}
               onChange={(e) => setReason(e.target.value)}
-              placeholder="e.g., Received new shipment, Damaged items, etc."
+              placeholder={t("stockAdjustment.reasonPlaceholder")}
               rows={3}
               className="resize-none"
             />
@@ -197,10 +210,12 @@ export function StockAdjustmentDialog({
               animate={{ opacity: 1, scale: 1 }}
               className="p-4 rounded-lg border bg-muted/30 space-y-3"
             >
-              <h4 className="font-medium text-sm">Preview</h4>
+              <h4 className="font-medium text-sm">
+                {t("stockAdjustment.preview")}
+              </h4>
               <div className="flex items-center justify-between">
                 <span className="text-sm text-muted-foreground">
-                  New Stock Level
+                  {t("stockAdjustment.newStockLevel")}
                 </span>
                 <div className="flex items-center gap-2">
                   <span className="text-2xl font-bold">{newStock}</span>
@@ -213,16 +228,14 @@ export function StockAdjustmentDialog({
                           : "default"
                     }
                   >
-                    {stockStatus === "out_of_stock"
-                      ? "Out of Stock"
-                      : stockStatus === "low_stock"
-                        ? "Low Stock"
-                        : "In Stock"}
+                    {getStockStatusLabel()}
                   </Badge>
                 </div>
               </div>
               <div className="flex items-center justify-between text-sm">
-                <span className="text-muted-foreground">Change</span>
+                <span className="text-muted-foreground">
+                  {t("stockAdjustment.change")}
+                </span>
                 <span
                   className={cn(
                     "font-medium",
@@ -240,13 +253,13 @@ export function StockAdjustmentDialog({
 
           <DialogFooter>
             <Button type="button" variant="outline" onClick={handleClose}>
-              Cancel
+              {t("stockAdjustment.cancel")}
             </Button>
             <Button
               type="submit"
               disabled={!quantity || parseInt(quantity) <= 0}
             >
-              Confirm Adjustment
+              {t("stockAdjustment.confirmAdjustment")}
             </Button>
           </DialogFooter>
         </form>

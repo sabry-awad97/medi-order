@@ -12,7 +12,7 @@ import {
   AlertCircle,
   Sparkles,
 } from "lucide-react";
-import { useDirection } from "@meditrack/i18n";
+import { useDirection, useTranslation } from "@meditrack/i18n";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -68,29 +68,29 @@ interface ValidationErrors {
   [key: string]: string;
 }
 
-const STEPS = [
+const getSteps = (t: (key: string) => string) => [
   {
     id: 1,
-    title: "Basic Information",
-    description: "Medicine details and identification",
+    title: t("form.step1.title"),
+    description: t("form.step1.description"),
     icon: Package,
   },
   {
     id: 2,
-    title: "Stock & Pricing",
-    description: "Inventory levels and cost",
+    title: t("form.step2.title"),
+    description: t("form.step2.description"),
     icon: DollarSign,
   },
   {
     id: 3,
-    title: "Classification",
-    description: "Regulatory and storage details",
+    title: t("form.step3.title"),
+    description: t("form.step3.description"),
     icon: Shield,
   },
   {
     id: 4,
-    title: "Review",
-    description: "Confirm all details",
+    title: t("form.step4.title"),
+    description: t("form.step4.description"),
     icon: Check,
   },
 ];
@@ -102,8 +102,10 @@ export function InventoryForm({
   mode = "create",
 }: InventoryFormProps) {
   const { isRTL } = useDirection();
+  const { t } = useTranslation("inventory");
   const [currentStep, setCurrentStep] = useState(1);
   const [errors, setErrors] = useState<ValidationErrors>({});
+  const STEPS = getSteps(t);
 
   const [formData, setFormData] = useState<FormData>({
     name: "",
@@ -138,13 +140,13 @@ export function InventoryForm({
 
     if (step === 1) {
       if (!formData.name.trim()) {
-        newErrors.name = "Medicine name is required";
+        newErrors.name = t("form.validation.nameRequired");
       }
       if (!formData.concentration.trim()) {
-        newErrors.concentration = "Concentration is required";
+        newErrors.concentration = t("form.validation.concentrationRequired");
       }
       if (!formData.form) {
-        newErrors.form = "Medicine form is required";
+        newErrors.form = t("form.validation.formRequired");
       }
     }
 
@@ -154,13 +156,13 @@ export function InventoryForm({
       const price = parseFloat(formData.unit_price);
 
       if (isNaN(stockQty) || stockQty < 0) {
-        newErrors.stock_quantity = "Valid stock quantity is required";
+        newErrors.stock_quantity = t("form.validation.stockQuantityRequired");
       }
       if (isNaN(minStock) || minStock < 0) {
-        newErrors.min_stock_level = "Valid minimum stock level is required";
+        newErrors.min_stock_level = t("form.validation.minStockRequired");
       }
       if (isNaN(price) || price <= 0) {
-        newErrors.unit_price = "Valid unit price is required";
+        newErrors.unit_price = t("form.validation.unitPriceRequired");
       }
     }
 
@@ -239,7 +241,7 @@ export function InventoryForm({
               </div>
               <div>
                 <DialogTitle className="text-2xl">
-                  {mode === "create" ? "Add New Medicine" : "Edit Medicine"}
+                  {mode === "create" ? t("form.addTitle") : t("form.editTitle")}
                 </DialogTitle>
                 <DialogDescription>
                   {STEPS[currentStep - 1].description}
@@ -310,14 +312,14 @@ export function InventoryForm({
                     {/* Medicine Name */}
                     <div className="space-y-2 sm:col-span-2">
                       <Label htmlFor="name" className="flex items-center gap-2">
-                        Medicine Name
+                        {t("form.fields.medicineName")}
                         <span className="text-destructive">*</span>
                       </Label>
                       <Input
                         id="name"
                         value={formData.name}
                         onChange={(e) => updateField("name", e.target.value)}
-                        placeholder="e.g., Paracetamol"
+                        placeholder={t("form.fields.medicineNamePlaceholder")}
                         className={cn(errors.name && "border-destructive")}
                       />
                       {errors.name && (
@@ -334,14 +336,16 @@ export function InventoryForm({
 
                     {/* Generic Name */}
                     <div className="space-y-2">
-                      <Label htmlFor="generic_name">Generic Name</Label>
+                      <Label htmlFor="generic_name">
+                        {t("form.fields.genericName")}
+                      </Label>
                       <Input
                         id="generic_name"
                         value={formData.generic_name}
                         onChange={(e) =>
                           updateField("generic_name", e.target.value)
                         }
-                        placeholder="e.g., Acetaminophen"
+                        placeholder={t("form.fields.genericNamePlaceholder")}
                       />
                     </div>
 
@@ -351,7 +355,7 @@ export function InventoryForm({
                         htmlFor="concentration"
                         className="flex items-center gap-2"
                       >
-                        Concentration
+                        {t("form.fields.concentration")}
                         <span className="text-destructive">*</span>
                       </Label>
                       <Input
@@ -360,7 +364,7 @@ export function InventoryForm({
                         onChange={(e) =>
                           updateField("concentration", e.target.value)
                         }
-                        placeholder="e.g., 500mg"
+                        placeholder={t("form.fields.concentrationPlaceholder")}
                         className={cn(
                           errors.concentration && "border-destructive",
                         )}
@@ -380,7 +384,7 @@ export function InventoryForm({
                     {/* Form */}
                     <div className="space-y-2">
                       <Label htmlFor="form" className="flex items-center gap-2">
-                        Medicine Form
+                        {t("form.fields.form")}
                         <span className="text-destructive">*</span>
                       </Label>
                       <Select
@@ -392,7 +396,9 @@ export function InventoryForm({
                         <SelectTrigger
                           className={cn(errors.form && "border-destructive")}
                         >
-                          <SelectValue placeholder="Select form" />
+                          <SelectValue
+                            placeholder={t("form.fields.formPlaceholder")}
+                          />
                         </SelectTrigger>
                         <SelectContent>
                           {MEDICINE_FORMS.map((form) => (
@@ -416,25 +422,29 @@ export function InventoryForm({
 
                     {/* Manufacturer */}
                     <div className="space-y-2">
-                      <Label htmlFor="manufacturer">Manufacturer</Label>
+                      <Label htmlFor="manufacturer">
+                        {t("form.fields.manufacturer")}
+                      </Label>
                       <Input
                         id="manufacturer"
                         value={formData.manufacturer}
                         onChange={(e) =>
                           updateField("manufacturer", e.target.value)
                         }
-                        placeholder="e.g., Pfizer"
+                        placeholder={t("form.fields.manufacturerPlaceholder")}
                       />
                     </div>
 
                     {/* Barcode */}
                     <div className="space-y-2 sm:col-span-2">
-                      <Label htmlFor="barcode">Barcode</Label>
+                      <Label htmlFor="barcode">
+                        {t("form.fields.barcode")}
+                      </Label>
                       <Input
                         id="barcode"
                         value={formData.barcode}
                         onChange={(e) => updateField("barcode", e.target.value)}
-                        placeholder="e.g., 1234567890123"
+                        placeholder={t("form.fields.barcodePlaceholder")}
                         className="font-mono"
                       />
                     </div>
@@ -452,7 +462,7 @@ export function InventoryForm({
                         htmlFor="stock_quantity"
                         className="flex items-center gap-2"
                       >
-                        Current Stock
+                        {t("form.fields.currentStock")}
                         <span className="text-destructive">*</span>
                       </Label>
                       <Input
@@ -486,7 +496,7 @@ export function InventoryForm({
                         htmlFor="min_stock_level"
                         className="flex items-center gap-2"
                       >
-                        Min Stock Level
+                        {t("form.fields.minStockLevel")}
                         <span className="text-destructive">*</span>
                       </Label>
                       <Input
@@ -520,7 +530,7 @@ export function InventoryForm({
                         htmlFor="unit_price"
                         className="flex items-center gap-2"
                       >
-                        Unit Price ($)
+                        {t("form.fields.unitPrice")}
                         <span className="text-destructive">*</span>
                       </Label>
                       <Input
@@ -552,11 +562,13 @@ export function InventoryForm({
 
                   {/* Stock Status Preview */}
                   <div className="p-4 rounded-lg bg-muted/50 border">
-                    <h4 className="font-medium mb-3">Stock Status Preview</h4>
+                    <h4 className="font-medium mb-3">
+                      {t("form.preview.stockStatus")}
+                    </h4>
                     <div className="grid gap-3 sm:grid-cols-3">
                       <div className="space-y-1">
                         <p className="text-sm text-muted-foreground">
-                          Current Stock
+                          {t("form.preview.currentStock")}
                         </p>
                         <p className="text-2xl font-bold">
                           {formData.stock_quantity || 0}
@@ -564,7 +576,7 @@ export function InventoryForm({
                       </div>
                       <div className="space-y-1">
                         <p className="text-sm text-muted-foreground">
-                          Min Level
+                          {t("form.preview.minLevel")}
                         </p>
                         <p className="text-2xl font-bold">
                           {formData.min_stock_level || 0}
@@ -572,7 +584,7 @@ export function InventoryForm({
                       </div>
                       <div className="space-y-1">
                         <p className="text-sm text-muted-foreground">
-                          Total Value
+                          {t("form.preview.totalValue")}
                         </p>
                         <p className="text-2xl font-bold">
                           $
@@ -592,7 +604,9 @@ export function InventoryForm({
                 <div className="space-y-6">
                   {/* Regulatory Switches */}
                   <div className="space-y-4 p-4 rounded-lg bg-muted/50 border">
-                    <h4 className="font-medium">Regulatory Classification</h4>
+                    <h4 className="font-medium">
+                      {t("form.review.classification")}
+                    </h4>
 
                     <div className="flex items-center justify-between p-3 rounded-md bg-background">
                       <div className="space-y-0.5">
@@ -600,10 +614,10 @@ export function InventoryForm({
                           htmlFor="requires_prescription"
                           className="text-base"
                         >
-                          Requires Prescription
+                          {t("form.fields.requiresPrescription")}
                         </Label>
                         <p className="text-sm text-muted-foreground">
-                          This medicine requires a doctor's prescription
+                          {t("form.fields.requiresPrescriptionDesc")}
                         </p>
                       </div>
                       <Switch
@@ -618,10 +632,10 @@ export function InventoryForm({
                     <div className="flex items-center justify-between p-3 rounded-md bg-background">
                       <div className="space-y-0.5">
                         <Label htmlFor="is_controlled" className="text-base">
-                          Controlled Substance
+                          {t("form.fields.controlledSubstance")}
                         </Label>
                         <p className="text-sm text-muted-foreground">
-                          Subject to special regulations and tracking
+                          {t("form.fields.controlledSubstanceDesc")}
                         </p>
                       </div>
                       <Switch
@@ -637,7 +651,7 @@ export function InventoryForm({
                   {/* Storage Instructions */}
                   <div className="space-y-2">
                     <Label htmlFor="storage_instructions">
-                      Storage Instructions
+                      {t("form.fields.storageInstructions")}
                     </Label>
                     <Textarea
                       id="storage_instructions"
@@ -645,7 +659,9 @@ export function InventoryForm({
                       onChange={(e) =>
                         updateField("storage_instructions", e.target.value)
                       }
-                      placeholder="e.g., Store in a cool, dry place away from direct sunlight"
+                      placeholder={t(
+                        "form.fields.storageInstructionsPlaceholder",
+                      )}
                       rows={3}
                       className="resize-none"
                     />
@@ -653,12 +669,12 @@ export function InventoryForm({
 
                   {/* Notes */}
                   <div className="space-y-2">
-                    <Label htmlFor="notes">Additional Notes</Label>
+                    <Label htmlFor="notes">{t("form.fields.notes")}</Label>
                     <Textarea
                       id="notes"
                       value={formData.notes}
                       onChange={(e) => updateField("notes", e.target.value)}
-                      placeholder="Any additional information about this medicine"
+                      placeholder={t("form.fields.notesPlaceholder")}
                       rows={3}
                       className="resize-none"
                     />
@@ -673,11 +689,11 @@ export function InventoryForm({
                     <div className="flex items-center gap-2 mb-4">
                       <Check className="h-5 w-5 text-primary" />
                       <h4 className="font-semibold text-lg">
-                        Review Your Information
+                        {t("form.review.title")}
                       </h4>
                     </div>
                     <p className="text-sm text-muted-foreground">
-                      Please review all details before submitting
+                      {t("form.review.description")}
                     </p>
                   </div>
 
@@ -685,28 +701,31 @@ export function InventoryForm({
                   <div className="space-y-3">
                     <h5 className="font-medium flex items-center gap-2">
                       <Package className="h-4 w-4" />
-                      Basic Information
+                      {t("form.review.basicInfo")}
                     </h5>
                     <div className="grid gap-3 sm:grid-cols-2 p-4 rounded-lg bg-muted/50">
                       <ReviewField
-                        label="Medicine Name"
+                        label={t("form.fields.medicineName")}
                         value={formData.name}
                       />
                       <ReviewField
-                        label="Generic Name"
+                        label={t("form.fields.genericName")}
                         value={formData.generic_name || "—"}
                       />
                       <ReviewField
-                        label="Concentration"
+                        label={t("form.fields.concentration")}
                         value={formData.concentration}
                       />
-                      <ReviewField label="Form" value={formData.form} />
                       <ReviewField
-                        label="Manufacturer"
+                        label={t("form.fields.form")}
+                        value={formData.form}
+                      />
+                      <ReviewField
+                        label={t("form.fields.manufacturer")}
                         value={formData.manufacturer || "—"}
                       />
                       <ReviewField
-                        label="Barcode"
+                        label={t("form.fields.barcode")}
                         value={formData.barcode || "—"}
                       />
                     </div>
@@ -716,19 +735,19 @@ export function InventoryForm({
                   <div className="space-y-3">
                     <h5 className="font-medium flex items-center gap-2">
                       <DollarSign className="h-4 w-4" />
-                      Stock & Pricing
+                      {t("form.review.stockPricing")}
                     </h5>
                     <div className="grid gap-3 sm:grid-cols-3 p-4 rounded-lg bg-muted/50">
                       <ReviewField
-                        label="Current Stock"
+                        label={t("form.preview.currentStock")}
                         value={`${formData.stock_quantity} units`}
                       />
                       <ReviewField
-                        label="Min Stock Level"
+                        label={t("form.preview.minLevel")}
                         value={`${formData.min_stock_level} units`}
                       />
                       <ReviewField
-                        label="Unit Price"
+                        label={t("form.fields.unitPrice")}
                         value={`$${parseFloat(formData.unit_price).toFixed(2)}`}
                       />
                     </div>
@@ -738,32 +757,37 @@ export function InventoryForm({
                   <div className="space-y-3">
                     <h5 className="font-medium flex items-center gap-2">
                       <Shield className="h-4 w-4" />
-                      Classification
+                      {t("form.review.classification")}
                     </h5>
                     <div className="p-4 rounded-lg bg-muted/50 space-y-3">
                       <div className="flex items-center gap-2">
                         {formData.requires_prescription ? (
                           <Badge variant="secondary">
-                            Prescription Required
+                            {t("form.review.prescriptionRequired")}
                           </Badge>
                         ) : (
-                          <Badge variant="outline">Over-the-Counter</Badge>
+                          <Badge variant="outline">
+                            {t("form.review.overTheCounter")}
+                          </Badge>
                         )}
                         {formData.is_controlled && (
                           <Badge variant="destructive" className="gap-1">
                             <Shield className="h-3 w-3" />
-                            Controlled Substance
+                            {t("form.review.controlledSubstance")}
                           </Badge>
                         )}
                       </div>
                       {formData.storage_instructions && (
                         <ReviewField
-                          label="Storage Instructions"
+                          label={t("form.fields.storageInstructions")}
                           value={formData.storage_instructions}
                         />
                       )}
                       {formData.notes && (
-                        <ReviewField label="Notes" value={formData.notes} />
+                        <ReviewField
+                          label={t("form.fields.notes")}
+                          value={formData.notes}
+                        />
                       )}
                     </div>
                   </div>
@@ -787,18 +811,23 @@ export function InventoryForm({
               ) : (
                 <ChevronLeft className="h-4 w-4" />
               )}
-              {currentStep === 1 ? "Cancel" : "Previous"}
+              {currentStep === 1
+                ? t("form.buttons.cancel")
+                : t("form.buttons.previous")}
             </Button>
 
             <div className="flex items-center gap-2">
               <span className="text-sm text-muted-foreground">
-                Step {currentStep} of {STEPS.length}
+                {t("form.stepProgress", {
+                  current: currentStep,
+                  total: STEPS.length,
+                })}
               </span>
             </div>
 
             {currentStep < STEPS.length ? (
               <Button onClick={handleNext} className="gap-2">
-                Next
+                {t("form.buttons.next")}
                 {isRTL ? (
                   <ChevronLeft className="h-4 w-4" />
                 ) : (
@@ -808,7 +837,7 @@ export function InventoryForm({
             ) : (
               <Button onClick={handleSubmit} className="gap-2">
                 <Check className="h-4 w-4" />
-                Submit
+                {t("form.buttons.submit")}
               </Button>
             )}
           </div>

@@ -1,0 +1,214 @@
+{
+  "page": {
+    "title": "إدارة المخزون",
+    "description": "إدارة مخزون الأدوية في الصيدلية",
+    "addItem": "إضافة صنف",
+    "gridView": "عرض الشبكة",
+    "tableView": "عرض الجدول",
+    "searchPlaceholder": "البحث بالاسم أو الاسم العام أو الباركود...",
+    "noItems": "لا توجد أصناف في المخزون",
+    "noItemsFound": "لم يتم العثور على أصناف",
+    "startAdding": "ابدأ بإضافة دواء جديد",
+    "tryDifferentSearch": "جرب البحث بكلمات مختلفة",
+    "loadingInventory": "جاري تحميل المخزون..."
+  },
+  "stats": {
+    "totalItems": "إجمالي الأصناف",
+    "inStock": "متوفر",
+    "lowStock": "مخزون منخفض",
+    "outOfStock": "نفذ من المخزون",
+    "totalValue": "القيمة الإجمالية"
+  },
+  "filters": {
+    "allForms": "جميع الأشكال",
+    "allStock": "جميع المخزون",
+    "inStock": "متوفر",
+    "lowStock": "مخزون منخفض",
+    "outOfStock": "نفذ من المخزون",
+    "allTypes": "جميع الأنواع",
+    "prescription": "بوصفة طبية",
+    "otc": "بدون وصفة",
+    "clearFilters": "مسح ({{count}})",
+    "filters": "الفلاتر",
+    "filterByForm": "تصفية حسب الشكل",
+    "filterByStock": "تصفية حسب المخزون",
+    "filterByType": "تصفية حسب النوع",
+    "medicineForm": "شكل الدواء",
+    "stockStatus": "حالة المخزون",
+    "medicineType": "نوع الدواء"
+  },
+  "table": {
+    "medicineName": "اسم الدواء",
+    "concentration": "التركيز",
+    "form": "الشكل",
+    "stock": "المخزون",
+    "unitPrice": "سعر الوحدة",
+    "manufacturer": "الشركة المصنعة",
+    "type": "النوع",
+    "barcode": "الباركود",
+    "actions": "الإجراءات",
+    "units": "وحدة",
+    "rx": "وصفة",
+    "controlled": "مراقب",
+    "na": "غير محدد"
+  },
+  "card": {
+    "stock": "المخزون:",
+    "minLevel": "الحد الأدنى:",
+    "price": "السعر:",
+    "rxRequired": "يتطلب وصفة",
+    "controlled": "مراقب"
+  },
+  "actions": {
+    "viewDetails": "عرض التفاصيل",
+    "editItem": "تعديل الصنف",
+    "duplicate": "نسخ",
+    "adjustStock": "تعديل المخزون",
+    "stockHistory": "سجل المخزون",
+    "archive": "أرشفة"
+  },
+  "form": {
+    "addTitle": "إضافة دواء جديد",
+    "editTitle": "تعديل الدواء",
+    "step1": {
+      "title": "المعلومات الأساسية",
+      "description": "تفاصيل الدواء والتعريف"
+    },
+    "step2": {
+      "title": "المخزون والتسعير",
+      "description": "مستويات المخزون والتكلفة"
+    },
+    "step3": {
+      "title": "التصنيف",
+      "description": "التفاصيل التنظيمية والتخزين"
+    },
+    "step4": {
+      "title": "المراجعة",
+      "description": "تأكيد جميع التفاصيل"
+    },
+    "stepProgress": "الخطوة {{current}} من {{total}}",
+    "fields": {
+      "medicineName": "اسم الدواء",
+      "medicineNamePlaceholder": "مثال: باراسيتامول",
+      "genericName": "الاسم العام",
+      "genericNamePlaceholder": "مثال: أسيتامينوفين",
+      "concentration": "التركيز",
+      "concentrationPlaceholder": "مثال: 500 ملغ",
+      "form": "شكل الدواء",
+      "formPlaceholder": "اختر الشكل",
+      "manufacturer": "الشركة المصنعة",
+      "manufacturerPlaceholder": "مثال: فايزر",
+      "barcode": "الباركود",
+      "barcodePlaceholder": "مثال: 1234567890123",
+      "currentStock": "المخزون الحالي",
+      "minStockLevel": "الحد الأدنى للمخزون",
+      "unitPrice": "سعر الوحدة ($)",
+      "requiresPrescription": "يتطلب وصفة طبية",
+      "requiresPrescriptionDesc": "هذا الدواء يتطلب وصفة طبية من الطبيب",
+      "controlledSubstance": "مادة مراقبة",
+      "controlledSubstanceDesc": "خاضع للوائح خاصة والتتبع",
+      "storageInstructions": "تعليمات التخزين",
+      "storageInstructionsPlaceholder": "مثال: يحفظ في مكان بارد وجاف بعيداً عن أشعة الشمس المباشرة",
+      "notes": "ملاحظات إضافية",
+      "notesPlaceholder": "أي معلومات إضافية عن هذا الدواء"
+    },
+    "preview": {
+      "stockStatus": "معاينة حالة المخزون",
+      "currentStock": "المخزون الحالي",
+      "minLevel": "الحد الأدنى",
+      "totalValue": "القيمة الإجمالية",
+      "newStockLevel": "مستوى المخزون الجديد"
+    },
+    "review": {
+      "title": "مراجعة المعلومات",
+      "description": "يرجى مراجعة جميع التفاصيل قبل الإرسال",
+      "basicInfo": "المعلومات الأساسية",
+      "stockPricing": "المخزون والتسعير",
+      "classification": "التصنيف",
+      "prescriptionRequired": "يتطلب وصفة طبية",
+      "overTheCounter": "بدون وصفة طبية",
+      "controlledSubstance": "مادة مراقبة"
+    },
+    "buttons": {
+      "cancel": "إلغاء",
+      "previous": "السابق",
+      "next": "التالي",
+      "submit": "إرسال"
+    },
+    "validation": {
+      "nameRequired": "اسم الدواء مطلوب",
+      "concentrationRequired": "التركيز مطلوب",
+      "formRequired": "شكل الدواء مطلوب",
+      "stockQuantityRequired": "كمية المخزون الصحيحة مطلوبة",
+      "minStockRequired": "الحد الأدنى الصحيح للمخزون مطلوب",
+      "unitPriceRequired": "سعر الوحدة الصحيح مطلوب"
+    }
+  },
+  "stockAdjustment": {
+    "title": "تعديل المخزون",
+    "description": "تعديل مستويات المخزون لـ {{name}}",
+    "currentStock": "المخزون الحالي",
+    "minLevel": "الحد الأدنى",
+    "adjustmentType": "نوع التعديل",
+    "addStock": "إضافة مخزون",
+    "removeStock": "إزالة مخزون",
+    "quantity": "الكمية",
+    "quantityPlaceholder": "أدخل الكمية",
+    "reason": "السبب (اختياري)",
+    "reasonPlaceholder": "مثال: استلام شحنة جديدة، أصناف تالفة، إلخ.",
+    "preview": "معاينة",
+    "newStockLevel": "مستوى المخزون الجديد",
+    "change": "التغيير",
+    "confirmAdjustment": "تأكيد التعديل",
+    "cancel": "إلغاء",
+    "validation": {
+      "validQuantity": "يرجى إدخال كمية صحيحة",
+      "cannotSubtract": "لا يمكن طرح أكثر من المخزون الحالي ({{stock}})"
+    }
+  },
+  "itemDetails": {
+    "title": "تفاصيل الصنف",
+    "stockInfo": "معلومات المخزون",
+    "currentStock": "المخزون الحالي",
+    "minLevel": "الحد الأدنى",
+    "totalValue": "القيمة الإجمالية",
+    "stockLevel": "مستوى المخزون",
+    "basicInfo": "المعلومات الأساسية",
+    "concentration": "التركيز",
+    "form": "الشكل",
+    "manufacturer": "الشركة المصنعة",
+    "barcode": "الباركود",
+    "pricing": "التسعير",
+    "unitPrice": "سعر الوحدة",
+    "totalInventoryValue": "القيمة الإجمالية للمخزون",
+    "classification": "التصنيف",
+    "prescriptionRequired": "يتطلب وصفة طبية",
+    "overTheCounter": "بدون وصفة طبية",
+    "controlledSubstance": "مادة مراقبة",
+    "active": "نشط",
+    "inactive": "غير نشط",
+    "storageInstructions": "تعليمات التخزين",
+    "additionalNotes": "ملاحظات إضافية",
+    "timeline": "الجدول الزمني",
+    "created": "تاريخ الإنشاء",
+    "lastUpdated": "آخر تحديث",
+    "lastRestocked": "آخر تجديد للمخزون"
+  },
+  "stockStatus": {
+    "inStock": "متوفر",
+    "lowStock": "مخزون منخفض",
+    "outOfStock": "نفذ من المخزون"
+  },
+  "messages": {
+    "itemCreated": "تم إنشاء الصنف \"{{name}}\" بنجاح",
+    "itemUpdated": "تم تحديث الصنف بنجاح",
+    "itemDeleted": "تم حذف الصنف بنجاح",
+    "itemRestored": "تم استعادة الصنف بنجاح",
+    "stockUpdated": "تم تحديث المخزون بنجاح",
+    "stockAdjusted": "تم تعديل المخزون بنجاح",
+    "confirmDelete": "أرشفة \"{{name}}\"؟",
+    "deleteDescription": "سيتم أرشفة هذا الصنف. يمكنك استعادته لاحقاً إذا لزم الأمر.",
+    "cancel": "إلغاء",
+    "archive": "أرشفة"
+  }
+}
