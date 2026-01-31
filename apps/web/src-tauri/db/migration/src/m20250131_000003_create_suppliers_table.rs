@@ -121,7 +121,6 @@ impl MigrationTrait for Migration {
 
 #[derive(DeriveIden)]
 enum Supplier {
-    Table,
     Id,
     Name,
     Phone,

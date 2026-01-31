@@ -7,6 +7,7 @@ use typed_builder::TypedBuilder;
 use db_migration::run_migrations;
 
 mod onboarding;
+mod settings;
 mod staff;
 mod user;
 
@@ -27,6 +28,9 @@ pub use user::{UserService, UserStatistics};
 
 // Export Onboarding service
 pub use onboarding::OnboardingService;
+
+// Export Settings service
+pub use settings::{SettingsService, SettingsStatistics};
 
 /// Database connection configuration
 pub struct DatabaseConfig {
@@ -63,6 +67,10 @@ pub struct ServiceManager {
     /// Onboarding service
     #[builder(setter(into))]
     onboarding: Arc<OnboardingService>,
+
+    /// Settings service
+    #[builder(setter(into))]
+    settings: Arc<SettingsService>,
 }
 
 impl ServiceManager {
@@ -113,12 +121,14 @@ impl ServiceManager {
             jwt_service.clone(),
         ));
         let onboarding = Arc::new(OnboardingService::new(user.clone()));
+        let settings = Arc::new(SettingsService::new(db.clone()));
 
         Ok(Self::builder()
             .db(db.clone())
             .staff(staff)
             .user(user)
             .onboarding(onboarding)
+            .settings(settings)
             .build())
     }
 }

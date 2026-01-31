@@ -154,7 +154,6 @@ impl MigrationTrait for Migration {
 
 #[derive(DeriveIden)]
 enum Customer {
-    Table,
     Id,
     FullName,
     PhoneNumber,

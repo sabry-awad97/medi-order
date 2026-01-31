@@ -1,4 +1,5 @@
 pub mod onboarding;
+pub mod settings;
 pub mod user;
 
 pub use user::{
@@ -25,3 +26,28 @@ pub use user::{
 };
 
 pub use onboarding::{check_first_run, complete_first_run_setup, complete_first_run_setup_default};
+
+pub use settings::{
+    // CRUD operations
+    delete_setting,
+    delete_setting_by_id,
+    // Category operations
+    delete_setting_category,
+    get_setting,
+    // Typed getters
+    get_setting_bool,
+    get_setting_by_id,
+    get_setting_categories,
+    get_setting_number,
+    get_setting_string,
+    get_settings_by_category,
+    // Statistics
+    get_settings_statistics,
+    list_settings,
+    // Bulk operations
+    set_multiple_settings,
+    set_setting,
+    // Existence checks
+    setting_exists,
+    update_setting,
+};

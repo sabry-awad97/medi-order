@@ -189,7 +189,6 @@ impl MigrationTrait for Migration {
 
 #[derive(DeriveIden)]
 enum SpecialOrder {
-    Table,
     Id,
     CustomerId,
     SupplierId,
@@ -212,12 +211,10 @@ enum SpecialOrder {
 
 #[derive(DeriveIden)]
 enum Customer {
-    Table,
     Id,
 }
 
 #[derive(DeriveIden)]
 enum Supplier {
-    Table,
     Id,
 }

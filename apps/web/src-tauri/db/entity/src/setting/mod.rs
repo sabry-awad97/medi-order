@@ -9,12 +9,12 @@ use serde::{Deserialize, Serialize};
 #[derive(Clone, Debug, PartialEq, DeriveEntityModel, Serialize, Deserialize)]
 #[sea_orm(table_name = "settings")]
 pub struct Model {
-    /// Primary key - setting key as VARCHAR(100)
-    #[sea_orm(
-        primary_key,
-        auto_increment = false,
-        column_type = "String(StringLen::N(100))"
-    )]
+    /// Primary key - UUID
+    #[sea_orm(primary_key, auto_increment = false)]
+    pub id: Id,
+
+    /// Setting key as VARCHAR(100) - unique identifier for the setting
+    #[sea_orm(column_type = "String(StringLen::N(100))", unique)]
     pub key: String,
 
     /// Setting value as JSONB for flexible data types
@@ -48,9 +48,10 @@ pub enum Relation {}
 
 #[async_trait::async_trait]
 impl ActiveModelBehavior for ActiveModel {
-    /// Called before insert - set timestamps
+    /// Called before insert - set ID and timestamps
     fn new() -> Self {
         Self {
+            id: sea_orm::ActiveValue::Set(Id::new()),
             created_at: sea_orm::ActiveValue::Set(chrono::Utc::now().into()),
             updated_at: sea_orm::ActiveValue::Set(chrono::Utc::now().into()),
             ..Default::default()

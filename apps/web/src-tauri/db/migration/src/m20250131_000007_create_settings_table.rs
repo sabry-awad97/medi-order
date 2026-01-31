@@ -11,15 +11,17 @@ impl MigrationTrait for Migration {
                 Table::create()
                     .table(Alias::new("settings"))
                     .if_not_exists()
+                    .col(ColumnDef::new(Setting::Id).uuid().not_null().primary_key())
                     .col(
                         ColumnDef::new(Setting::Key)
                             .string_len(100)
                             .not_null()
-                            .primary_key(),
+                            .unique_key(),
                     )
                     .col(ColumnDef::new(Setting::Value).json_binary().not_null())
                     .col(ColumnDef::new(Setting::Category).string_len(50).null())
                     .col(ColumnDef::new(Setting::Description).text().null())
+                    .col(ColumnDef::new(Setting::UpdatedBy).uuid().null())
                     .col(
                         ColumnDef::new(Setting::CreatedAt)
                             .timestamp_with_time_zone()
@@ -32,6 +34,17 @@ impl MigrationTrait for Migration {
                             .not_null()
                             .default(Expr::current_timestamp()),
                     )
+                    .to_owned(),
+            )
+            .await?;
+
+        // Create index on key for fast lookups
+        manager
+            .create_index(
+                Index::create()
+                    .name("idx_settings_key")
+                    .table(Alias::new("settings"))
+                    .col(Setting::Key)
                     .to_owned(),
             )
             .await?;
@@ -81,11 +94,12 @@ impl MigrationTrait for Migration {
 
 #[derive(DeriveIden)]
 enum Setting {
-    Table,
+    Id,
     Key,
     Value,
     Category,
     Description,
+    UpdatedBy,
     CreatedAt,
     UpdatedAt,
 }

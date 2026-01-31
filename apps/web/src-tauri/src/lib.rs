@@ -84,6 +84,28 @@ pub async fn run() {
         ipc::commands::onboarding::check_first_run,
         ipc::commands::onboarding::complete_first_run_setup,
         ipc::commands::onboarding::complete_first_run_setup_default,
+        // Settings CRUD operations
+        ipc::commands::settings::get_setting_by_id,
+        ipc::commands::settings::get_setting,
+        ipc::commands::settings::set_setting,
+        ipc::commands::settings::update_setting,
+        ipc::commands::settings::delete_setting_by_id,
+        ipc::commands::settings::delete_setting,
+        ipc::commands::settings::list_settings,
+        // Settings Category operations
+        ipc::commands::settings::get_settings_by_category,
+        ipc::commands::settings::get_setting_categories,
+        ipc::commands::settings::delete_setting_category,
+        // Settings Bulk operations
+        ipc::commands::settings::set_multiple_settings,
+        // Settings Typed getters
+        ipc::commands::settings::get_setting_string,
+        ipc::commands::settings::get_setting_bool,
+        ipc::commands::settings::get_setting_number,
+        // Settings Existence checks
+        ipc::commands::settings::setting_exists,
+        // Settings Statistics
+        ipc::commands::settings::get_settings_statistics,
     ]);
 
     builder

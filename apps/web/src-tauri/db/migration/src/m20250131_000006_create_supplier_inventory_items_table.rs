@@ -203,7 +203,6 @@ impl MigrationTrait for Migration {
 
 #[derive(DeriveIden)]
 enum SupplierInventoryItem {
-    Table,
     Id,
     SupplierId,
     InventoryItemId,
@@ -222,12 +221,10 @@ enum SupplierInventoryItem {
 
 #[derive(DeriveIden)]
 enum Supplier {
-    Table,
     Id,
 }
 
 #[derive(DeriveIden)]
 enum InventoryItem {
-    Table,
     Id,
 }

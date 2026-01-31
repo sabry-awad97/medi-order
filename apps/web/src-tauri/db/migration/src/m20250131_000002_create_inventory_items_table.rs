@@ -210,7 +210,6 @@ impl MigrationTrait for Migration {
 
 #[derive(DeriveIden)]
 enum InventoryItem {
-    Table,
     Id,
     Name,
     GenericName,
