@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import { toast } from "sonner";
 import { useOrders } from "./use-orders-db";
-import { useSettings } from "./use-settings-db";
+import { useSettingValue } from "./use-settings-db";
 import type { Order } from "@/lib/types";
 
 /**
@@ -10,13 +10,19 @@ import type { Order } from "@/lib/types";
  */
 export function useOrderAlerts(enabled?: boolean) {
   const { data: orders = [] } = useOrders();
-  const { data: settings } = useSettings();
+
+  const enableAlerts = useSettingValue<boolean>("enableAlerts", true);
+  const oldOrderThreshold = useSettingValue<number>("oldOrderThreshold", 7);
+  const pickupReminderDays = useSettingValue<number>("pickupReminderDays", 3);
+  const alertCheckInterval = useSettingValue<number>("alertCheckInterval", 30);
 
   // استخدام القيم من الإعدادات أو القيم الافتراضية
-  const alertsEnabled = enabled ?? settings?.enableAlerts ?? true;
-  const oldOrderThreshold = settings?.oldOrderThreshold ?? 7;
-  const pickupReminderDays = settings?.pickupReminderDays ?? 3;
-  const alertCheckInterval = settings?.alertCheckInterval ?? 30;
+  const alertsEnabled = enabled ?? enableAlerts ?? true;
+
+  // Ensure we have valid values
+  const validOldOrderThreshold = oldOrderThreshold ?? 7;
+  const validPickupReminderDays = pickupReminderDays ?? 3;
+  const validAlertCheckInterval = alertCheckInterval ?? 30;
 
   useEffect(() => {
     // إذا كانت التنبيهات معطلة، لا تفعل شيء
@@ -31,7 +37,7 @@ export function useOrderAlerts(enabled?: boolean) {
 
         // تنبيه للطلبات القديمة (حسب الإعدادات)
         if (
-          daysSinceCreated > oldOrderThreshold &&
+          daysSinceCreated > validOldOrderThreshold &&
           order.status === "pending"
         ) {
           toast.warning(
@@ -46,7 +52,7 @@ export function useOrderAlerts(enabled?: boolean) {
 
         // تنبيه للطلبات الواصلة غير المستلمة (حسب الإعدادات)
         if (
-          daysSinceCreated > pickupReminderDays &&
+          daysSinceCreated > validPickupReminderDays &&
           order.status === "arrived"
         ) {
           toast.info(`� ${order.customerName} لم يستلم طلبه بعد`, {
@@ -57,7 +63,7 @@ export function useOrderAlerts(enabled?: boolean) {
         }
 
         // تنبيه للطلبات التي تم طلبها منذ فترة ولم تصل
-        const delayedThreshold = oldOrderThreshold - 2; // قبل يومين من عتبة الطلبات القديمة
+        const delayedThreshold = validOldOrderThreshold - 2; // قبل يومين من عتبة الطلبات القديمة
         if (daysSinceCreated > delayedThreshold && order.status === "ordered") {
           toast.warning(`🚚 طلب ${order.customerName} متأخر`, {
             id: `delayed-order-${order.id}`,
@@ -72,7 +78,10 @@ export function useOrderAlerts(enabled?: boolean) {
     checkAlerts();
 
     // فحص حسب الفترة المحددة في الإعدادات (بالدقائق)
-    const interval = setInterval(checkAlerts, alertCheckInterval * 60 * 1000);
+    const interval = setInterval(
+      checkAlerts,
+      validAlertCheckInterval * 60 * 1000,
+    );
 
     return () => clearInterval(interval);
   }, [
@@ -89,29 +98,31 @@ export function useOrderAlerts(enabled?: boolean) {
  */
 export function useAlertStats() {
   const { data: orders = [] } = useOrders();
-  const { data: settings } = useSettings();
 
-  const oldOrderThreshold = settings?.oldOrderThreshold ?? 7;
-  const pickupReminderDays = settings?.pickupReminderDays ?? 3;
+  const oldOrderThreshold = useSettingValue<number>("oldOrderThreshold", 7);
+  const pickupReminderDays = useSettingValue<number>("pickupReminderDays", 3);
 
   const now = new Date();
+
+  const validOldOrderThreshold = oldOrderThreshold ?? 7;
+  const validPickupReminderDays = pickupReminderDays ?? 3;
 
   const oldOrders = orders.filter((order: Order) => {
     const days =
       (now.getTime() - order.createdAt.getTime()) / (1000 * 60 * 60 * 24);
-    return days > oldOrderThreshold && order.status === "pending";
+    return days > validOldOrderThreshold && order.status === "pending";
   }).length;
 
   const notPickedUp = orders.filter((order: Order) => {
     const days =
       (now.getTime() - order.createdAt.getTime()) / (1000 * 60 * 60 * 24);
-    return days > pickupReminderDays && order.status === "arrived";
+    return days > validPickupReminderDays && order.status === "arrived";
   }).length;
 
   const delayed = orders.filter((order: Order) => {
     const days =
       (now.getTime() - order.createdAt.getTime()) / (1000 * 60 * 60 * 24);
-    const delayedThreshold = oldOrderThreshold - 2;
+    const delayedThreshold = validOldOrderThreshold - 2;
     return days > delayedThreshold && order.status === "ordered";
   }).length;
 

@@ -66,17 +66,14 @@ import {
 import { cn } from "@/lib/utils";
 import {
   useSettings,
-  useUpdateSettings,
-  useResetSettings,
-  useExportSettings,
-  useImportSettings,
+  useSetSetting,
+  useUpdateSettingValue,
+  useSettingValue,
 } from "@/hooks";
 import {
   SETTINGS_DEFINITIONS,
   SETTINGS_CATEGORIES,
-  getAllDefaultValues,
 } from "@/lib/settings-definitions";
-import type { Settings } from "@/lib/types-settings";
 import type { SettingCategory, SettingDefinition } from "@/lib/types-settings";
 import { useTheme } from "@/components/theme-provider";
 import { ManualUpdateCheck } from "@/components/manual-update-check";
@@ -163,63 +160,47 @@ function SettingsPage() {
   const { locale, setLocale } = useLocale();
   const { theme, setTheme } = useTheme();
   const { data: settings, isLoading } = useSettings();
-  const updateSettings = useUpdateSettings();
-  const resetSettings = useResetSettings();
-  const exportSettings = useExportSettings();
-  const importSettings = useImportSettings();
+  const updateSettingValue = useUpdateSettingValue();
 
-  const [formData, setFormData] = useState<Record<string, unknown>>({});
-  const [hasChanges, setHasChanges] = useState(false);
-  const [showResetDialog, setShowResetDialog] = useState(false);
-  const [saveSuccess, setSaveSuccess] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
 
-  // Update formData when settings load
-  useEffect(() => {
-    if (settings && Object.keys(formData).length === 0) {
-      setFormData(settings);
-    }
-  }, [settings, formData]);
-
   // Sync language setting with i18n ONLY on initial load
+  const defaultLanguage = useSettingValue<string>("defaultLanguage", "en");
   const hasInitializedLanguage = React.useRef(false);
   useEffect(() => {
-    if (settings?.defaultLanguage && !hasInitializedLanguage.current) {
-      if (settings.defaultLanguage !== locale) {
+    if (defaultLanguage && !hasInitializedLanguage.current) {
+      if (defaultLanguage !== locale) {
         console.log(
           "🔄 Settings page: Syncing language from DB:",
-          settings.defaultLanguage,
+          defaultLanguage,
         );
-        setLocale(settings.defaultLanguage as "en" | "ar");
+        setLocale(defaultLanguage as "en" | "ar");
       }
       hasInitializedLanguage.current = true;
     }
-  }, [settings?.defaultLanguage]);
+  }, [defaultLanguage, locale, setLocale]);
 
   // Sync theme setting with ThemeProvider ONLY on initial load
+  const defaultTheme = useSettingValue<string>("defaultTheme", "system");
   const hasInitializedTheme = React.useRef(false);
   useEffect(() => {
-    if (settings?.defaultTheme && !hasInitializedTheme.current) {
+    if (defaultTheme && !hasInitializedTheme.current) {
       if (
-        settings.defaultTheme !== theme &&
-        (settings.defaultTheme === "light" ||
-          settings.defaultTheme === "dark" ||
-          settings.defaultTheme === "system")
+        defaultTheme !== theme &&
+        (defaultTheme === "light" ||
+          defaultTheme === "dark" ||
+          defaultTheme === "system")
       ) {
-        console.log(
-          "🔄 Settings page: Syncing theme from DB:",
-          settings.defaultTheme,
-        );
-        setTheme(settings.defaultTheme);
+        console.log("🔄 Settings page: Syncing theme from DB:", defaultTheme);
+        setTheme(defaultTheme as "light" | "dark" | "system");
       }
       hasInitializedTheme.current = true;
     }
-  }, [settings?.defaultTheme]);
+  }, [defaultTheme, theme, setTheme]);
 
   const handleChange = (key: string, value: unknown) => {
-    setFormData((prev) => ({ ...prev, [key]: value }));
-    setHasChanges(true);
-    setSaveSuccess(false);
+    // Update setting immediately
+    updateSettingValue.mutate({ key, value });
 
     // If language is changed, update i18n immediately for better UX
     if (key === "defaultLanguage" && (value === "en" || value === "ar")) {
@@ -231,52 +212,9 @@ function SettingsPage() {
       key === "defaultTheme" &&
       (value === "light" || value === "dark" || value === "system")
     ) {
-      setTheme(value);
+      setTheme(value as "light" | "dark" | "system");
     }
   };
-
-  const handleSave = () => {
-    updateSettings.mutate(formData, {
-      onSuccess: () => {
-        setHasChanges(false);
-        setSaveSuccess(true);
-        setTimeout(() => setSaveSuccess(false), 3000);
-      },
-    });
-  };
-
-  const handleResetConfirm = () => {
-    resetSettings.mutate(undefined, {
-      onSuccess: () => {
-        const defaults = getAllDefaultValues();
-        setFormData(defaults as Settings);
-        setHasChanges(false);
-        setShowResetDialog(false);
-      },
-    });
-  };
-
-  const handleExport = () => {
-    exportSettings.mutate();
-  };
-
-  const handleImport = () => {
-    const input = document.createElement("input");
-    input.type = "file";
-    input.accept = ".json";
-    input.onchange = (e) => {
-      const file = (e.target as HTMLInputElement).files?.[0];
-      if (file) {
-        importSettings.mutate(file, {
-          onSuccess: () => {
-            setHasChanges(false);
-          },
-        });
-      }
-    };
-    input.click();
-  };
-
   // Filter settings based on search
   const filteredCategories = React.useMemo(() => {
     if (!searchQuery.trim()) {
@@ -310,16 +248,16 @@ function SettingsPage() {
   }, [searchQuery, t]);
 
   const getFilteredSettings = (category: SettingCategory) => {
-    const settings = SETTINGS_DEFINITIONS.filter(
+    const settingsList = SETTINGS_DEFINITIONS.filter(
       (s) => s.category === category,
     );
 
     if (!searchQuery.trim()) {
-      return settings;
+      return settingsList;
     }
 
     const query = searchQuery.toLowerCase();
-    return settings.filter((setting) => {
+    return settingsList.filter((setting) => {
       const label = t(setting.label).toLowerCase();
       const desc = t(setting.description).toLowerCase();
       return label.includes(query) || desc.includes(query);
@@ -339,43 +277,9 @@ function SettingsPage() {
           <PageHeaderDescription>{t("description")}</PageHeaderDescription>
         </PageHeaderContent>
         <PageHeaderActions>
-          <Button variant="outline" size="lg" onClick={handleImport}>
-            <Upload className="h-4 w-4" />
-            <span className="hidden sm:inline">{t("import")}</span>
-          </Button>
-
-          <Button variant="outline" size="lg" onClick={handleExport}>
-            <Download className="h-4 w-4" />
-            <span className="hidden sm:inline">{t("export")}</span>
-          </Button>
-
-          <Button
-            variant="outline"
-            size="lg"
-            onClick={() => setShowResetDialog(true)}
-          >
-            <RotateCcw className="h-4 w-4" />
-            <span className="hidden sm:inline">{t("reset")}</span>
-          </Button>
-
-          <Button
-            size="lg"
-            onClick={handleSave}
-            disabled={!hasChanges}
-            className={cn(saveSuccess && "bg-green-600 hover:bg-green-700")}
-          >
-            {saveSuccess ? (
-              <>
-                <Check className="h-4 w-4" />
-                <span>Saved!</span>
-              </>
-            ) : (
-              <>
-                <Save className="h-4 w-4" />
-                <span>{t("saveChanges")}</span>
-              </>
-            )}
-          </Button>
+          <div className="text-sm text-muted-foreground">
+            {t("description")}
+          </div>
         </PageHeaderActions>
       </PageHeader>
 
@@ -436,15 +340,18 @@ function SettingsPage() {
                   <Separator />
                   <CardContent className="flex-1 p-0">
                     <div className="divide-y">
-                      {settings.map((setting) => (
-                        <SettingField
-                          key={setting.id}
-                          setting={setting}
-                          value={formData[setting.key]}
-                          onChange={(value) => handleChange(setting.key, value)}
-                          searchQuery={searchQuery}
-                        />
-                      ))}
+                      {getFilteredSettings(categoryKey).map(
+                        (setting: SettingDefinition) => (
+                          <SettingFieldWrapper
+                            key={setting.id}
+                            setting={setting}
+                            onChange={(value) =>
+                              handleChange(setting.key, value)
+                            }
+                            searchQuery={searchQuery}
+                          />
+                        ),
+                      )}
                     </div>
                   </CardContent>
 
@@ -485,24 +392,6 @@ function SettingsPage() {
           )}
         </PageContentInner>
       </PageContent>
-
-      {/* Reset Confirmation Dialog */}
-      <AlertDialog open={showResetDialog} onOpenChange={setShowResetDialog}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>{t("resetTitle")}</AlertDialogTitle>
-            <AlertDialogDescription>
-              {t("resetDescription")}
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>{t("actions.cancel")}</AlertDialogCancel>
-            <AlertDialogAction onClick={handleResetConfirm}>
-              {t("actions.reset")}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
     </Page>
   );
 }
@@ -513,6 +402,24 @@ interface SettingFieldProps extends VariantProps<typeof settingRowVariants> {
   value: unknown;
   onChange: (value: unknown) => void;
   searchQuery?: string;
+}
+
+// Wrapper to get value from settings array
+function SettingFieldWrapper({
+  setting,
+  onChange,
+  searchQuery,
+}: Omit<SettingFieldProps, "value">) {
+  const value = useSettingValue(setting.key, setting.defaultValue);
+
+  return (
+    <SettingField
+      setting={setting}
+      value={value}
+      onChange={onChange}
+      searchQuery={searchQuery}
+    />
+  );
 }
 
 function SettingField({

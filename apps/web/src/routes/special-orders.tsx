@@ -48,7 +48,7 @@ import {
   useOrderAlerts,
   useSeedData,
   useClearData,
-  useSettings,
+  useSettingValue,
 } from "@/hooks";
 import type { Order, OrderFormData, OrderStatus } from "@/lib/types";
 
@@ -68,17 +68,22 @@ function SpecialOrdersComponent() {
   const clearData = useClearData();
 
   // جلب الإعدادات
-  const { data: settings } = useSettings();
+  const enableAlerts = useSettingValue<boolean>("enableAlerts", true);
+  const enableDevMode = useSettingValue<boolean>("enableDevMode", false);
+  const defaultOrderStatus = useSettingValue<OrderStatus | null>(
+    "defaultOrderStatus",
+    null,
+  );
 
   // تفعيل التنبيهات التلقائية (حسب الإعدادات)
-  useOrderAlerts(settings?.enableAlerts);
+  useOrderAlerts(enableAlerts);
 
   // التحقق من وضع التطوير (من الإعدادات)
-  const isDev = settings?.enableDevMode ?? import.meta.env.DEV;
+  const isDev = enableDevMode ?? import.meta.env.DEV;
 
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<OrderStatus | "all" | null>(
-    settings?.defaultOrderStatus || null,
+    defaultOrderStatus || null,
   );
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [isViewOpen, setIsViewOpen] = useState(false);

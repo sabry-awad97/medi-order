@@ -1,5 +1,5 @@
 import { useEffect, useRef } from "react";
-import { useSettings } from "./use-settings-db";
+import { useSettingValue } from "./use-settings-db";
 import { useOrders } from "./use-orders-db";
 import type { Order } from "@/lib/types";
 import { logger } from "@/lib/logger";
@@ -9,24 +9,34 @@ import { logger } from "@/lib/logger";
  * Handles notification permissions and displays notifications based on settings
  */
 export function useNotifications() {
-  const { data: settings } = useSettings();
+  const enableNotifications = useSettingValue<boolean>(
+    "enableNotifications",
+    true,
+  );
+  const notifyOnNewOrder = useSettingValue<boolean>("notifyOnNewOrder", true);
+  const notifyOnStatusChange = useSettingValue<boolean>(
+    "notifyOnStatusChange",
+    true,
+  );
+  const notificationSound = useSettingValue<boolean>("notificationSound", true);
+
   const { data: orders = [] } = useOrders();
   const previousOrdersRef = useRef<Order[]>([]);
   const notificationPermission = useRef<NotificationPermission>("default");
 
   // Request notification permission on mount if enabled
   useEffect(() => {
-    if (settings?.enableNotifications && "Notification" in window) {
+    if (enableNotifications && "Notification" in window) {
       Notification.requestPermission().then((permission) => {
         notificationPermission.current = permission;
         logger.info("Notification permission:", permission);
       });
     }
-  }, [settings?.enableNotifications]);
+  }, [enableNotifications]);
 
   // Check for new orders
   useEffect(() => {
-    if (!settings?.enableNotifications || !settings?.notifyOnNewOrder) {
+    if (!enableNotifications || !notifyOnNewOrder) {
       return;
     }
 
@@ -49,22 +59,17 @@ export function useNotifications() {
         showNotification(
           "طلب جديد",
           `طلب جديد من ${order.customerName}`,
-          settings.notificationSound ?? true,
+          notificationSound ?? true,
         );
       });
     }
 
     previousOrdersRef.current = orders;
-  }, [
-    orders,
-    settings?.enableNotifications,
-    settings?.notifyOnNewOrder,
-    settings?.notificationSound,
-  ]);
+  }, [orders, enableNotifications, notifyOnNewOrder, notificationSound]);
 
   // Check for status changes
   useEffect(() => {
-    if (!settings?.enableNotifications || !settings?.notifyOnStatusChange) {
+    if (!enableNotifications || !notifyOnStatusChange) {
       return;
     }
 
@@ -90,19 +95,14 @@ export function useNotifications() {
         showNotification(
           "تغيير حالة الطلب",
           `طلب ${order.customerName}: ${statusLabels[order.status] || order.status}`,
-          settings.notificationSound ?? true,
+          notificationSound ?? true,
         );
       }
     });
-  }, [
-    orders,
-    settings?.enableNotifications,
-    settings?.notifyOnStatusChange,
-    settings?.notificationSound,
-  ]);
+  }, [orders, enableNotifications, notifyOnStatusChange, notificationSound]);
 
   return {
-    isEnabled: settings?.enableNotifications ?? false,
+    isEnabled: enableNotifications ?? false,
     permission: notificationPermission.current,
   };
 }

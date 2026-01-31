@@ -40,7 +40,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { useTheme } from "@/components/theme-provider";
-import { useAlertStats, useSettings, useUpdateSetting } from "@/hooks";
+import { useAlertStats, useSettingValue, useUpdateSettingValue } from "@/hooks";
 import {
   useLocale,
   LOCALES,
@@ -51,8 +51,11 @@ import { useAuth } from "@/hooks/use-auth";
 
 export function AppSidebar() {
   const { state, open, setOpen } = useSidebar();
-  const { data: settings } = useSettings();
-  const updateSetting = useUpdateSetting();
+  const sidebarDefaultState = useSettingValue<string>(
+    "sidebarDefaultState",
+    "open",
+  );
+  const updateSettingValue = useUpdateSettingValue();
   const routerState = useRouterState();
   const currentPath = routerState.location.pathname;
   const { theme, setTheme } = useTheme();
@@ -115,8 +118,8 @@ export function AppSidebar() {
 
   // Load sidebar state from settings on mount only
   useEffect(() => {
-    if (settings?.sidebarDefaultState) {
-      const shouldBeOpen = settings.sidebarDefaultState === "open";
+    if (sidebarDefaultState) {
+      const shouldBeOpen = sidebarDefaultState === "open";
       if (open !== shouldBeOpen) {
         setOpen(shouldBeOpen);
       }
@@ -133,16 +136,14 @@ export function AppSidebar() {
       return;
     }
 
-    if (settings) {
-      const newState = open ? "open" : "collapsed";
-      if (settings.sidebarDefaultState !== newState) {
-        updateSetting.mutate({
-          key: "sidebarDefaultState",
-          value: newState,
-        });
-      }
+    const newState = open ? "open" : "collapsed";
+    if (sidebarDefaultState !== newState) {
+      updateSettingValue.mutate({
+        key: "sidebarDefaultState",
+        value: newState,
+      });
     }
-  }, [open]);
+  }, [open, sidebarDefaultState, updateSettingValue]);
 
   return (
     <Sidebar
@@ -247,7 +248,7 @@ export function AppSidebar() {
                     const newTheme = theme === "dark" ? "light" : "dark";
                     setTheme(newTheme);
                     // Save to database
-                    updateSetting.mutate({
+                    updateSettingValue.mutate({
                       key: "defaultTheme",
                       value: newTheme,
                     });
@@ -284,7 +285,7 @@ export function AppSidebar() {
                     setLocale(newLocale);
                     // Save to database
                     console.log("💾 Saving language to database...");
-                    updateSetting.mutate({
+                    updateSettingValue.mutate({
                       key: "defaultLanguage",
                       value: newLocale,
                     });

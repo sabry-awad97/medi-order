@@ -23,7 +23,7 @@ import {
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Textarea } from "@/components/ui/textarea";
 import { MEDICINE_FORMS } from "@/lib/constants";
-import { useSettings } from "@/hooks";
+import { useSettingValue } from "@/hooks";
 import type { Order, OrderFormData } from "@/lib/types";
 
 interface OrderFormProps {
@@ -50,7 +50,19 @@ export function OrderForm({
   mode,
 }: OrderFormProps) {
   const { t } = useTranslation("orders");
-  const { data: settings } = useSettings();
+
+  const allowedMedicineForms = useSettingValue(
+    "allowedMedicineForms",
+    MEDICINE_FORMS,
+  );
+  const requireCustomerPhone = useSettingValue<boolean>(
+    "requireCustomerPhone",
+    true,
+  );
+  const maxMedicinesPerOrder = useSettingValue<number>(
+    "maxMedicinesPerOrder",
+    10,
+  );
 
   const [customerName, setCustomerName] = useState(
     initialData?.customerName || "",
@@ -78,9 +90,9 @@ export function OrderForm({
   );
 
   // الحصول على أشكال الأدوية المسموحة من الإعدادات
-  const allowedForms = settings?.allowedMedicineForms || MEDICINE_FORMS;
-  const phoneRequired = settings?.requireCustomerPhone ?? true;
-  const maxMedicines = settings?.maxMedicinesPerOrder ?? 10;
+  const allowedForms = allowedMedicineForms || MEDICINE_FORMS;
+  const phoneRequired = requireCustomerPhone ?? true;
+  const maxMedicines = maxMedicinesPerOrder ?? 10;
 
   const handleAddMedicine = () => {
     setMedicines([

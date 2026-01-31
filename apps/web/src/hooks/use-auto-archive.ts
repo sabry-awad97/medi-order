@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { useSettings } from "./use-settings-db";
+import { useSettingValue } from "./use-settings-db";
 import { useOrders, useUpdateOrderStatus } from "./use-orders-db";
 import type { Order } from "@/lib/types";
 import { logger } from "@/lib/logger";
@@ -10,13 +10,12 @@ import { toast } from "sonner";
  * Runs periodically to check for orders that should be archived
  */
 export function useAutoArchive() {
-  const { data: settings } = useSettings();
+  const autoArchiveDays = useSettingValue<number>("autoArchiveDays", 30);
   const { data: orders = [] } = useOrders();
   const updateOrderStatus = useUpdateOrderStatus();
 
   useEffect(() => {
     // Check if auto-archive is enabled
-    const autoArchiveDays = settings?.autoArchiveDays;
     if (!autoArchiveDays || autoArchiveDays <= 0) {
       return;
     }
@@ -66,19 +65,17 @@ export function useAutoArchive() {
     const interval = setInterval(checkAndArchive, 24 * 60 * 60 * 1000);
 
     return () => clearInterval(interval);
-  }, [orders, settings?.autoArchiveDays, updateOrderStatus]);
+  }, [orders, autoArchiveDays, updateOrderStatus]);
 }
 
 /**
  * Get statistics about archivable orders
  */
 export function useArchivableOrdersStats() {
-  const { data: settings } = useSettings();
+  const autoArchiveDays = useSettingValue<number>("autoArchiveDays", 0);
   const { data: orders = [] } = useOrders();
 
-  const autoArchiveDays = settings?.autoArchiveDays ?? 0;
-
-  if (autoArchiveDays <= 0) {
+  if (!autoArchiveDays || autoArchiveDays <= 0) {
     return {
       count: 0,
       orders: [],

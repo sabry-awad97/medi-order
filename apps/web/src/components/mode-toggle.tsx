@@ -8,16 +8,16 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { useUpdateSetting } from "@/hooks";
+import { useUpdateSettingValue } from "@/hooks";
 
 export function ModeToggle() {
   const { setTheme } = useTheme();
-  const updateSetting = useUpdateSetting();
+  const updateSettingValue = useUpdateSettingValue();
 
   const handleThemeChange = (theme: "light" | "dark" | "system") => {
     setTheme(theme);
     // Also save to settings database for persistence
-    updateSetting.mutate({ key: "defaultTheme", value: theme });
+    updateSettingValue.mutate({ key: "defaultTheme", value: theme });
   };
 
   return (

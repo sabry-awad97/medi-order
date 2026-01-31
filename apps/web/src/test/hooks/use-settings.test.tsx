@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach, vi } from "vitest";
 import { renderHook, waitFor } from "@testing-library/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { useSettings, useUpdateSettings, useResetSettings } from "@/hooks";
+import { useSettings, useSetSetting } from "@/hooks";
 import { mockSettings } from "@/test/mockData";
 
 vi.mock("sonner", () => ({ toast: { success: vi.fn(), error: vi.fn() } }));
@@ -31,6 +31,10 @@ describe("useSettings", () => {
     const { result } = renderHook(() => useSettings(), { wrapper });
 
     await waitFor(() => expect(result.current.isLoading).toBe(false));
-    expect(result.current.data?.pharmacyName).toBe("صيدلية الاختبار");
+    // Settings are now an array, so we need to find by key
+    const pharmacyNameSetting = result.current.data?.find(
+      (s) => s.key === "pharmacyName",
+    );
+    expect(pharmacyNameSetting?.value).toBe("صيدلية الاختبار");
   });
 });

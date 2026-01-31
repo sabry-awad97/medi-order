@@ -12,6 +12,16 @@
   "searchPlaceholder": "Search settings...",
   "noResults": "No results found",
   "noResultsDescription": "Try adjusting your search query",
+  "toast": {
+    "loadFailed": "Failed to load settings",
+    "created": "Setting \"{{key}}\" created successfully",
+    "createFailed": "Failed to create setting: {{error}}",
+    "updated": "Setting \"{{key}}\" updated successfully",
+    "updateFailed": "Failed to update setting: {{error}}",
+    "deleted": "Setting \"{{key}}\" deleted successfully",
+    "deleteFailed": "Failed to delete setting: {{error}}",
+    "refreshing": "Refreshing settings..."
+  },
   "actions": {
     "cancel": "Cancel",
     "reset": "Reset"

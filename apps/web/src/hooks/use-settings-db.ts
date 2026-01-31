@@ -1,416 +1,631 @@
 /**
  * TanStack DB Hooks for Settings
  *
- * Drop-in replacement for use-settings.ts using TanStack DB.
- * Same API, but with reactive collections and optimistic updates.
+ * Professional reactive hooks using TanStack DB with Tauri backend integration.
+ * Provides optimistic updates, automatic cache synchronization, and real-time reactivity.
+ *
+ * @module hooks/use-settings-db
  */
 
-import { createCollection, eq, useLiveQuery } from "@tanstack/react-db";
+import {
+  createCollection,
+  eq,
+  useLiveQuery,
+  or,
+  ilike,
+} from "@tanstack/react-db";
 import { queryCollectionOptions } from "@tanstack/query-db-collection";
 import { toast } from "sonner";
-import { z } from "zod";
 import { useMemo } from "react";
 import { queryClient } from "@/lib/query-client";
+import { createLogger } from "@/lib/logger";
 import {
-  SETTINGS_DEFINITIONS,
-  getAllDefaultValues,
-} from "@/lib/settings-definitions";
-import {
-  SettingsSchema,
-  PartialSettingsSchema,
-  type Settings,
-  type PartialSettings,
-} from "@/lib/types-settings";
-import { logger } from "@/lib/logger";
-import { useTranslation } from "@meditrack/i18n";
+  settingsApi,
+  SettingResponseSchema,
+  type SettingResponse,
+  type SetSetting,
+  type SettingId,
+  type SettingsStatistics,
+} from "@/api/settings.api";
+
+const logger = createLogger("SettingsDB");
 
 // ============================================================================
-// TYPES
+// Query Keys
 // ============================================================================
 
-interface SettingItem {
-  key: string;
-  value: unknown;
-}
-
-// ============================================================================
-// API FUNCTIONS
-// ============================================================================
-
-async function fetchSettings(): Promise<SettingItem[]> {
-  try {
-    const { default: localforage } = await import("localforage");
-
-    const settingsDB = localforage.createInstance({
-      name: "pharmacy-special-orders",
-      storeName: "settings",
-    });
-
-    const settings: SettingItem[] = [];
-    await settingsDB.iterate<unknown, void>((value, key) => {
-      settings.push({ key, value });
-    });
-
-    return settings;
-  } catch (error) {
-    logger.error("Error fetching settings:", error);
-    return [];
-  }
-}
-
-async function saveSettingAPI(key: string, value: unknown): Promise<void> {
-  const { default: localforage } = await import("localforage");
-  const settingsDB = localforage.createInstance({
-    name: "pharmacy-special-orders",
-    storeName: "settings",
-  });
-  await settingsDB.setItem(key, value);
-}
-
-async function deleteSettingAPI(key: string): Promise<void> {
-  const { default: localforage } = await import("localforage");
-  const settingsDB = localforage.createInstance({
-    name: "pharmacy-special-orders",
-    storeName: "settings",
-  });
-  await settingsDB.removeItem(key);
-}
-
-async function clearSettingsAPI(): Promise<void> {
-  const { default: localforage } = await import("localforage");
-  const settingsDB = localforage.createInstance({
-    name: "pharmacy-special-orders",
-    storeName: "settings",
-  });
-  await settingsDB.clear();
-}
-
-// ============================================================================
-// QUERY KEYS
-// ============================================================================
-
-export const settingsKeys = {
+export const settingKeys = {
   all: ["settings"] as const,
-};
+  statistics: ["settings", "statistics"] as const,
+  categories: ["settings", "categories"] as const,
+} as const;
 
 // ============================================================================
-// COLLECTION DEFINITION
+// Collection Definition
 // ============================================================================
 
+/**
+ * Settings collection with Tauri backend integration
+ * Provides reactive queries with automatic cache management
+ */
 export const settingsCollection = createCollection(
   queryCollectionOptions({
-    queryKey: settingsKeys.all,
     queryClient,
-    queryFn: fetchSettings,
-    getKey: (setting) => setting.key,
+    queryKey: settingKeys.all,
 
+    // Fetch from Tauri backend
+    queryFn: async (): Promise<SettingResponse[]> => {
+      try {
+        logger.info("Fetching settings from Tauri backend");
+        const settings = await settingsApi.list();
+
+        // Validate all settings
+        const validatedSettings = settings.map((setting) =>
+          SettingResponseSchema.parse(setting),
+        );
+
+        logger.info(`Fetched ${validatedSettings.length} settings`);
+        return validatedSettings;
+      } catch (error) {
+        logger.error("Failed to fetch settings:", error);
+        toast.error("Failed to load settings");
+        throw error;
+      }
+    },
+
+    getKey: (setting: SettingResponse) => setting.id,
+
+    // Handle INSERT operations
     onInsert: async ({ transaction }) => {
-      const { modified } = transaction.mutations[0];
-      await saveSettingAPI(modified.key, modified.value);
+      const mutation = transaction.mutations[0];
+      const newSetting = mutation.modified as SettingResponse & {
+        _setData?: SetSetting;
+      };
+
+      try {
+        logger.info("Creating setting:", newSetting.key);
+
+        // If we have set data, use it; otherwise extract from setting
+        const setData: SetSetting = newSetting._setData || {
+          key: newSetting.key,
+          value: newSetting.value,
+          category: newSetting.category || undefined,
+          description: newSetting.description || undefined,
+          updated_by: newSetting.updated_by || undefined,
+        };
+
+        // Call Tauri backend
+        const result = await settingsApi.set(setData);
+
+        logger.info("Setting created successfully:", result.id);
+        toast.success(`Setting "${newSetting.key}" created successfully`);
+
+        // Invalidate statistics and categories
+        queryClient.invalidateQueries({ queryKey: settingKeys.statistics });
+        queryClient.invalidateQueries({ queryKey: settingKeys.categories });
+      } catch (error) {
+        logger.error("Failed to create setting:", error);
+        toast.error(
+          `Failed to create setting: ${error instanceof Error ? error.message : "Unknown error"}`,
+        );
+        throw error;
+      }
     },
 
+    // Handle UPDATE operations
     onUpdate: async ({ transaction }) => {
-      const { modified } = transaction.mutations[0];
-      await saveSettingAPI(modified.key, modified.value);
+      const mutation = transaction.mutations[0];
+      const modified = mutation.modified as SettingResponse;
+      const original = mutation.original as SettingResponse;
+
+      try {
+        logger.info("Updating setting:", modified.id);
+
+        // Build update data
+        const updates: SetSetting = {
+          key: modified.key,
+          value: modified.value,
+          category: modified.category || undefined,
+          description: modified.description || undefined,
+          updated_by: modified.updated_by || undefined,
+        };
+
+        // Call Tauri backend
+        await settingsApi.update(modified.id, updates);
+
+        logger.info("Setting updated successfully:", modified.id);
+        toast.success(`Setting "${modified.key}" updated successfully`);
+
+        // Invalidate statistics if category changed
+        if (modified.category !== original.category) {
+          queryClient.invalidateQueries({ queryKey: settingKeys.statistics });
+          queryClient.invalidateQueries({ queryKey: settingKeys.categories });
+        }
+      } catch (error) {
+        logger.error("Failed to update setting:", error);
+        toast.error(
+          `Failed to update setting: ${error instanceof Error ? error.message : "Unknown error"}`,
+        );
+        throw error;
+      }
     },
 
+    // Handle DELETE operations
     onDelete: async ({ transaction }) => {
-      const { original } = transaction.mutations[0];
-      await deleteSettingAPI(original.key);
+      const mutation = transaction.mutations[0];
+      const original = mutation.original as SettingResponse;
+
+      try {
+        logger.info("Deleting setting:", original.id);
+
+        // Call Tauri backend
+        await settingsApi.deleteById(original.id);
+
+        logger.info("Setting deleted successfully:", original.id);
+        toast.success(`Setting "${original.key}" deleted successfully`);
+
+        // Invalidate statistics and categories
+        queryClient.invalidateQueries({ queryKey: settingKeys.statistics });
+        queryClient.invalidateQueries({ queryKey: settingKeys.categories });
+      } catch (error) {
+        logger.error("Failed to delete setting:", error);
+        toast.error(
+          `Failed to delete setting: ${error instanceof Error ? error.message : "Unknown error"}`,
+        );
+        throw error;
+      }
     },
   }),
 );
 
 // ============================================================================
-// CUSTOM HOOKS
+// Query Hooks
 // ============================================================================
 
 /**
- * Hook لجلب جميع الإعدادات
+ * Get all settings with reactive updates
+ *
+ * @example
+ * ```tsx
+ * const { data: settings, isLoading } = useSettings();
+ * ```
  */
 export function useSettings() {
   const query = useLiveQuery((q) => q.from({ setting: settingsCollection }));
 
-  // دمج القيم المحفوظة مع القيم الافتراضية
-  const settings: Settings = useMemo(() => {
-    const defaults = getAllDefaultValues();
-    const merged: Record<string, unknown> = { ...defaults };
-
-    if (query.data) {
-      query.data.forEach((setting) => {
-        merged[setting.key] = setting.value;
-      });
-    }
-
-    // التحقق من صحة البيانات باستخدام Zod
-    try {
-      return SettingsSchema.parse(merged);
-    } catch (error) {
-      logger.error("Settings validation error:", error);
-      // إرجاع القيم الافتراضية في حالة فشل التحقق
-      return SettingsSchema.parse(defaults);
-    }
-  }, [query.data]);
-
   return {
-    data: settings,
+    data: query.data,
     isLoading: query.isLoading,
     isError: query.isError,
   };
 }
 
 /**
- * Hook لجلب إعداد واحد
+ * Get a single setting by ID
+ *
+ * @param id - Setting ID
+ * @example
+ * ```tsx
+ * const { data: setting } = useSetting(settingId);
+ * ```
  */
-export function useSetting(key: string) {
+export function useSetting(id: SettingId) {
+  const query = useLiveQuery(
+    (q) =>
+      q
+        .from({ setting: settingsCollection })
+        .where(({ setting }) => eq(setting.id, id))
+        .limit(1),
+    [id],
+  );
+
+  return {
+    data: query.data?.[0] || null,
+    isLoading: query.isLoading,
+    isError: query.isError,
+  };
+}
+
+/**
+ * Get a setting by key
+ *
+ * @param key - Setting key
+ * @example
+ * ```tsx
+ * const { data: setting } = useSettingByKey('app.theme');
+ * ```
+ */
+export function useSettingByKey(key: string) {
   const query = useLiveQuery(
     (q) =>
       q
         .from({ setting: settingsCollection })
         .where(({ setting }) => eq(setting.key, key))
-        .findOne(),
+        .limit(1),
     [key],
   );
 
-  const value = useMemo(() => {
-    if (query.data) return query.data.value;
-
-    // إرجاع القيمة الافتراضية إذا لم يكن محفوظاً
-    const definition = SETTINGS_DEFINITIONS.find((s) => s.key === key);
-    return definition?.defaultValue ?? null;
-  }, [query.data, key]);
-
   return {
-    data: value,
+    data: query.data?.[0] || null,
     isLoading: query.isLoading,
     isError: query.isError,
   };
 }
 
 /**
- * Hook لتحديث إعداد واحد
+ * Get settings by category
+ *
+ * @param category - Category to filter by
+ * @example
+ * ```tsx
+ * const { data: appSettings } = useSettingsByCategory('app');
+ * ```
  */
-export function useUpdateSetting() {
-  const { t } = useTranslation("common");
+export function useSettingsByCategory(category: string | null) {
+  const query = useLiveQuery(
+    (q) => {
+      if (!category) {
+        return q.from({ setting: settingsCollection });
+      }
+      return q
+        .from({ setting: settingsCollection })
+        .where(({ setting }) => eq(setting.category, category));
+    },
+    [category],
+  );
 
   return {
+    data: query.data,
+    isLoading: query.isLoading,
+    isError: query.isError,
+  };
+}
+
+/**
+ * Search settings by key or description
+ *
+ * @param searchQuery - Search term
+ * @example
+ * ```tsx
+ * const { data: results } = useSearchSettings('theme');
+ * ```
+ */
+export function useSearchSettings(searchQuery: string) {
+  // Use live query with SQL-like pattern matching
+  const query = useLiveQuery(
+    (q) => {
+      // If search query is empty or too short, return all settings
+      if (!searchQuery || searchQuery.length < 2) {
+        return q.from({ setting: settingsCollection });
+      }
+
+      // Use SQL ILIKE for case-insensitive pattern matching
+      const pattern = `%${searchQuery}%`;
+
+      return q
+        .from({ setting: settingsCollection })
+        .where(({ setting }) =>
+          or(
+            ilike(setting.key, pattern),
+            ilike(setting.description, pattern),
+            ilike(setting.category, pattern),
+          ),
+        );
+    },
+    [searchQuery], // Re-run when search query changes
+  );
+
+  return {
+    data: query.data || [],
+    isLoading: query.isLoading,
+    isError: query.isError,
+  };
+}
+
+/**
+ * Get unique categories (computed from collection)
+ *
+ * @example
+ * ```tsx
+ * const { data: categories } = useSettingCategories();
+ * ```
+ */
+export function useSettingCategories() {
+  const { data: settings, isLoading, isError } = useSettings();
+
+  const categories = useMemo(() => {
+    if (!settings) return [];
+
+    const uniqueCategories = new Set<string>();
+    settings.forEach((setting) => {
+      if (setting.category) {
+        uniqueCategories.add(setting.category);
+      }
+    });
+
+    return Array.from(uniqueCategories).sort();
+  }, [settings]);
+
+  return {
+    data: categories,
+    isLoading,
+    isError,
+  };
+}
+
+/**
+ * Get settings statistics (computed from collection)
+ *
+ * @example
+ * ```tsx
+ * const stats = useSettingsStatistics();
+ * // stats: { total, total_categories }
+ * ```
+ */
+export function useSettingsStatistics() {
+  const { data: settings } = useSettings();
+  const { data: categories } = useSettingCategories();
+
+  const stats = useMemo<SettingsStatistics>(() => {
+    return {
+      total: settings?.length || 0,
+      total_categories: categories?.length || 0,
+    };
+  }, [settings, categories]);
+
+  return stats;
+}
+
+/**
+ * Get a setting value with type safety
+ *
+ * @param key - Setting key
+ * @param defaultValue - Default value if setting doesn't exist
+ * @example
+ * ```tsx
+ * const theme = useSettingValue<string>('defaultTheme', 'light');
+ * ```
+ */
+export function useSettingValue<T = any>(
+  key: string,
+  defaultValue?: T,
+): T | undefined {
+  const { data: setting, isLoading } = useSettingByKey(key);
+
+  return useMemo(() => {
+    if (isLoading) return defaultValue;
+    if (!setting) return defaultValue;
+    return setting.value as T;
+  }, [setting, defaultValue, isLoading]);
+}
+
+// ============================================================================
+// Mutation Hooks
+// ============================================================================
+
+/**
+ * Set a setting (create or update)
+ *
+ * @example
+ * ```tsx
+ * const setSetting = useSetSetting();
+ *
+ * setSetting.mutate({
+ *   key: 'app.theme',
+ *   value: 'dark',
+ *   category: 'app',
+ * });
+ * ```
+ */
+export function useSetSetting() {
+  return {
     mutate: (
-      { key, value }: { key: string; value: unknown },
+      data: SetSetting,
+      options?: {
+        onSuccess?: (setting: SettingResponse) => void;
+        onError?: (error: Error) => void;
+      },
+    ) => {
+      try {
+        // Create optimistic setting object
+        const optimisticSetting: SettingResponse & { _setData: SetSetting } = {
+          id: crypto.randomUUID(), // Temporary ID
+          key: data.key,
+          value: data.value,
+          category: data.category || null,
+          description: data.description || null,
+          updated_by: data.updated_by || null,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+          _setData: data, // Store set data for backend call
+        };
+
+        // Validate
+        const validatedSetting = SettingResponseSchema.parse(optimisticSetting);
+
+        // Insert into collection (triggers onInsert)
+        settingsCollection.insert(validatedSetting);
+
+        options?.onSuccess?.(validatedSetting);
+        return validatedSetting;
+      } catch (error) {
+        logger.error("Error setting:", error);
+        options?.onError?.(error as Error);
+        throw error;
+      }
+    },
+  };
+}
+
+/**
+ * Update an existing setting
+ *
+ * @example
+ * ```tsx
+ * const updateSetting = useUpdateSetting();
+ *
+ * updateSetting.mutate({
+ *   id: settingId,
+ *   data: { value: 'new-value' },
+ * });
+ * ```
+ */
+export function useUpdateSetting() {
+  return {
+    mutate: (
+      { id, data }: { id: SettingId; data: Partial<SetSetting> },
       options?: { onSuccess?: () => void; onError?: (error: Error) => void },
     ) => {
       try {
-        // التحقق من صحة القيمة حسب نوع الإعداد
-        const definition = SETTINGS_DEFINITIONS.find((s) => s.key === key);
-        if (definition?.validation) {
-          const validationResult = definition.validation(value);
-          if (validationResult !== true) {
-            throw new Error(
-              typeof validationResult === "string"
-                ? validationResult
-                : t("toast.validationError", { message: "Invalid value" }),
-            );
-          }
-        }
+        // Update in collection (triggers onUpdate)
+        settingsCollection.update(id, (draft) => {
+          if (data.key !== undefined) draft.key = data.key;
+          if (data.value !== undefined) draft.value = data.value;
+          if (data.category !== undefined)
+            draft.category = data.category || null;
+          if (data.description !== undefined)
+            draft.description = data.description || null;
+          if (data.updated_by !== undefined)
+            draft.updated_by = data.updated_by || null;
+          draft.updated_at = new Date().toISOString();
+        });
 
-        // Try to update, if it fails, insert
-        try {
-          settingsCollection.update(key, (draft) => {
-            draft.value = value;
-          });
-        } catch {
-          // Setting doesn't exist, insert it
-          settingsCollection.insert({ key, value });
-        }
-
-        toast.success(t("toast.settingSaved"));
         options?.onSuccess?.();
       } catch (error) {
         logger.error("Error updating setting:", error);
-        toast.error(
-          error instanceof Error ? error.message : t("toast.settingFailed"),
-        );
         options?.onError?.(error as Error);
+        throw error;
       }
     },
   };
 }
 
 /**
- * Hook لتحديث عدة إعدادات دفعة واحدة
+ * Update a setting value by key
+ *
+ * @example
+ * ```tsx
+ * const updateValue = useUpdateSettingValue();
+ *
+ * updateValue.mutate({ key: 'app.theme', value: 'dark' });
+ * ```
  */
-export function useUpdateSettings() {
-  const { t } = useTranslation("common");
+export function useUpdateSettingValue() {
+  const { data: settings } = useSettings();
 
   return {
     mutate: (
-      settings: PartialSettings,
-      options?: { onSuccess?: () => void; onError?: (error: Error) => void },
+      { key, value }: { key: string; value: any },
+      options?: { onSuccess?: () => void },
     ) => {
       try {
-        // التحقق من صحة البيانات باستخدام Zod
-        const validated = PartialSettingsSchema.parse(settings);
+        // Find setting by key from query results
+        const setting = settings?.find((s: SettingResponse) => s.key === key);
 
-        // Update or insert each setting
-        Object.entries(validated).forEach(([key, value]) => {
-          try {
-            settingsCollection.update(key, (draft) => {
-              draft.value = value;
-            });
-          } catch {
-            // Setting doesn't exist, insert it
-            settingsCollection.insert({ key, value });
-          }
+        if (!setting) {
+          throw new Error(`Setting with key "${key}" not found`);
+        }
+
+        // Update value
+        settingsCollection.update(setting.id, (draft) => {
+          draft.value = value;
+          draft.updated_at = new Date().toISOString();
         });
 
-        toast.success(t("toast.settingsSaved"));
         options?.onSuccess?.();
       } catch (error) {
-        logger.error("Error updating settings:", error);
-        if (error instanceof z.ZodError) {
-          const firstError = error.issues[0];
-          toast.error(
-            t("toast.validationError", { message: firstError.message }),
-          );
-        } else {
-          toast.error(t("toast.settingsFailed"));
-        }
-        options?.onError?.(error as Error);
+        logger.error("Error updating setting value:", error);
+        throw error;
       }
     },
   };
 }
 
 /**
- * Hook لإعادة تعيين الإعدادات إلى القيم الافتراضية
+ * Delete a setting
+ *
+ * @example
+ * ```tsx
+ * const deleteSetting = useDeleteSetting();
+ *
+ * deleteSetting.mutate(settingId);
+ * ```
  */
-export function useResetSettings() {
-  const { t } = useTranslation("common");
-
+export function useDeleteSetting() {
   return {
-    mutate: async (
-      _?: void,
+    mutate: (
+      id: SettingId,
       options?: { onSuccess?: () => void; onError?: (error: Error) => void },
     ) => {
       try {
-        // Clear all settings from IndexedDB
-        await clearSettingsAPI();
-
-        // Insert default values
-        const defaults = getAllDefaultValues();
-        const validated = SettingsSchema.parse(defaults);
-
-        Object.entries(validated).forEach(([key, value]) => {
-          try {
-            settingsCollection.update(key, (draft) => {
-              draft.value = value;
-            });
-          } catch {
-            settingsCollection.insert({ key, value });
-          }
-        });
-
-        toast.success(t("toast.settingsReset"));
+        // Delete from collection (triggers onDelete)
+        settingsCollection.delete(id);
         options?.onSuccess?.();
       } catch (error) {
-        logger.error("Error resetting settings:", error);
-        toast.error(t("toast.settingsResetFailed"));
+        logger.error("Error deleting setting:", error);
         options?.onError?.(error as Error);
+        throw error;
       }
     },
   };
 }
 
 /**
- * Hook لتصدير الإعدادات
+ * Delete a setting by key
+ *
+ * @example
+ * ```tsx
+ * const deleteByKey = useDeleteSettingByKey();
+ *
+ * deleteByKey.mutate('app.theme');
+ * ```
  */
-export function useExportSettings() {
-  const { t } = useTranslation("common");
+export function useDeleteSettingByKey() {
+  const { data: settings } = useSettings();
 
   return {
-    mutate: async (
-      _?: void,
+    mutate: (
+      key: string,
       options?: { onSuccess?: () => void; onError?: (error: Error) => void },
     ) => {
       try {
-        const settings = await fetchSettings();
-        const data = JSON.stringify(settings, null, 2);
-        const blob = new Blob([data], { type: "application/json" });
-        const url = URL.createObjectURL(blob);
-        const link = document.createElement("a");
-        link.href = url;
-        link.download = `pharmacy-settings-${new Date().toISOString().split("T")[0]}.json`;
-        link.click();
-        URL.revokeObjectURL(url);
+        // Find setting by key from query results
+        const setting = settings?.find((s: SettingResponse) => s.key === key);
 
-        toast.success(t("toast.settingsExported"));
+        if (!setting) {
+          throw new Error(`Setting with key "${key}" not found`);
+        }
+
+        // Delete from collection
+        settingsCollection.delete(setting.id);
         options?.onSuccess?.();
       } catch (error) {
-        logger.error("Error exporting settings:", error);
-        toast.error(t("toast.settingsExportFailed"));
+        logger.error("Error deleting setting by key:", error);
         options?.onError?.(error as Error);
+        throw error;
       }
     },
   };
 }
 
+// ============================================================================
+// Utility Hooks
+// ============================================================================
+
 /**
- * Hook لاستيراد الإعدادات
+ * Refresh settings from backend
+ *
+ * @example
+ * ```tsx
+ * const refreshSettings = useRefreshSettings();
+ *
+ * <button onClick={refreshSettings}>Refresh</button>
+ * ```
  */
-export function useImportSettings() {
-  const { t } = useTranslation("common");
-
-  return {
-    mutate: async (
-      file: File,
-      options?: { onSuccess?: () => void; onError?: (error: Error) => void },
-    ) => {
-      try {
-        const text = await file.text();
-        const data = JSON.parse(text);
-
-        // التحقق من صحة البيانات
-        if (!Array.isArray(data)) {
-          throw new Error(t("toast.invalidFileFormat"));
-        }
-
-        // تحويل المصفوفة إلى كائن
-        const settingsObj: Record<string, unknown> = {};
-        for (const setting of data) {
-          if (setting.key && setting.value !== undefined) {
-            settingsObj[setting.key] = setting.value;
-          }
-        }
-
-        // التحقق من صحة البيانات باستخدام Zod
-        const validated = PartialSettingsSchema.parse(settingsObj);
-
-        // Update or insert each setting
-        Object.entries(validated).forEach(([key, value]) => {
-          try {
-            settingsCollection.update(key, (draft) => {
-              draft.value = value;
-            });
-          } catch {
-            settingsCollection.insert({ key, value });
-          }
-        });
-
-        toast.success(t("toast.settingsImported"));
-        options?.onSuccess?.();
-      } catch (error) {
-        logger.error("Error importing settings:", error);
-        if (error instanceof z.ZodError) {
-          const firstError = error.issues[0];
-          toast.error(
-            t("toast.validationError", { message: firstError.message }),
-          );
-        } else if (error instanceof Error) {
-          toast.error(error.message);
-        } else {
-          toast.error(t("toast.settingsImportFailed"));
-        }
-        options?.onError?.(error as Error);
-      }
-    },
+export function useRefreshSettings() {
+  return () => {
+    logger.info("Manually refreshing settings");
+    queryClient.invalidateQueries({ queryKey: settingKeys.all });
+    toast.info("Refreshing settings...");
   };
 }

@@ -40,7 +40,7 @@ import {
   useDeleteSupplier,
   useSeedData,
   useClearData,
-  useSettings,
+  useSettingValue,
 } from "@/hooks";
 import type { Supplier, SupplierFormData } from "@/lib/types";
 import {
@@ -71,7 +71,11 @@ function SuppliersPage() {
   const clearData = useClearData();
 
   // جلب الإعدادات
-  const { data: settings } = useSettings();
+  const enableDevMode = useSettingValue<boolean>("enableDevMode", false);
+  const requireSupplierEmail = useSettingValue<boolean>(
+    "requireSupplierEmail",
+    false,
+  );
 
   const [searchQuery, setSearchQuery] = useState("");
   const [isFormOpen, setIsFormOpen] = useState(false);
@@ -82,7 +86,7 @@ function SuppliersPage() {
   const [formMode, setFormMode] = useState<"create" | "edit">("create");
 
   // التحقق من وضع التطوير (من الإعدادات)
-  const isDev = settings?.enableDevMode ?? import.meta.env.DEV;
+  const isDev = enableDevMode ?? import.meta.env.DEV;
 
   // تصفية الموردين
   const filteredSuppliers = useMemo(() => {
@@ -441,8 +445,7 @@ function SupplierFormDialog({
   const updateSupplier = useUpdateSupplier();
 
   // جلب الإعدادات
-  const { data: settings } = useSettings();
-  const emailRequired = settings?.requireSupplierEmail ?? false;
+  const emailRequired = useSettingValue<boolean>("requireSupplierEmail", false);
 
   const [formData, setFormData] = useState<SupplierFormData>({
     name: "",

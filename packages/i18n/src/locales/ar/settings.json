@@ -12,6 +12,16 @@
   "searchPlaceholder": "البحث في الإعدادات...",
   "noResults": "لا توجد نتائج",
   "noResultsDescription": "حاول تعديل كلمات البحث",
+  "toast": {
+    "loadFailed": "فشل في تحميل الإعدادات",
+    "created": "تم إنشاء الإعداد \"{{key}}\" بنجاح",
+    "createFailed": "فشل في إنشاء الإعداد: {{error}}",
+    "updated": "تم تحديث الإعداد \"{{key}}\" بنجاح",
+    "updateFailed": "فشل في تحديث الإعداد: {{error}}",
+    "deleted": "تم حذف الإعداد \"{{key}}\" بنجاح",
+    "deleteFailed": "فشل في حذف الإعداد: {{error}}",
+    "refreshing": "جاري تحديث الإعدادات..."
+  },
   "actions": {
     "cancel": "إلغاء",
     "reset": "إعادة تعيين"
