@@ -61,7 +61,7 @@ export function OrganizationStep({
               autoFocus
             />
           </div>
-          <FieldError>{errors.organization_name?.message}</FieldError>
+          <FieldError>{errors.organization_name?.message as string}</FieldError>
         </Field>
 
         <div className="rounded-lg bg-muted/50 p-4 text-sm text-muted-foreground">

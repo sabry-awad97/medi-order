@@ -28,7 +28,11 @@ import type {
   CreateManufacturer,
   UpdateManufacturer,
 } from "@/api/manufacturer.api";
-import { useManufacturerColumns } from "./-components/manufacturer-table-columns";
+import {
+  useManufacturerColumns,
+  ManufacturerDetailsDialog,
+  ManufacturerFormDialog,
+} from "./-components";
 
 // Generic components
 import { DataTable } from "@/components/data-display";
@@ -42,18 +46,17 @@ export const Route = createLazyFileRoute("/inventory/manufacturers/")({
 
 function ManufacturersComponent() {
   const { t } = useTranslation("manufacturer");
-  const { t: tCommon } = useTranslation("common");
   const { isRTL } = useDirection();
 
   // Local state
-  const [searchQuery, setSearchQuery] = useState("");
-  const [statusFilter, setStatusFilter] = useState<
-    "all" | "active" | "inactive"
-  >("all");
+  const [searchQuery] = useState("");
+  const [statusFilter] = useState<"all" | "active" | "inactive">("all");
   const [sorting, setSorting] = useState<SortingState>([]);
-  const [currentPage, setCurrentPage] = useState(1);
-  const [pageSize, setPageSize] = useState(20);
+  const [currentPage] = useState(1);
+  const [pageSize] = useState(20);
   const [isFormOpen, setIsFormOpen] = useState(false);
+  const [isDetailsOpen, setIsDetailsOpen] = useState(false);
+  const [formMode, setFormMode] = useState<"create" | "edit">("create");
   const [selectedManufacturer, setSelectedManufacturer] =
     useState<ManufacturerResponse | null>(null);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
@@ -82,8 +85,6 @@ function ManufacturersComponent() {
   });
 
   const manufacturers = data?.items || [];
-  const totalItems = data?.total || 0;
-  const totalPages = data?.total_pages || 1;
 
   const createManufacturer = useCreateManufacturer();
   const updateManufacturer = useUpdateManufacturer();
@@ -92,12 +93,30 @@ function ManufacturersComponent() {
   // Handlers
   const handleViewDetails = (manufacturer: ManufacturerResponse) => {
     setSelectedManufacturer(manufacturer);
-    // TODO: Open details dialog
+    setIsDetailsOpen(true);
+  };
+
+  const handleOpenCreateForm = () => {
+    setSelectedManufacturer(null);
+    setFormMode("create");
+    setIsFormOpen(true);
   };
 
   const handleEdit = (manufacturer: ManufacturerResponse) => {
     setSelectedManufacturer(manufacturer);
+    setFormMode("edit");
     setIsFormOpen(true);
+  };
+
+  const handleFormSubmit = (data: CreateManufacturer | UpdateManufacturer) => {
+    if (formMode === "create") {
+      createManufacturer.mutate(data as CreateManufacturer);
+    } else if (selectedManufacturer) {
+      updateManufacturer.mutate({
+        id: selectedManufacturer.id,
+        data: data as UpdateManufacturer,
+      });
+    }
   };
 
   const handleDelete = (manufacturer: ManufacturerResponse) => {
@@ -190,7 +209,7 @@ function ManufacturersComponent() {
           <Button
             size="default"
             className="gap-2"
-            onClick={() => setIsFormOpen(true)}
+            onClick={handleOpenCreateForm}
           >
             <Plus className="h-4 w-4" />
             <span className="hidden sm:inline">{t("addManufacturer")}</span>
@@ -227,7 +246,7 @@ function ManufacturersComponent() {
                   !searchQuery && statusFilter === "all"
                     ? {
                         label: t("addManufacturer"),
-                        onClick: () => setIsFormOpen(true),
+                        onClick: handleOpenCreateForm,
                         icon: Plus,
                       }
                     : undefined
@@ -260,7 +279,21 @@ function ManufacturersComponent() {
         </PageContentInner>
       </PageContent>
 
-      {/* Delete Confirmation Dialog */}
+      {/* Dialogs */}
+      <ManufacturerDetailsDialog
+        open={isDetailsOpen}
+        onOpenChange={setIsDetailsOpen}
+        manufacturer={selectedManufacturer}
+      />
+
+      <ManufacturerFormDialog
+        open={isFormOpen}
+        onOpenChange={setIsFormOpen}
+        manufacturer={selectedManufacturer}
+        mode={formMode}
+        onSubmit={handleFormSubmit}
+      />
+
       <ConfirmationDialog
         open={isDeleteDialogOpen}
         onOpenChange={setIsDeleteDialogOpen}

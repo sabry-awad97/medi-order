@@ -37,11 +37,71 @@
     "edit": "تعديل",
     "delete": "حذف"
   },
+  "details": {
+    "title": "تفاصيل الشركة المصنعة",
+    "companyInfo": "معلومات الشركة",
+    "contactInfo": "معلومات الاتصال",
+    "name": "الاسم",
+    "shortName": "الاسم المختصر",
+    "country": "الدولة",
+    "phone": "الهاتف",
+    "email": "البريد الإلكتروني",
+    "website": "الموقع الإلكتروني",
+    "notes": "ملاحظات",
+    "status": "الحالة",
+    "active": "نشط",
+    "inactive": "غير نشط",
+    "timeline": "الجدول الزمني",
+    "created": "تاريخ الإنشاء",
+    "lastUpdated": "آخر تحديث",
+    "noNotes": "لا توجد ملاحظات متاحة",
+    "visitWebsite": "زيارة الموقع",
+    "callPhone": "اتصال",
+    "sendEmail": "إرسال بريد إلكتروني"
+  },
+  "form": {
+    "addTitle": "إضافة شركة مصنعة جديدة",
+    "editTitle": "تعديل شركة مصنعة",
+    "companyInfo": "معلومات الشركة",
+    "contactInfo": "معلومات الاتصال",
+    "additionalInfo": "معلومات إضافية",
+    "fields": {
+      "name": "اسم الشركة المصنعة",
+      "namePlaceholder": "مثال: شركة فايزر",
+      "shortName": "الاسم المختصر",
+      "shortNamePlaceholder": "مثال: فايزر",
+      "country": "الدولة",
+      "countryPlaceholder": "مثال: الولايات المتحدة",
+      "phone": "رقم الهاتف",
+      "phonePlaceholder": "+1 (555) 123-4567",
+      "email": "البريد الإلكتروني",
+      "emailPlaceholder": "contact@manufacturer.com",
+      "website": "الموقع الإلكتروني",
+      "websitePlaceholder": "https://www.manufacturer.com",
+      "notes": "ملاحظات",
+      "notesPlaceholder": "معلومات إضافية عن هذه الشركة المصنعة..."
+    },
+    "validation": {
+      "nameRequired": "اسم الشركة المصنعة مطلوب",
+      "emailInvalid": "يرجى إدخال بريد إلكتروني صحيح",
+      "websiteInvalid": "يرجى إدخال رابط موقع إلكتروني صحيح"
+    },
+    "buttons": {
+      "cancel": "إلغاء",
+      "submit": "إضافة شركة مصنعة",
+      "update": "تحديث شركة مصنعة"
+    }
+  },
   "delete": {
     "title": "حذف {{name}}؟",
     "description": "سيتم إلغاء تفعيل الشركة المصنعة. يمكنك إعادة تفعيلها لاحقاً إذا لزم الأمر.",
     "confirm": "حذف",
     "cancel": "إلغاء"
+  },
+  "messages": {
+    "created": "تم إنشاء الشركة المصنعة بنجاح",
+    "updated": "تم تحديث الشركة المصنعة بنجاح",
+    "deleted": "تم حذف الشركة المصنعة بنجاح"
   },
   "pagination": {
     "showing": "عرض",

@@ -105,18 +105,13 @@ export function useManufacturerByName(
  */
 export function useCreateManufacturer() {
   const queryClient = useQueryClient();
-  const { t } = useTranslation("common");
+  const { t } = useTranslation("manufacturer");
 
   return useMutation({
     mutationFn: (data: CreateManufacturer) => manufacturerApi.create(data),
     onSuccess: (_result, variables) => {
       queryClient.invalidateQueries({ queryKey: manufacturerKeys.lists() });
-      toast.success(
-        t("messages.created", {
-          item: "Manufacturer",
-          name: variables.name,
-        }) || `Manufacturer "${variables.name}" created successfully`,
-      );
+      toast.success(t("messages.created"));
       logger.info("Manufacturer created:", _result.id);
     },
     onError: (error: Error) => {
@@ -131,7 +126,7 @@ export function useCreateManufacturer() {
  */
 export function useUpdateManufacturer() {
   const queryClient = useQueryClient();
-  const { t } = useTranslation("common");
+  const { t } = useTranslation("manufacturer");
 
   return useMutation({
     mutationFn: ({
@@ -144,10 +139,7 @@ export function useUpdateManufacturer() {
     onSuccess: (_result, { id }) => {
       queryClient.invalidateQueries({ queryKey: manufacturerKeys.lists() });
       queryClient.invalidateQueries({ queryKey: manufacturerKeys.detail(id) });
-      toast.success(
-        t("messages.updated", { item: "Manufacturer" }) ||
-          "Manufacturer updated successfully",
-      );
+      toast.success(t("messages.updated"));
       logger.info("Manufacturer updated:", id);
     },
     onError: (error: Error) => {
@@ -162,17 +154,14 @@ export function useUpdateManufacturer() {
  */
 export function useDeleteManufacturer() {
   const queryClient = useQueryClient();
-  const { t } = useTranslation("common");
+  const { t } = useTranslation("manufacturer");
 
   return useMutation({
     mutationFn: (id: ManufacturerId) => manufacturerApi.delete(id),
     onSuccess: (_result, id) => {
       queryClient.invalidateQueries({ queryKey: manufacturerKeys.lists() });
       queryClient.invalidateQueries({ queryKey: manufacturerKeys.detail(id) });
-      toast.success(
-        t("messages.deleted", { item: "Manufacturer" }) ||
-          "Manufacturer deleted successfully",
-      );
+      toast.success(t("messages.deleted"));
       logger.info("Manufacturer deleted:", id);
     },
     onError: (error: Error) => {

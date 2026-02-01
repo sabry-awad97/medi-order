@@ -57,7 +57,7 @@ export function PersonalInfoStep({
               placeholder="John"
               autoFocus
             />
-            <FieldError>{errors.first_name?.message}</FieldError>
+            <FieldError>{errors.first_name?.message as string}</FieldError>
           </Field>
 
           <Field data-invalid={!!errors.last_name}>
@@ -70,7 +70,7 @@ export function PersonalInfoStep({
               {...register("last_name")}
               placeholder="Doe"
             />
-            <FieldError>{errors.last_name?.message}</FieldError>
+            <FieldError>{errors.last_name?.message as string}</FieldError>
           </Field>
         </div>
 
@@ -90,7 +90,7 @@ export function PersonalInfoStep({
               className={direction === "rtl" ? "pr-10" : "pl-10"}
             />
           </div>
-          <FieldError>{errors.email?.message}</FieldError>
+          <FieldError>{errors.email?.message as string}</FieldError>
         </Field>
       </div>
     </motion.div>

@@ -62,7 +62,7 @@ export function AccountSetupStep({
               autoFocus
             />
           </div>
-          <FieldError>{errors.username?.message}</FieldError>
+          <FieldError>{errors.username?.message as string}</FieldError>
         </Field>
 
         <Field data-invalid={!!errors.password}>
@@ -82,7 +82,7 @@ export function AccountSetupStep({
               className={direction === "rtl" ? "pr-10" : "pl-10"}
             />
           </div>
-          <FieldError>{errors.password?.message}</FieldError>
+          <FieldError>{errors.password?.message as string}</FieldError>
         </Field>
 
         <Field data-invalid={!!errors.confirmPassword}>
@@ -103,7 +103,7 @@ export function AccountSetupStep({
               className={direction === "rtl" ? "pr-10" : "pl-10"}
             />
           </div>
-          <FieldError>{errors.confirmPassword?.message}</FieldError>
+          <FieldError>{errors.confirmPassword?.message as string}</FieldError>
         </Field>
 
         <div className="rounded-lg bg-muted/50 p-4 text-sm">

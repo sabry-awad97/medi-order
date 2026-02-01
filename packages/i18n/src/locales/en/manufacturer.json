@@ -37,11 +37,71 @@
     "edit": "Edit",
     "delete": "Delete"
   },
+  "details": {
+    "title": "Manufacturer Details",
+    "companyInfo": "Company Information",
+    "contactInfo": "Contact Information",
+    "name": "Name",
+    "shortName": "Short Name",
+    "country": "Country",
+    "phone": "Phone",
+    "email": "Email",
+    "website": "Website",
+    "notes": "Notes",
+    "status": "Status",
+    "active": "Active",
+    "inactive": "Inactive",
+    "timeline": "Timeline",
+    "created": "Created",
+    "lastUpdated": "Last Updated",
+    "noNotes": "No notes available",
+    "visitWebsite": "Visit Website",
+    "callPhone": "Call",
+    "sendEmail": "Send Email"
+  },
+  "form": {
+    "addTitle": "Add New Manufacturer",
+    "editTitle": "Edit Manufacturer",
+    "companyInfo": "Company Information",
+    "contactInfo": "Contact Information",
+    "additionalInfo": "Additional Information",
+    "fields": {
+      "name": "Manufacturer Name",
+      "namePlaceholder": "e.g., Pfizer Inc.",
+      "shortName": "Short Name",
+      "shortNamePlaceholder": "e.g., Pfizer",
+      "country": "Country",
+      "countryPlaceholder": "e.g., United States",
+      "phone": "Phone Number",
+      "phonePlaceholder": "+1 (555) 123-4567",
+      "email": "Email Address",
+      "emailPlaceholder": "contact@manufacturer.com",
+      "website": "Website",
+      "websitePlaceholder": "https://www.manufacturer.com",
+      "notes": "Notes",
+      "notesPlaceholder": "Additional information about this manufacturer..."
+    },
+    "validation": {
+      "nameRequired": "Manufacturer name is required",
+      "emailInvalid": "Please enter a valid email address",
+      "websiteInvalid": "Please enter a valid website URL"
+    },
+    "buttons": {
+      "cancel": "Cancel",
+      "submit": "Add Manufacturer",
+      "update": "Update Manufacturer"
+    }
+  },
   "delete": {
     "title": "Delete {{name}}?",
     "description": "This will deactivate the manufacturer. You can reactivate it later if needed.",
     "confirm": "Delete",
     "cancel": "Cancel"
+  },
+  "messages": {
+    "created": "Manufacturer created successfully",
+    "updated": "Manufacturer updated successfully",
+    "deleted": "Manufacturer deleted successfully"
   },
   "pagination": {
     "showing": "Showing",

@@ -1,4 +1,4 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { useNavigate, createLazyFileRoute } from "@tanstack/react-router";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -21,7 +21,7 @@ import {
   NavigationButtons,
 } from "./-components";
 
-export const Route = createFileRoute("/onboarding/index/lazy/")({
+export const Route = createLazyFileRoute("/onboarding/")({
   component: OnboardingPage,
 });
 
