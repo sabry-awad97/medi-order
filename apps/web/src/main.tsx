@@ -5,11 +5,11 @@ import { lazy, Suspense } from "react";
 import { AppProviders } from "./providers";
 import { routeTree } from "./routeTree.gen";
 import { Loading } from "./components/ui/loading";
-import { SplashScreen } from "./components/splash-screen";
+import { SplashScreen } from "./components/feedback";
 
 // Lazy load UpdateDialog
 const UpdateDialog = lazy(() =>
-  import("./components/update-dialog").then((m) => ({
+  import("./components/feedback").then((m) => ({
     default: m.UpdateDialog,
   })),
 );

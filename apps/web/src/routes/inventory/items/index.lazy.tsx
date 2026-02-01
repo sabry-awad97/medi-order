@@ -49,10 +49,10 @@ import {
 } from "./-components";
 
 // Generic components
-import { DataTable } from "@/components/data-table";
-import { EmptyState } from "@/components/empty-state";
-import { ConfirmationDialog } from "@/components/confirmation-dialog";
-import { StatsGrid, type StatItem } from "@/components/stats-grid";
+import { DataTable } from "@/components/data-display";
+import { EmptyState } from "@/components/feedback";
+import { ConfirmationDialog } from "@/components/feedback";
+import { StatsGrid, type StatItem } from "@/components/data-display";
 
 export const Route = createLazyFileRoute("/inventory/items/")({
   component: InventoryComponent,

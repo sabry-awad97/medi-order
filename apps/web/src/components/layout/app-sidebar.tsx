@@ -52,7 +52,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { useTheme } from "@/components/theme-provider";
+import { useTheme } from "@/components/settings";
 import { useAlertStats, useSettingValue, useUpsertSettingValue } from "@/hooks";
 import {
   useLocale,

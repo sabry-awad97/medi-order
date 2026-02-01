@@ -24,7 +24,7 @@ import "../index.css";
 
 // Lazy load AppSidebar (only needed for authenticated routes)
 const AppSidebar = lazy(() =>
-  import("@/components/app-sidebar").then((m) => ({ default: m.AppSidebar })),
+  import("@/components/layout").then((m) => ({ default: m.AppSidebar })),
 );
 
 export interface RouterAppContext {}

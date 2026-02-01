@@ -1,4 +1,4 @@
-import { ThemeProvider } from "@/components/theme-provider";
+import { ThemeProvider, useTheme } from "@/components/settings";
 import { Toaster } from "@/components/ui/sonner";
 import { I18nProvider, useDirection, useLocale } from "@meditrack/i18n";
 import { QueryProvider } from "./query-provider";
@@ -7,7 +7,6 @@ import { AuthProvider } from "@/contexts/auth-context";
 import { useEffect } from "react";
 import type { Locale } from "@meditrack/i18n";
 import { useNotifications, useAutoArchive, useSettingValue } from "@/hooks";
-import { useTheme } from "@/components/theme-provider";
 import {
   SETTING_DEFAULT_LANGUAGE,
   SETTING_DEFAULT_THEME,

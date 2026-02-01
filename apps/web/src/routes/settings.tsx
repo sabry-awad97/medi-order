@@ -19,8 +19,8 @@ import {
 import * as React from "react";
 import { useEffect, useState } from "react";
 
-import { ManualUpdateCheck } from "@/components/manual-update-check";
-import { useTheme } from "@/components/theme-provider";
+import { ManualUpdateCheck } from "@/components/settings";
+import { useTheme } from "@/components/settings";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
