@@ -34,7 +34,7 @@ import {
   type ColumnDef,
   type SortingState,
 } from "@tanstack/react-table";
-import type { PriceHistoryEntry } from "@/routes/inventory/-components";
+import type { PriceHistoryEntry } from "@/routes/inventory/items/-components";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -130,7 +130,7 @@ import {
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 
-export const Route = createLazyFileRoute("/inventory/")({
+export const Route = createLazyFileRoute("/inventory/items/")({
   component: InventoryComponent,
 });
 

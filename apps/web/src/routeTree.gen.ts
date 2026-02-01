@@ -20,7 +20,11 @@ import { Route as LoginRouteImport } from './routes/login'
 import { Route as R404RouteImport } from './routes/404'
 import { Route as IndexRouteImport } from './routes/index'
 
-const InventoryIndexLazyRouteImport = createFileRoute('/inventory/')()
+const InventoryManufacturersIndexLazyRouteImport = createFileRoute(
+  '/inventory/manufacturers/',
+)()
+const InventoryItemsIndexLazyRouteImport =
+  createFileRoute('/inventory/items/')()
 
 const SuppliersRoute = SuppliersRouteImport.update({
   id: '/suppliers',
@@ -62,12 +66,20 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const InventoryIndexLazyRoute = InventoryIndexLazyRouteImport.update({
-  id: '/inventory/',
-  path: '/inventory/',
+const InventoryManufacturersIndexLazyRoute =
+  InventoryManufacturersIndexLazyRouteImport.update({
+    id: '/inventory/manufacturers/',
+    path: '/inventory/manufacturers/',
+    getParentRoute: () => rootRouteImport,
+  } as any).lazy(() =>
+    import('./routes/inventory/manufacturers/index.lazy').then((d) => d.Route),
+  )
+const InventoryItemsIndexLazyRoute = InventoryItemsIndexLazyRouteImport.update({
+  id: '/inventory/items/',
+  path: '/inventory/items/',
   getParentRoute: () => rootRouteImport,
 } as any).lazy(() =>
-  import('./routes/inventory/index.lazy').then((d) => d.Route),
+  import('./routes/inventory/items/index.lazy').then((d) => d.Route),
 )
 
 export interface FileRoutesByFullPath {
@@ -79,7 +91,8 @@ export interface FileRoutesByFullPath {
   '/settings': typeof SettingsRoute
   '/special-orders': typeof SpecialOrdersRoute
   '/suppliers': typeof SuppliersRoute
-  '/inventory/': typeof InventoryIndexLazyRoute
+  '/inventory/items/': typeof InventoryItemsIndexLazyRoute
+  '/inventory/manufacturers/': typeof InventoryManufacturersIndexLazyRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -90,7 +103,8 @@ export interface FileRoutesByTo {
   '/settings': typeof SettingsRoute
   '/special-orders': typeof SpecialOrdersRoute
   '/suppliers': typeof SuppliersRoute
-  '/inventory': typeof InventoryIndexLazyRoute
+  '/inventory/items': typeof InventoryItemsIndexLazyRoute
+  '/inventory/manufacturers': typeof InventoryManufacturersIndexLazyRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -102,7 +116,8 @@ export interface FileRoutesById {
   '/settings': typeof SettingsRoute
   '/special-orders': typeof SpecialOrdersRoute
   '/suppliers': typeof SuppliersRoute
-  '/inventory/': typeof InventoryIndexLazyRoute
+  '/inventory/items/': typeof InventoryItemsIndexLazyRoute
+  '/inventory/manufacturers/': typeof InventoryManufacturersIndexLazyRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -115,7 +130,8 @@ export interface FileRouteTypes {
     | '/settings'
     | '/special-orders'
     | '/suppliers'
-    | '/inventory/'
+    | '/inventory/items/'
+    | '/inventory/manufacturers/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -126,7 +142,8 @@ export interface FileRouteTypes {
     | '/settings'
     | '/special-orders'
     | '/suppliers'
-    | '/inventory'
+    | '/inventory/items'
+    | '/inventory/manufacturers'
   id:
     | '__root__'
     | '/'
@@ -137,7 +154,8 @@ export interface FileRouteTypes {
     | '/settings'
     | '/special-orders'
     | '/suppliers'
-    | '/inventory/'
+    | '/inventory/items/'
+    | '/inventory/manufacturers/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -149,7 +167,8 @@ export interface RootRouteChildren {
   SettingsRoute: typeof SettingsRoute
   SpecialOrdersRoute: typeof SpecialOrdersRoute
   SuppliersRoute: typeof SuppliersRoute
-  InventoryIndexLazyRoute: typeof InventoryIndexLazyRoute
+  InventoryItemsIndexLazyRoute: typeof InventoryItemsIndexLazyRoute
+  InventoryManufacturersIndexLazyRoute: typeof InventoryManufacturersIndexLazyRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -210,11 +229,18 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/inventory/': {
-      id: '/inventory/'
-      path: '/inventory'
-      fullPath: '/inventory/'
-      preLoaderRoute: typeof InventoryIndexLazyRouteImport
+    '/inventory/manufacturers/': {
+      id: '/inventory/manufacturers/'
+      path: '/inventory/manufacturers'
+      fullPath: '/inventory/manufacturers/'
+      preLoaderRoute: typeof InventoryManufacturersIndexLazyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/inventory/items/': {
+      id: '/inventory/items/'
+      path: '/inventory/items'
+      fullPath: '/inventory/items/'
+      preLoaderRoute: typeof InventoryItemsIndexLazyRouteImport
       parentRoute: typeof rootRouteImport
     }
   }
@@ -229,7 +255,8 @@ const rootRouteChildren: RootRouteChildren = {
   SettingsRoute: SettingsRoute,
   SpecialOrdersRoute: SpecialOrdersRoute,
   SuppliersRoute: SuppliersRoute,
-  InventoryIndexLazyRoute: InventoryIndexLazyRoute,
+  InventoryItemsIndexLazyRoute: InventoryItemsIndexLazyRoute,
+  InventoryManufacturersIndexLazyRoute: InventoryManufacturersIndexLazyRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

@@ -167,7 +167,7 @@ function useMenuItems(t: (key: string) => string) {
           subItems: [
             {
               title: t("navigation.allItems"),
-              url: "/inventory",
+              url: "/inventory/items",
               icon: PackageSearch,
             },
             {
