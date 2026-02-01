@@ -66,11 +66,35 @@ impl MigrationTrait for Migration {
             )
             .await?;
 
+        // Create stock_adjustment_type ENUM type
+        manager
+            .get_connection()
+            .execute_unprepared(
+                r#"
+                CREATE TYPE stock_adjustment_type AS ENUM (
+                    'manual_adjustment',
+                    'order_arrival',
+                    'sale',
+                    'damage',
+                    'expiry',
+                    'return',
+                    'transfer',
+                    'initial_stock'
+                );
+                "#,
+            )
+            .await?;
+
         Ok(())
     }
 
     async fn down(&self, manager: &SchemaManager) -> Result<(), DbErr> {
         // Drop ENUM types in reverse order
+        manager
+            .get_connection()
+            .execute_unprepared("DROP TYPE IF EXISTS stock_adjustment_type CASCADE;")
+            .await?;
+
         manager
             .get_connection()
             .execute_unprepared("DROP TYPE IF EXISTS special_order_status CASCADE;")

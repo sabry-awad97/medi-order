@@ -7,27 +7,6 @@ pub struct Migration;
 impl MigrationTrait for Migration {
     async fn up(&self, manager: &SchemaManager) -> Result<(), DbErr> {
         // ========================================
-        // Create stock_adjustment_type ENUM
-        // ========================================
-        manager
-            .get_connection()
-            .execute_unprepared(
-                r#"
-                CREATE TYPE stock_adjustment_type AS ENUM (
-                    'manual_adjustment',
-                    'order_arrival',
-                    'sale',
-                    'damage',
-                    'expiry',
-                    'return',
-                    'transfer',
-                    'initial_stock'
-                );
-                "#,
-            )
-            .await?;
-
-        // ========================================
         // Create inventory_stock_history table
         // ========================================
         manager
@@ -220,12 +199,6 @@ impl MigrationTrait for Migration {
                     .if_exists()
                     .to_owned(),
             )
-            .await?;
-
-        // Drop ENUM
-        manager
-            .get_connection()
-            .execute_unprepared("DROP TYPE IF EXISTS stock_adjustment_type;")
             .await?;
 
         Ok(())
