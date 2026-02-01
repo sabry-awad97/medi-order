@@ -20,6 +20,7 @@ import {
   FileText,
   TrendingUp,
   Tablets,
+  ClipboardList,
 } from "lucide-react";
 
 import {
@@ -180,6 +181,11 @@ function useMenuItems(t: (key: string) => string) {
               title: t("navigation.medicineForms"),
               url: "/inventory/medicine-forms",
               icon: Tablets,
+            },
+            {
+              title: t("navigation.openingBalances"),
+              url: "/inventory/opening-balances",
+              icon: ClipboardList,
             },
             {
               title: t("navigation.stockAdjustments"),

@@ -79,7 +79,23 @@ impl MigrationTrait for Migration {
                     'expiry',
                     'return',
                     'transfer',
-                    'initial_stock'
+                    'initial_stock',
+                    'opening_balance'
+                );
+                "#,
+            )
+            .await?;
+
+        // Create opening_balance_entry_type ENUM type
+        manager
+            .get_connection()
+            .execute_unprepared(
+                r#"
+                CREATE TYPE opening_balance_entry_type AS ENUM (
+                    'initial',
+                    'adjustment',
+                    'correction',
+                    'reconciliation'
                 );
                 "#,
             )
@@ -90,6 +106,11 @@ impl MigrationTrait for Migration {
 
     async fn down(&self, manager: &SchemaManager) -> Result<(), DbErr> {
         // Drop ENUM types in reverse order
+        manager
+            .get_connection()
+            .execute_unprepared("DROP TYPE IF EXISTS opening_balance_entry_type CASCADE;")
+            .await?;
+
         manager
             .get_connection()
             .execute_unprepared("DROP TYPE IF EXISTS stock_adjustment_type CASCADE;")

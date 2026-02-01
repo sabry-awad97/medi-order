@@ -18,6 +18,7 @@ import manufacturerEn from "../locales/en/manufacturer.json";
 import medicineFormsEn from "../locales/en/medicine-forms.json";
 import stockAdjustmentsEn from "../locales/en/stock-adjustments.json";
 import itemInquiryEn from "../locales/en/item-inquiry.json";
+import openingBalancesEn from "../locales/en/opening-balances.json";
 
 import commonAr from "../locales/ar/common.json";
 import homeAr from "../locales/ar/home.json";
@@ -33,6 +34,7 @@ import manufacturerAr from "../locales/ar/manufacturer.json";
 import medicineFormsAr from "../locales/ar/medicine-forms.json";
 import stockAdjustmentsAr from "../locales/ar/stock-adjustments.json";
 import itemInquiryAr from "../locales/ar/item-inquiry.json";
+import openingBalancesAr from "../locales/ar/opening-balances.json";
 
 // Missing translations registry for development
 export const missingTranslations = new Set<string>();
@@ -73,6 +75,7 @@ export async function initializeI18n(initialLocale?: Locale) {
           "medicine-forms": medicineFormsEn,
           "stock-adjustments": stockAdjustmentsEn,
           "item-inquiry": itemInquiryEn,
+          "opening-balances": openingBalancesEn,
         },
         ar: {
           common: commonAr,
@@ -89,6 +92,7 @@ export async function initializeI18n(initialLocale?: Locale) {
           "medicine-forms": medicineFormsAr,
           "stock-adjustments": stockAdjustmentsAr,
           "item-inquiry": itemInquiryAr,
+          "opening-balances": openingBalancesAr,
         },
       },
       lng: locale,

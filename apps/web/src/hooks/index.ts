@@ -178,3 +178,28 @@ export {
   // Query Keys
   manufacturerKeys,
 } from "./use-manufacturers";
+
+// Hooks للأرصدة الافتتاحية (Opening Balances)
+export {
+  // Query Hooks
+  useOpeningBalances,
+  useOpeningBalance,
+  useOpeningBalancesByItem,
+  useUnverifiedOpeningBalances,
+  useOpeningBalancesByBatch,
+  useOpeningBalanceStatistics,
+  // Mutation Hooks
+  useCreateOpeningBalance,
+  useUpdateOpeningBalance,
+  useDeleteOpeningBalance,
+  // Verification Workflow Mutation Hooks
+  useVerifyOpeningBalance,
+  useRejectOpeningBalance,
+  // Adjustment Mutation Hooks
+  useCreateOpeningBalanceAdjustment,
+  // Utility Hooks
+  usePrefetchOpeningBalance,
+  useInvalidateOpeningBalances,
+  // Query Keys
+  openingBalanceKeys,
+} from "./use-opening-balances";

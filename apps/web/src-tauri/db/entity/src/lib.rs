@@ -4,6 +4,7 @@ pub mod customer;
 pub mod id;
 pub mod inventory_item;
 pub mod inventory_item_barcode;
+pub mod inventory_opening_balance;
 pub mod inventory_price_history;
 pub mod inventory_stock;
 pub mod inventory_stock_history;
@@ -30,6 +31,9 @@ pub mod prelude {
     pub use super::inventory_item_barcode;
     pub use super::inventory_item_barcode::Entity as InventoryItemBarcode;
     pub use super::inventory_item_barcode::dto as inventory_item_barcode_dto;
+    pub use super::inventory_opening_balance;
+    pub use super::inventory_opening_balance::Entity as InventoryOpeningBalance;
+    pub use super::inventory_opening_balance::dto as inventory_opening_balance_dto;
     pub use super::inventory_price_history;
     pub use super::inventory_price_history::Entity as InventoryPriceHistory;
     pub use super::inventory_price_history::dto as inventory_price_history_dto;

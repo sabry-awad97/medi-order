@@ -1,4 +1,5 @@
 pub mod medicine_forms;
+pub mod opening_balance;
 
 // Re-export medicine forms commands
 pub use medicine_forms::{
@@ -6,6 +7,14 @@ pub use medicine_forms::{
     get_medicine_form_usage_count, list_active_medicine_forms, list_medicine_forms,
     medicine_form_exists, medicine_form_exists_by_code, reorder_medicine_forms,
     restore_medicine_form, update_medicine_form,
+};
+
+// Re-export opening balance commands
+pub use opening_balance::{
+    create_opening_balance, create_opening_balance_adjustment, delete_opening_balance,
+    get_opening_balance, get_opening_balance_statistics, get_opening_balances_by_batch,
+    get_opening_balances_by_item, get_unverified_opening_balances, list_opening_balances,
+    reject_opening_balance, update_opening_balance, verify_opening_balance,
 };
 
 use db_entity::inventory_item::dto::{

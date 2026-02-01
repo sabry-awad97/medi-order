@@ -152,6 +152,23 @@ pub async fn run() {
         ipc::commands::inventory::medicine_forms::medicine_form_exists_by_code,
         ipc::commands::inventory::medicine_forms::get_medicine_form_usage_count,
         ipc::commands::inventory::medicine_forms::reorder_medicine_forms,
+        // Opening Balance CRUD operations
+        ipc::commands::inventory::opening_balance::create_opening_balance,
+        ipc::commands::inventory::opening_balance::get_opening_balance,
+        ipc::commands::inventory::opening_balance::list_opening_balances,
+        ipc::commands::inventory::opening_balance::update_opening_balance,
+        ipc::commands::inventory::opening_balance::delete_opening_balance,
+        // Opening Balance Verification
+        ipc::commands::inventory::opening_balance::verify_opening_balance,
+        ipc::commands::inventory::opening_balance::reject_opening_balance,
+        // Opening Balance Adjustments
+        ipc::commands::inventory::opening_balance::create_opening_balance_adjustment,
+        // Opening Balance Queries
+        ipc::commands::inventory::opening_balance::get_opening_balances_by_item,
+        ipc::commands::inventory::opening_balance::get_unverified_opening_balances,
+        ipc::commands::inventory::opening_balance::get_opening_balances_by_batch,
+        // Opening Balance Statistics
+        ipc::commands::inventory::opening_balance::get_opening_balance_statistics,
         // Manufacturer CRUD operations
         ipc::commands::manufacturer::create_manufacturer,
         ipc::commands::manufacturer::create_manufacturers_bulk,

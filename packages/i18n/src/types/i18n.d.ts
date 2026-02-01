@@ -15,6 +15,7 @@ import type manufacturer from "../locales/en/manufacturer.json";
 import type medicineForms from "../locales/en/medicine-forms.json";
 import type stockAdjustments from "../locales/en/stock-adjustments.json";
 import type itemInquiry from "../locales/en/item-inquiry.json";
+import type openingBalances from "../locales/en/opening-balances.json";
 
 declare module "i18next" {
   interface CustomTypeOptions {
@@ -34,6 +35,7 @@ declare module "i18next" {
       "medicine-forms": typeof medicineForms;
       "stock-adjustments": typeof stockAdjustments;
       "item-inquiry": typeof itemInquiry;
+      "opening-balances": typeof openingBalances;
     };
     returnNull: false;
   }

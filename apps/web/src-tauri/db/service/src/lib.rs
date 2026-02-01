@@ -54,6 +54,9 @@ pub use inventory::price_history::PriceHistoryService;
 // Export Stock History service
 pub use inventory::stock_history::StockHistoryService;
 
+// Export Opening Balance service
+pub use inventory::opening_balances::OpeningBalanceService;
+
 // Export Role service
 pub use role::RoleService;
 
@@ -121,6 +124,10 @@ pub struct ServiceManager {
     #[builder(setter(into))]
     stock_history: Arc<StockHistoryService>,
 
+    /// Opening balance service
+    #[builder(setter(into))]
+    opening_balance: Arc<OpeningBalanceService>,
+
     /// Role service
     #[builder(setter(into))]
     role: Arc<RoleService>,
@@ -181,6 +188,7 @@ impl ServiceManager {
         let medicine_forms = Arc::new(MedicineFormsService::new(db.clone()));
         let price_history = Arc::new(PriceHistoryService::new(db.clone()));
         let stock_history = Arc::new(StockHistoryService::new(db.clone()));
+        let opening_balance = Arc::new(OpeningBalanceService::new(db.clone()));
         let role = Arc::new(RoleService::new(db.clone()));
 
         Ok(Self::builder()
@@ -195,6 +203,7 @@ impl ServiceManager {
             .medicine_forms(medicine_forms)
             .price_history(price_history)
             .stock_history(stock_history)
+            .opening_balance(opening_balance)
             .role(role)
             .build())
     }

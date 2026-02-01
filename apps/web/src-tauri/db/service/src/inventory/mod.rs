@@ -1,4 +1,5 @@
 pub mod medicine_forms;
+pub mod opening_balances;
 pub mod price_history;
 pub mod stock_history;
 

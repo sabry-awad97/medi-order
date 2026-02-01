@@ -29,6 +29,8 @@ pub enum StockAdjustmentType {
     Transfer,
     #[sea_orm(string_value = "initial_stock")]
     InitialStock,
+    #[sea_orm(string_value = "opening_balance")]
+    OpeningBalance,
 }
 
 /// Stock history entity - tracks all stock quantity changes
