@@ -28,6 +28,9 @@ const InventoryManufacturersIndexLazyRouteImport = createFileRoute(
 )()
 const InventoryItemsIndexLazyRouteImport =
   createFileRoute('/inventory/items/')()
+const InventoryItemInquiryIndexLazyRouteImport = createFileRoute(
+  '/inventory/item-inquiry/',
+)()
 
 const SuppliersRoute = SuppliersRouteImport.update({
   id: '/suppliers',
@@ -96,6 +99,14 @@ const InventoryItemsIndexLazyRoute = InventoryItemsIndexLazyRouteImport.update({
 } as any).lazy(() =>
   import('./routes/inventory/items/index.lazy').then((d) => d.Route),
 )
+const InventoryItemInquiryIndexLazyRoute =
+  InventoryItemInquiryIndexLazyRouteImport.update({
+    id: '/inventory/item-inquiry/',
+    path: '/inventory/item-inquiry/',
+    getParentRoute: () => rootRouteImport,
+  } as any).lazy(() =>
+    import('./routes/inventory/item-inquiry/index.lazy').then((d) => d.Route),
+  )
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -106,6 +117,7 @@ export interface FileRoutesByFullPath {
   '/special-orders': typeof SpecialOrdersRoute
   '/suppliers': typeof SuppliersRoute
   '/onboarding/': typeof OnboardingIndexLazyRoute
+  '/inventory/item-inquiry/': typeof InventoryItemInquiryIndexLazyRoute
   '/inventory/items/': typeof InventoryItemsIndexLazyRoute
   '/inventory/manufacturers/': typeof InventoryManufacturersIndexLazyRoute
   '/inventory/stock-adjustments/': typeof InventoryStockAdjustmentsIndexLazyRoute
@@ -119,6 +131,7 @@ export interface FileRoutesByTo {
   '/special-orders': typeof SpecialOrdersRoute
   '/suppliers': typeof SuppliersRoute
   '/onboarding': typeof OnboardingIndexLazyRoute
+  '/inventory/item-inquiry': typeof InventoryItemInquiryIndexLazyRoute
   '/inventory/items': typeof InventoryItemsIndexLazyRoute
   '/inventory/manufacturers': typeof InventoryManufacturersIndexLazyRoute
   '/inventory/stock-adjustments': typeof InventoryStockAdjustmentsIndexLazyRoute
@@ -133,6 +146,7 @@ export interface FileRoutesById {
   '/special-orders': typeof SpecialOrdersRoute
   '/suppliers': typeof SuppliersRoute
   '/onboarding/': typeof OnboardingIndexLazyRoute
+  '/inventory/item-inquiry/': typeof InventoryItemInquiryIndexLazyRoute
   '/inventory/items/': typeof InventoryItemsIndexLazyRoute
   '/inventory/manufacturers/': typeof InventoryManufacturersIndexLazyRoute
   '/inventory/stock-adjustments/': typeof InventoryStockAdjustmentsIndexLazyRoute
@@ -148,6 +162,7 @@ export interface FileRouteTypes {
     | '/special-orders'
     | '/suppliers'
     | '/onboarding/'
+    | '/inventory/item-inquiry/'
     | '/inventory/items/'
     | '/inventory/manufacturers/'
     | '/inventory/stock-adjustments/'
@@ -161,6 +176,7 @@ export interface FileRouteTypes {
     | '/special-orders'
     | '/suppliers'
     | '/onboarding'
+    | '/inventory/item-inquiry'
     | '/inventory/items'
     | '/inventory/manufacturers'
     | '/inventory/stock-adjustments'
@@ -174,6 +190,7 @@ export interface FileRouteTypes {
     | '/special-orders'
     | '/suppliers'
     | '/onboarding/'
+    | '/inventory/item-inquiry/'
     | '/inventory/items/'
     | '/inventory/manufacturers/'
     | '/inventory/stock-adjustments/'
@@ -188,6 +205,7 @@ export interface RootRouteChildren {
   SpecialOrdersRoute: typeof SpecialOrdersRoute
   SuppliersRoute: typeof SuppliersRoute
   OnboardingIndexLazyRoute: typeof OnboardingIndexLazyRoute
+  InventoryItemInquiryIndexLazyRoute: typeof InventoryItemInquiryIndexLazyRoute
   InventoryItemsIndexLazyRoute: typeof InventoryItemsIndexLazyRoute
   InventoryManufacturersIndexLazyRoute: typeof InventoryManufacturersIndexLazyRoute
   InventoryStockAdjustmentsIndexLazyRoute: typeof InventoryStockAdjustmentsIndexLazyRoute
@@ -272,6 +290,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof InventoryItemsIndexLazyRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/inventory/item-inquiry/': {
+      id: '/inventory/item-inquiry/'
+      path: '/inventory/item-inquiry'
+      fullPath: '/inventory/item-inquiry/'
+      preLoaderRoute: typeof InventoryItemInquiryIndexLazyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -284,6 +309,7 @@ const rootRouteChildren: RootRouteChildren = {
   SpecialOrdersRoute: SpecialOrdersRoute,
   SuppliersRoute: SuppliersRoute,
   OnboardingIndexLazyRoute: OnboardingIndexLazyRoute,
+  InventoryItemInquiryIndexLazyRoute: InventoryItemInquiryIndexLazyRoute,
   InventoryItemsIndexLazyRoute: InventoryItemsIndexLazyRoute,
   InventoryManufacturersIndexLazyRoute: InventoryManufacturersIndexLazyRoute,
   InventoryStockAdjustmentsIndexLazyRoute:

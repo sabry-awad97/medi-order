@@ -180,6 +180,11 @@ function useMenuItems(t: (key: string) => string) {
               url: "/inventory/stock-adjustments",
               icon: TrendingUp,
             },
+            {
+              title: t("navigation.itemInquiry"),
+              url: "/inventory/item-inquiry",
+              icon: FileText,
+            },
           ],
         },
         {

@@ -44,7 +44,7 @@ interface StockAdjustmentDialogProps {
     itemId: string,
     adjustment: number,
     reason?: string,
-    adjustmentType?: string,
+    adjustmentType?: StockAdjustmentType,
   ) => void;
 }
 

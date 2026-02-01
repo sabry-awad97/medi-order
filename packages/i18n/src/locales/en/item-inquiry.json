@@ -1,0 +1,53 @@
+{
+  "title": "Item Inquiry",
+  "description": "Search and view detailed information about inventory items",
+  "loading": "Loading items...",
+  "stats": {
+    "totalItems": "Total Items",
+    "lowStock": "Low Stock",
+    "outOfStock": "Out of Stock",
+    "expiringSoon": "Expiring Soon",
+    "highValue": "High Value Items"
+  },
+  "searchPanel": {
+    "searchBy": "Search By",
+    "byName": "Item Name",
+    "byBarcode": "Barcode",
+    "byGeneric": "Generic Name",
+    "searchQuery": "Search Query",
+    "namePlaceholder": "Enter item name...",
+    "barcodePlaceholder": "Enter barcode number...",
+    "genericPlaceholder": "Enter generic name...",
+    "nameDescription": "Search by brand or trade name",
+    "barcodeDescription": "Search by barcode number",
+    "genericDescription": "Search by scientific name",
+    "search": "Search",
+    "advancedSearch": "Advanced Search",
+    "searchOptions": "Search Options",
+    "searchOptionsDescription": "Choose how you want to search for items",
+    "applySettings": "Apply & Search",
+    "tip1": "Use partial names for broader results (e.g., 'para' for Paracetamol)",
+    "tip2": "Press Enter to search quickly"
+  },
+  "searchResults": {
+    "found": "Found {{count}} item(s)",
+    "noSearchYet": "Start Your Search",
+    "startSearching": "Enter a search query above to find inventory items",
+    "noResults": "No Items Found",
+    "tryDifferent": "Try a different search term or search type",
+    "stock": "Stock",
+    "units": "units",
+    "min": "Min",
+    "price": "Price",
+    "total": "Total",
+    "manufacturer": "Manufacturer",
+    "barcode": "Barcode",
+    "na": "N/A",
+    "inStock": "In Stock",
+    "lowStock": "Low Stock",
+    "outOfStock": "Out of Stock",
+    "viewDetails": "View Details",
+    "stockHistory": "Stock History",
+    "priceHistory": "Price History"
+  }
+}

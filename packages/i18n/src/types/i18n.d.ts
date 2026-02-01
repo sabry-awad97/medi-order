@@ -13,6 +13,7 @@ import type inventory from "../locales/en/inventory.json";
 import type login from "../locales/en/login.json";
 import type manufacturer from "../locales/en/manufacturer.json";
 import type stockAdjustments from "../locales/en/stock-adjustments.json";
+import type itemInquiry from "../locales/en/item-inquiry.json";
 
 declare module "i18next" {
   interface CustomTypeOptions {
@@ -30,6 +31,7 @@ declare module "i18next" {
       login: typeof login;
       manufacturer: typeof manufacturer;
       "stock-adjustments": typeof stockAdjustments;
+      "item-inquiry": typeof itemInquiry;
     };
     returnNull: false;
   }

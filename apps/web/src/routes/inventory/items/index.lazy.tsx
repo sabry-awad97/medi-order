@@ -38,6 +38,7 @@ import { SETTING_INVENTORY_VIEW_MODE } from "@/lib/constants";
 import type {
   InventoryItemWithStockResponse,
   CreateInventoryItemWithStock,
+  StockAdjustmentType,
 } from "@/api/inventory.api";
 import {
   InventoryForm,
@@ -150,7 +151,7 @@ function InventoryComponent() {
     itemId: string,
     adjustment: number,
     reason?: string,
-    adjustmentType?: string,
+    adjustmentType?: StockAdjustmentType,
   ) => {
     adjustStock.mutate({
       id: itemId,

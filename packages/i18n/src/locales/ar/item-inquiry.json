@@ -1,0 +1,53 @@
+{
+  "title": "الاستعلام عن صنف",
+  "description": "البحث وعرض معلومات تفصيلية عن أصناف المخزون",
+  "loading": "جاري تحميل الأصناف...",
+  "stats": {
+    "totalItems": "إجمالي الأصناف",
+    "lowStock": "مخزون منخفض",
+    "outOfStock": "نفذ من المخزون",
+    "expiringSoon": "قريب الانتهاء",
+    "highValue": "أصناف عالية القيمة"
+  },
+  "searchPanel": {
+    "searchBy": "البحث بواسطة",
+    "byName": "اسم الصنف",
+    "byBarcode": "الباركود",
+    "byGeneric": "الاسم العام",
+    "searchQuery": "استعلام البحث",
+    "namePlaceholder": "أدخل اسم الصنف...",
+    "barcodePlaceholder": "أدخل رقم الباركود...",
+    "genericPlaceholder": "أدخل الاسم العام...",
+    "nameDescription": "البحث بالاسم التجاري أو العلامة التجارية",
+    "barcodeDescription": "البحث برقم الباركود",
+    "genericDescription": "البحث بالاسم العلمي",
+    "search": "بحث",
+    "advancedSearch": "بحث متقدم",
+    "searchOptions": "خيارات البحث",
+    "searchOptionsDescription": "اختر كيفية البحث عن الأصناف",
+    "applySettings": "تطبيق والبحث",
+    "tip1": "استخدم أسماء جزئية للحصول على نتائج أوسع (مثال: 'بارا' لباراسيتامول)",
+    "tip2": "اضغط Enter للبحث السريع"
+  },
+  "searchResults": {
+    "found": "تم العثور على {{count}} صنف",
+    "noSearchYet": "ابدأ البحث",
+    "startSearching": "أدخل استعلام بحث أعلاه للعثور على أصناف المخزون",
+    "noResults": "لم يتم العثور على أصناف",
+    "tryDifferent": "جرب مصطلح بحث مختلف أو نوع بحث آخر",
+    "stock": "المخزون",
+    "units": "وحدة",
+    "min": "الحد الأدنى",
+    "price": "السعر",
+    "total": "الإجمالي",
+    "manufacturer": "الشركة المصنعة",
+    "barcode": "الباركود",
+    "na": "غير محدد",
+    "inStock": "متوفر",
+    "lowStock": "مخزون منخفض",
+    "outOfStock": "نفذ من المخزون",
+    "viewDetails": "عرض التفاصيل",
+    "stockHistory": "سجل المخزون",
+    "priceHistory": "سجل الأسعار"
+  }
+}
