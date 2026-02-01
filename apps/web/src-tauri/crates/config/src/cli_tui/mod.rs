@@ -111,10 +111,10 @@ impl Component for MediTrackConfigTUI {
 }
 
 pub async fn run_config_tui() -> Result<(), Box<dyn std::error::Error>> {
-    // Initialize tracing
-    tracing_subscriber::fmt()
+    // Initialize tracing (ignore if already initialized)
+    let _ = tracing_subscriber::fmt()
         .with_max_level(tracing::Level::INFO)
-        .init();
+        .try_init();
 
     // Prompt for password
     let password = Password::new()

@@ -2,13 +2,10 @@ use crate::{Result, SeederError};
 use db_entity::manufacturer::dto::CreateManufacturer;
 use db_service::ServiceManager;
 use std::sync::Arc;
-use tracing::info;
 
 pub const MANUFACTURERS: &[CreateManufacturer] = &[];
 
 pub async fn seed(service_manager: &Arc<ServiceManager>) -> Result<()> {
-    info!("Seeding manufacturers...");
-
     let manufacturer_service = service_manager.manufacturer();
 
     // Prepare bulk create data
@@ -16,15 +13,14 @@ pub async fn seed(service_manager: &Arc<ServiceManager>) -> Result<()> {
 
     // Use bulk create for better performance
     match manufacturer_service.create_bulk(create_dtos).await {
-        Ok(results) => {
-            info!("Successfully seeded {} manufacturers", results.len());
+        Ok(_results) => {
+            // Successfully seeded
         }
-        Err(e) => {
+        Err(_e) => {
             // If bulk fails (e.g., duplicates), try individual inserts
-            info!("Bulk insert failed, trying individual inserts: {}", e);
-            let mut created_count = 0;
+            let mut _created_count = 0;
 
-            for mfr_data in MANUFACTURERS {
+            for mfr_data in MANUFACTURERS.iter() {
                 manufacturer_service
                     .create(mfr_data.clone())
                     .await
@@ -34,11 +30,7 @@ pub async fn seed(service_manager: &Arc<ServiceManager>) -> Result<()> {
                             mfr_data.name, e
                         ))
                     })?;
-
-                created_count += 1;
             }
-
-            info!("Manufacturers seeding completed: {} created", created_count,);
         }
     }
 

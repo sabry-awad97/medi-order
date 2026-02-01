@@ -4,7 +4,6 @@ use db_service::ServiceManager;
 use serde::Deserialize;
 use serde_json::Value as JsonValue;
 use std::sync::Arc;
-use tracing::info;
 
 /// Role data structure from JSON
 #[derive(Debug, Deserialize)]
@@ -28,14 +27,8 @@ fn load_roles() -> Result<Vec<RoleJson>> {
 }
 
 pub async fn seed(service_manager: &Arc<ServiceManager>) -> Result<()> {
-    info!("Seeding roles...");
-
     // Load roles from JSON
     let roles = load_roles()?;
-    info!("Loaded {} roles from JSON", roles.len());
-
-    let mut created_count = 0;
-    let mut skipped_count = 0;
 
     for role_data in roles.iter() {
         // Check if role already exists using the service manager's getter
@@ -45,8 +38,6 @@ pub async fn seed(service_manager: &Arc<ServiceManager>) -> Result<()> {
             .await
             .unwrap_or(false)
         {
-            info!("Role '{}' already exists, skipping", role_data.name);
-            skipped_count += 1;
             continue;
         }
 
@@ -77,13 +68,7 @@ pub async fn seed(service_manager: &Arc<ServiceManager>) -> Result<()> {
                     role_data.name, e
                 ))
             })?;
-
-        created_count += 1;
     }
 
-    info!(
-        "Roles seeding completed: {} created, {} skipped",
-        created_count, skipped_count
-    );
     Ok(())
 }

@@ -4,12 +4,11 @@ mod manufacturers;
 mod medicine_forms;
 mod roles;
 mod suppliers;
-
-pub use error::{Result, SeederError};
+mod tui;
 
 use db_service::ServiceManager;
+use error::{Result, SeederError};
 use std::sync::Arc;
-use tracing::info;
 
 /// Main seeder orchestrator
 pub struct Seeder {
@@ -23,8 +22,6 @@ impl Seeder {
 
     /// Run all seeders in the correct order
     pub async fn seed_all(&self) -> Result<()> {
-        info!("Starting database seeding...");
-
         // Seed in dependency order
         self.seed_roles().await?;
         self.seed_medicine_forms().await?;
@@ -32,7 +29,6 @@ impl Seeder {
         self.seed_inventory().await?;
         self.seed_suppliers().await?;
 
-        info!("Database seeding completed successfully");
         Ok(())
     }
 
@@ -60,4 +56,9 @@ impl Seeder {
     pub async fn seed_suppliers(&self) -> Result<()> {
         suppliers::seed(&self.service_manager).await
     }
+}
+
+#[tokio::main]
+async fn main() -> std::result::Result<(), Box<dyn std::error::Error>> {
+    tui::run_seeder_tui().await
 }

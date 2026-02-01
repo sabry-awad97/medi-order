@@ -3,7 +3,6 @@ use db_entity::medicine_form::dto::CreateMedicineForm;
 use db_service::ServiceManager;
 use serde::Deserialize;
 use std::sync::Arc;
-use tracing::info;
 
 /// Medicine form data structure from JSON
 #[derive(Debug, Deserialize)]
@@ -40,14 +39,8 @@ fn generate_code(name_en: &str) -> String {
 }
 
 pub async fn seed(service_manager: &Arc<ServiceManager>) -> Result<()> {
-    info!("Seeding medicine forms...");
-
     // Load medicine forms from JSON
     let medicine_forms = load_medicine_forms()?;
-    info!("Loaded {} medicine forms from JSON", medicine_forms.len());
-
-    let mut created_count = 0;
-    let mut skipped_count = 0;
 
     for (index, form_data) in medicine_forms.iter().enumerate() {
         let code = generate_code(&form_data.name_en);
@@ -59,8 +52,6 @@ pub async fn seed(service_manager: &Arc<ServiceManager>) -> Result<()> {
             .await
             .unwrap_or(false)
         {
-            info!("Medicine form '{}' already exists, skipping", code);
-            skipped_count += 1;
             continue;
         }
 
@@ -81,13 +72,7 @@ pub async fn seed(service_manager: &Arc<ServiceManager>) -> Result<()> {
                     code, e
                 ))
             })?;
-
-        created_count += 1;
     }
 
-    info!(
-        "Medicine forms seeding completed: {} created, {} skipped",
-        created_count, skipped_count
-    );
     Ok(())
 }

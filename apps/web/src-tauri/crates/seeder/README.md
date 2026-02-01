@@ -1,157 +1,247 @@
 # App Seeder
 
-Database seeding crate for the MediTrack application.
-
-## Overview
-
-This crate provides functionality to seed the database with initial data for development and testing purposes. It uses the `ServiceManager` and database services to ensure data integrity and proper validation.
+Database seeding utility for MediTrack application with TUI interface.
 
 ## Features
 
-- **Roles**: Seeds system roles (admin, manager, pharmacist, technician, viewer) with permissions
-- **Medicine Forms**: Seeds 200+ pharmaceutical forms from JSON (tablets, capsules, syrups, etc.)
-- **Manufacturers**: Seeds pharmaceutical manufacturers with contact information using bulk insert
-- **Inventory**: Seeds inventory items with stock levels (TODO)
-- **Suppliers**: Seeds supplier information with ratings (TODO)
+- Interactive TUI for easy database seeding
+- Reads encrypted configuration from MediTrack config
+- Supports selective or complete data seeding
+- Async execution with proper state management
+- Idempotent seeding (safe to run multiple times)
+
+## Password & Configuration
+
+The seeder reads database connection settings from the encrypted MediTrack configuration file.
+
+### First Time Setup
+
+If you haven't configured MediTrack yet:
+
+1. Run the seeder - it will detect no configuration exists
+2. You'll be prompted to create a new password
+3. Default database settings will be used (PostgreSQL on localhost:5432)
+4. The configuration will be saved encrypted
+
+```bash
+cargo run --bin seeder
+
+# Output:
+# No configuration found. Creating new configuration.
+# Create configuration password: ****
+# Confirm password: ****
+```
+
+### Using Existing Configuration
+
+If you've already set up MediTrack configuration (using the config TUI):
+
+1. Run the seeder
+2. Enter your existing configuration password
+3. Your saved database settings will be loaded
+
+```bash
+cargo run --bin seeder
+
+# Output:
+# Enter configuration password: ****
+```
+
+### Forgot Your Password?
+
+If you forgot your password, you have two options:
+
+1. **Delete the config and start fresh:**
+
+   ```bash
+   # Windows
+   del %APPDATA%\meditrack\config.enc
+
+   # Linux/Mac
+   rm ~/.config/meditrack/config.enc
+   ```
+
+2. **Use the config TUI to manage configuration:**
+   ```bash
+   # Run the config TUI to view/edit settings
+   cargo run --manifest-path apps/web/src-tauri/crates/config/Cargo.toml
+   ```
 
 ## Usage
 
-```rust
-use app_seeder::Seeder;
-use db_service::{DatabaseConfig, JwtConfig, ServiceManager};
-use std::sync::Arc;
-
-// Initialize service manager
-let db_config = DatabaseConfig {
-    url: "sqlite://meditrack.db?mode=rwc".to_string(),
-    max_connections: 10,
-    min_connections: 2,
-    connect_timeout: 30,
-    idle_timeout: 600,
-};
-
-let jwt_config = JwtConfig {
-    secret: "your-secret-key".to_string(),
-    issuer: "meditrack".to_string(),
-    audience: "meditrack-app".to_string(),
-    expiration_hours: 24,
-};
-
-let service_manager = Arc::new(ServiceManager::init(db_config, jwt_config).await?);
-
-// Create seeder instance
-let seeder = Seeder::new(service_manager);
-
-// Seed all data
-seeder.seed_all().await?;
-
-// Or seed specific data
-seeder.seed_roles().await?;
-seeder.seed_medicine_forms().await?;
-seeder.seed_manufacturers().await?;
-seeder.seed_suppliers().await?;
-```
-
-## Running Examples
+### Run the Seeder TUI
 
 ```bash
-# Seed all data
-cargo run --example seed_db
+# From workspace root
+cargo run --manifest-path apps/web/src-tauri/crates/seeder/Cargo.toml --bin seeder
 
-# Seed specific data
-cargo run --example seed_selective -- --roles --medicine-forms --manufacturers
-cargo run --example seed_selective -- --all
+# Or from the seeder directory
+cd apps/web/src-tauri/crates/seeder
+cargo run --bin seeder
 ```
+
+### TUI Navigation
+
+```
+┌─ MediTrack Database Seeder ─────────────────────────────────┐
+│ Populate database with initial data                          │
+└──────────────────────────────────────────────────────────────┘
+
+┌─ Select Data to Seed ───────────────────────────────────────┐
+│                                                               │
+│  > Seed All Data                                             │
+│    Seed all available data types                             │
+│                                                               │
+│    Seed Roles                                                │
+│    System roles with permissions                             │
+│                                                               │
+│    Seed Medicine Forms                                       │
+│    200+ pharmaceutical forms                                 │
+│                                                               │
+│    Seed Manufacturers                                        │
+│    Pharmaceutical manufacturers                              │
+│                                                               │
+│    Seed Inventory                                            │
+│    Inventory items (TODO)                                    │
+│                                                               │
+│    Seed Suppliers                                            │
+│    Supplier information (TODO)                               │
+│                                                               │
+│    Exit                                                      │
+│    Quit the seeder                                           │
+└──────────────────────────────────────────────────────────────┘
+
+┌──────────────────────────────────────────────────────────────┐
+│ Use ↑↓ to navigate, Enter to select, q to quit              │
+└──────────────────────────────────────────────────────────────┘
+```
+
+**Controls:**
+
+- **↑/↓ Arrow Keys**: Navigate menu options
+- **Enter**: Select and execute the highlighted option
+- **q or Esc**: Exit the application
+
+### CLI Examples (Programmatic)
+
+For automated scripts or CI/CD:
+
+```bash
+# Seed everything
+cargo run --example seed_all --manifest-path apps/web/src-tauri/crates/seeder/Cargo.toml
+
+# Seed specific types
+cargo run --example seed_selective --manifest-path apps/web/src-tauri/crates/seeder/Cargo.toml -- --roles --medicine-forms
+```
+
+## Available Seeders
+
+1. **Seed All Data** - Runs all seeders in dependency order
+2. **Seed Roles** - Seeds 5 system roles (admin, manager, pharmacist, technician, viewer)
+3. **Seed Medicine Forms** - Seeds 200+ pharmaceutical forms from JSON
+4. **Seed Manufacturers** - Placeholder (TODO)
+5. **Seed Inventory** - Placeholder (TODO)
+6. **Seed Suppliers** - Placeholder (TODO)
+
+## Data Files
+
+Seed data is stored in JSON files under `data/`:
+
+- `data/roles.json` - System roles with permissions
+- `data/medicine_forms.json` - Medicine forms (200+ entries)
+
+Data is loaded at compile time using `include_str!` macro for efficiency.
+
+## Configuration Details
+
+### Default Database Settings
+
+If no configuration exists, these defaults are used:
+
+```
+Host: localhost
+Port: 5432
+Database: meditrack
+Username: meditrack
+Password: meditrack_dev_password
+Max Connections: 10
+Min Connections: 2
+Connect Timeout: 30s
+Idle Timeout: 600s
+```
+
+### Configuration Location
+
+The encrypted configuration is stored at:
+
+- **Windows**: `%APPDATA%\meditrack\config.enc`
+- **Linux**: `~/.config/meditrack/config.enc`
+- **macOS**: `~/Library/Application Support/meditrack/config.enc`
+
+## Architecture
+
+The seeder follows best practices:
+
+- **Service Layer Pattern**: Uses `ServiceManager` to access services
+- **Never Direct DB Access**: Calls service methods (e.g., `role().create_bulk()`)
+- **Idempotent**: Safe to run multiple times with existence checks
+- **Async Execution**: Uses reratui's `use_mutation` hook for proper async state management
+- **Encrypted Config**: Reads from the same encrypted config as the main application
 
 ## Seeding Order
 
-The seeder runs in the following order to respect foreign key dependencies:
+Data is seeded in dependency order:
 
 1. Roles (no dependencies)
 2. Medicine Forms (no dependencies)
-3. Manufacturers (no dependencies)
-4. Inventory Items (depends on medicine forms and manufacturers) - TODO
-5. Suppliers (no dependencies) - TODO
+3. Manufacturers (TODO)
+4. Inventory (TODO - depends on medicine forms)
+5. Suppliers (TODO)
 
-## Features
+## Troubleshooting
 
-### Idempotent Seeding
+### "Failed to load configuration" Error
 
-- All seeders check for existing data before inserting
-- Running the seeder multiple times is safe and won't create duplicates
-- Provides detailed logging of created vs skipped records
+This usually means:
 
-### Bulk Operations
+1. Wrong password entered
+2. Configuration file is corrupted
+3. Configuration file doesn't exist
 
-- Manufacturers use bulk insert for better performance
-- Falls back to individual inserts if bulk fails (e.g., due to duplicates)
+**Solution**: Delete the config file and start fresh, or use the config TUI to fix it.
 
-### Service Integration
+### Database Connection Errors
 
-- Uses `ServiceManager` for proper service access
-- Leverages existing validation and business logic
-- Maintains data integrity through service layer
+If you see connection errors:
 
-### JSON Data Loading
+1. Verify PostgreSQL is running
+2. Check database credentials in config
+3. Ensure database exists
+4. Check network connectivity
 
-- Medicine forms and roles loaded from JSON files using `include_str!`
-- Data embedded at compile time for zero runtime overhead
-- Easy to update seed data by editing JSON files
+### Migration Warnings
 
-## Data Sources
-
-The seed data is based on:
-
-- System roles with hierarchical permissions (admin, manager, pharmacist, technician, viewer)
-- 200+ pharmaceutical forms from comprehensive JSON data
-- Real pharmaceutical companies and their information
-- Common medications with proper concentrations
-- Arabic and English translations for bilingual support
-- Realistic supplier information with ratings
-
-## Data Included
-
-### Roles (5 items)
-
-- **Admin** (Level 100): Full system access
-- **Manager** (Level 75): Management and reporting
-- **Pharmacist** (Level 50): Order and inventory management
-- **Technician** (Level 30): Order entry and basic inventory
-- **Viewer** (Level 10): Read-only access
-
-### Medicine Forms (200+ items)
-
-Loaded from `data/medicine_forms.json`:
-
-- Oral solid dosage (tablets, capsules, etc.)
-- Liquid forms (syrups, suspensions, solutions)
-- Topical forms (creams, ointments, gels)
-- Injectable forms (ampoules, vials)
-- And many more...
-
-### Manufacturers (9 items)
-
-- GSK, Pfizer, Sanofi, Bayer
-- Abbott, Novartis, Grünenthal
-- MSD, Various
-- Includes contact information
+You may see warnings about migrations - this is normal if tables already exist.
 
 ## Development
 
-To add new seed data:
+To add new seeders:
 
-1. Create a new module in `src/` (e.g., `src/my_data.rs`)
-2. Create a JSON file in `data/` if using JSON data
-3. Define your data structures and use `include_str!` to load JSON
-4. Implement the `seed()` function using the appropriate service
-5. Add the module to `lib.rs`
-6. Call it from `Seeder::seed_all()` in the correct order
+1. Create JSON data file in `data/`
+2. Create seeder module in `src/`
+3. Implement using service methods
+4. Register in `lib.rs`
+5. Update menu in `tui/components/main_menu.rs`
 
-## Notes
+## Related Tools
 
-- All IDs use UUIDv7 for time-ordered unique identifiers
-- Seed data includes both English and Arabic translations
-- The seeder is idempotent - running it multiple times is safe
-- Uses service layer for validation and business logic
-- Provides detailed logging for debugging
-- JSON data is embedded at compile time using `include_str!`
+- **Config TUI**: Manage application configuration
+
+  ```bash
+  cargo run --manifest-path apps/web/src-tauri/crates/config/Cargo.toml
+  ```
+
+- **Migration Tool**: Manage database schema
+  ```bash
+  cargo run --manifest-path apps/web/src-tauri/db/migration/Cargo.toml
+  ```
