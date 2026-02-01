@@ -1,24 +1,59 @@
 {
-  "title": "Home",
-  "subtitle": "Pharmacy Special Orders Management System",
-  "welcome": "Pharmacy Special Orders Management System",
-  "description": "Comprehensive system for managing special medicine orders efficiently and professionally",
-  "enterSystem": "Enter System",
-  "features": {
-    "orders": {
-      "title": "Order Management",
-      "description": "Add, edit, and track all special orders",
-      "details": "Easy and fast system for managing medicine orders with the ability to add multiple medicines per order"
-    },
-    "tracking": {
-      "title": "Status Tracking",
-      "description": "Monitor each order status accurately",
-      "details": "From pending to delivery, complete tracking of the order lifecycle"
-    },
-    "statistics": {
-      "title": "Real-time Statistics",
-      "description": "Clear information about all orders",
-      "details": "Comprehensive dashboard displaying order statistics by status"
-    }
+  "title": "Dashboard",
+  "subtitle": "Pharmacy Management Overview",
+  "stats": {
+    "totalOrders": "Total Orders",
+    "activeOrders": "{{count}} active",
+    "pendingOrders": "Pending Orders",
+    "needsAttention": "Needs attention",
+    "allClear": "All clear",
+    "totalItems": "Inventory Items",
+    "inStock": "{{count}} in stock",
+    "stockAlerts": "Stock Alerts",
+    "outOfStock": "out of stock",
+    "lowStock": "low stock",
+    "stockHealthy": "Stock is healthy"
+  },
+  "quickActions": {
+    "title": "Quick Actions",
+    "newOrder": "New Order",
+    "addItem": "Add Item",
+    "searchItem": "Search Item",
+    "viewReports": "View Reports"
+  },
+  "orderStatus": {
+    "title": "Order Status Overview",
+    "pending": "Pending",
+    "ordered": "Ordered",
+    "arrived": "Arrived",
+    "delivered": "Delivered",
+    "cancelled": "Cancelled"
+  },
+  "navigation": {
+    "title": "Quick Navigation"
+  },
+  "nav": {
+    "orders": "Special Orders",
+    "ordersDesc": "Manage special medicine orders",
+    "inventory": "Inventory",
+    "inventoryDesc": "Stock and item management",
+    "itemInquiry": "Item Inquiry",
+    "itemInquiryDesc": "Search and lookup items",
+    "suppliers": "Suppliers",
+    "suppliersDesc": "Supplier management",
+    "openingBalances": "Opening Balances",
+    "openingBalancesDesc": "Initial stock entries",
+    "medicineForms": "Medicine Forms",
+    "medicineFormsDesc": "Form types management",
+    "manufacturers": "Manufacturers",
+    "manufacturersDesc": "Manufacturer database",
+    "reports": "Reports",
+    "reportsDesc": "Analytics and reports",
+    "settings": "Settings",
+    "settingsDesc": "System configuration"
+  },
+  "system": {
+    "suppliers": "Suppliers",
+    "version": "Version"
   }
 }

@@ -1,24 +1,59 @@
 {
-  "title": "الصفحة الرئيسية",
-  "subtitle": "نظام إدارة الطلبات الخاصة للصيدلية",
-  "welcome": "نظام إدارة الطلبات الخاصة للصيدلية",
-  "description": "نظام متكامل لإدارة طلبات الأدوية الخاصة بكفاءة واحترافية",
-  "enterSystem": "الدخول إلى النظام",
-  "features": {
-    "orders": {
-      "title": "إدارة الطلبات",
-      "description": "إضافة وتعديل وتتبع جميع الطلبات الخاصة",
-      "details": "نظام سهل وسريع لإدارة طلبات الأدوية مع إمكانية إضافة عدة أدوية لكل طلب"
-    },
-    "tracking": {
-      "title": "تتبع الحالات",
-      "description": "متابعة حالة كل طلب بدقة",
-      "details": "من قيد الانتظار حتى التسليم، تتبع كامل لدورة حياة الطلب"
-    },
-    "statistics": {
-      "title": "إحصائيات فورية",
-      "description": "معلومات واضحة عن جميع الطلبات",
-      "details": "لوحة تحكم شاملة تعرض إحصائيات الطلبات حسب الحالة"
-    }
+  "title": "لوحة التحكم",
+  "subtitle": "نظرة عامة على إدارة الصيدلية",
+  "stats": {
+    "totalOrders": "إجمالي الطلبات",
+    "activeOrders": "{{count}} نشط",
+    "pendingOrders": "طلبات معلقة",
+    "needsAttention": "تحتاج اهتمام",
+    "allClear": "لا توجد طلبات",
+    "totalItems": "أصناف المخزون",
+    "inStock": "{{count}} متوفر",
+    "stockAlerts": "تنبيهات المخزون",
+    "outOfStock": "نفذ",
+    "lowStock": "منخفض",
+    "stockHealthy": "المخزون سليم"
+  },
+  "quickActions": {
+    "title": "إجراءات سريعة",
+    "newOrder": "طلب جديد",
+    "addItem": "إضافة صنف",
+    "searchItem": "بحث عن صنف",
+    "viewReports": "عرض التقارير"
+  },
+  "orderStatus": {
+    "title": "حالة الطلبات",
+    "pending": "قيد الانتظار",
+    "ordered": "تم الطلب",
+    "arrived": "وصل",
+    "delivered": "تم التسليم",
+    "cancelled": "ملغي"
+  },
+  "navigation": {
+    "title": "التنقل السريع"
+  },
+  "nav": {
+    "orders": "الطلبات الخاصة",
+    "ordersDesc": "إدارة طلبات الأدوية الخاصة",
+    "inventory": "المخزون",
+    "inventoryDesc": "إدارة المخزون والأصناف",
+    "itemInquiry": "استعلام الأصناف",
+    "itemInquiryDesc": "بحث واستعلام عن الأصناف",
+    "suppliers": "الموردين",
+    "suppliersDesc": "إدارة الموردين",
+    "openingBalances": "الأرصدة الافتتاحية",
+    "openingBalancesDesc": "إدخالات المخزون الأولية",
+    "medicineForms": "أشكال الأدوية",
+    "medicineFormsDesc": "إدارة أنواع الأشكال",
+    "manufacturers": "الشركات المصنعة",
+    "manufacturersDesc": "قاعدة بيانات الشركات",
+    "reports": "التقارير",
+    "reportsDesc": "التحليلات والتقارير",
+    "settings": "الإعدادات",
+    "settingsDesc": "تكوين النظام"
+  },
+  "system": {
+    "suppliers": "الموردين",
+    "version": "الإصدار"
   }
 }
