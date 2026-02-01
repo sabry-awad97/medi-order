@@ -15,10 +15,10 @@ import { Route as SuppliersRouteImport } from './routes/suppliers'
 import { Route as SpecialOrdersRouteImport } from './routes/special-orders'
 import { Route as SettingsRouteImport } from './routes/settings'
 import { Route as ReportsRouteImport } from './routes/reports'
-import { Route as OnboardingRouteImport } from './routes/onboarding'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as R404RouteImport } from './routes/404'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as OnboardingIndexLazyRouteImport } from './routes/onboarding/index.lazy.'
 
 const InventoryManufacturersIndexLazyRouteImport = createFileRoute(
   '/inventory/manufacturers/',
@@ -44,11 +44,6 @@ const SettingsRoute = SettingsRouteImport.update({
 const ReportsRoute = ReportsRouteImport.update({
   id: '/reports',
   path: '/reports',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const OnboardingRoute = OnboardingRouteImport.update({
-  id: '/onboarding',
-  path: '/onboarding',
   getParentRoute: () => rootRouteImport,
 } as any)
 const LoginRoute = LoginRouteImport.update({
@@ -81,43 +76,48 @@ const InventoryItemsIndexLazyRoute = InventoryItemsIndexLazyRouteImport.update({
 } as any).lazy(() =>
   import('./routes/inventory/items/index.lazy').then((d) => d.Route),
 )
+const OnboardingIndexLazyRoute = OnboardingIndexLazyRouteImport.update({
+  id: '/onboarding/index/lazy/',
+  path: '/onboarding/index/lazy/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/404': typeof R404Route
   '/login': typeof LoginRoute
-  '/onboarding': typeof OnboardingRoute
   '/reports': typeof ReportsRoute
   '/settings': typeof SettingsRoute
   '/special-orders': typeof SpecialOrdersRoute
   '/suppliers': typeof SuppliersRoute
   '/inventory/items/': typeof InventoryItemsIndexLazyRoute
   '/inventory/manufacturers/': typeof InventoryManufacturersIndexLazyRoute
+  '/onboarding/index/lazy/': typeof OnboardingIndexLazyRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/404': typeof R404Route
   '/login': typeof LoginRoute
-  '/onboarding': typeof OnboardingRoute
   '/reports': typeof ReportsRoute
   '/settings': typeof SettingsRoute
   '/special-orders': typeof SpecialOrdersRoute
   '/suppliers': typeof SuppliersRoute
   '/inventory/items': typeof InventoryItemsIndexLazyRoute
   '/inventory/manufacturers': typeof InventoryManufacturersIndexLazyRoute
+  '/onboarding/index/lazy': typeof OnboardingIndexLazyRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/404': typeof R404Route
   '/login': typeof LoginRoute
-  '/onboarding': typeof OnboardingRoute
   '/reports': typeof ReportsRoute
   '/settings': typeof SettingsRoute
   '/special-orders': typeof SpecialOrdersRoute
   '/suppliers': typeof SuppliersRoute
   '/inventory/items/': typeof InventoryItemsIndexLazyRoute
   '/inventory/manufacturers/': typeof InventoryManufacturersIndexLazyRoute
+  '/onboarding/index/lazy/': typeof OnboardingIndexLazyRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -125,50 +125,50 @@ export interface FileRouteTypes {
     | '/'
     | '/404'
     | '/login'
-    | '/onboarding'
     | '/reports'
     | '/settings'
     | '/special-orders'
     | '/suppliers'
     | '/inventory/items/'
     | '/inventory/manufacturers/'
+    | '/onboarding/index/lazy/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/404'
     | '/login'
-    | '/onboarding'
     | '/reports'
     | '/settings'
     | '/special-orders'
     | '/suppliers'
     | '/inventory/items'
     | '/inventory/manufacturers'
+    | '/onboarding/index/lazy'
   id:
     | '__root__'
     | '/'
     | '/404'
     | '/login'
-    | '/onboarding'
     | '/reports'
     | '/settings'
     | '/special-orders'
     | '/suppliers'
     | '/inventory/items/'
     | '/inventory/manufacturers/'
+    | '/onboarding/index/lazy/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   R404Route: typeof R404Route
   LoginRoute: typeof LoginRoute
-  OnboardingRoute: typeof OnboardingRoute
   ReportsRoute: typeof ReportsRoute
   SettingsRoute: typeof SettingsRoute
   SpecialOrdersRoute: typeof SpecialOrdersRoute
   SuppliersRoute: typeof SuppliersRoute
   InventoryItemsIndexLazyRoute: typeof InventoryItemsIndexLazyRoute
   InventoryManufacturersIndexLazyRoute: typeof InventoryManufacturersIndexLazyRoute
+  OnboardingIndexLazyRoute: typeof OnboardingIndexLazyRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -199,13 +199,6 @@ declare module '@tanstack/react-router' {
       path: '/reports'
       fullPath: '/reports'
       preLoaderRoute: typeof ReportsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/onboarding': {
-      id: '/onboarding'
-      path: '/onboarding'
-      fullPath: '/onboarding'
-      preLoaderRoute: typeof OnboardingRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/login': {
@@ -243,6 +236,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof InventoryItemsIndexLazyRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/onboarding/index/lazy/': {
+      id: '/onboarding/index/lazy/'
+      path: '/onboarding/index/lazy'
+      fullPath: '/onboarding/index/lazy/'
+      preLoaderRoute: typeof OnboardingIndexLazyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -250,13 +250,13 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   R404Route: R404Route,
   LoginRoute: LoginRoute,
-  OnboardingRoute: OnboardingRoute,
   ReportsRoute: ReportsRoute,
   SettingsRoute: SettingsRoute,
   SpecialOrdersRoute: SpecialOrdersRoute,
   SuppliersRoute: SuppliersRoute,
   InventoryItemsIndexLazyRoute: InventoryItemsIndexLazyRoute,
   InventoryManufacturersIndexLazyRoute: InventoryManufacturersIndexLazyRoute,
+  OnboardingIndexLazyRoute: OnboardingIndexLazyRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
