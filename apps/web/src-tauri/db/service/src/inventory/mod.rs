@@ -13,6 +13,7 @@ use db_entity::inventory_item_barcode::dto::InventoryItemBarcodeResponse;
 use db_entity::inventory_item_barcode::{self, Entity as InventoryItemBarcode};
 use db_entity::inventory_stock::dto::{AdjustStock, InventoryStockResponse, UpdateInventoryStock};
 use db_entity::inventory_stock::{self, Entity as InventoryStock};
+use db_entity::inventory_stock_history::{self};
 use rust_decimal::Decimal;
 use sea_orm::sea_query::Expr;
 use sea_orm::*;
@@ -410,6 +411,7 @@ impl InventoryService {
                 ))
             })?;
 
+        let old_quantity = stock.stock_quantity;
         let new_quantity = stock.stock_quantity + dto.adjustment;
 
         if new_quantity < 0 {
@@ -445,6 +447,38 @@ impl InventoryService {
                     e
                 )
             })?;
+
+        // Get adjustment type or default to ManualAdjustment
+        let adjustment_type = dto
+            .adjustment_type
+            .unwrap_or(inventory_stock_history::StockAdjustmentType::ManualAdjustment);
+
+        // Create stock history record using type-safe SeaORM
+        let history = inventory_stock_history::ActiveModel {
+            id: Set(Id::new()),
+            inventory_item_id: Set(inventory_item_id),
+            adjustment_type: Set(adjustment_type.clone()),
+            quantity_before: Set(old_quantity),
+            quantity_after: Set(new_quantity),
+            adjustment_amount: Set(dto.adjustment),
+            reason: Set(dto.reason.clone()),
+            reference_id: Set(None),
+            reference_type: Set(None),
+            recorded_at: Set(chrono::Utc::now().into()),
+            recorded_by: Set(None),
+        };
+
+        history
+            .insert(&*self.db)
+            .await
+            .tap_ok(|_| {
+                tracing::info!(
+                    "Created stock history record for item {}: {:?}",
+                    inventory_item_id,
+                    adjustment_type
+                )
+            })
+            .tap_err(|e| tracing::error!("Failed to create stock history record: {}", e))?;
 
         Ok(InventoryStockResponse::from(stock))
     }

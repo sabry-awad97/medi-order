@@ -60,10 +60,11 @@ function StockAdjustmentsComponent() {
     itemId: string,
     adjustment: number,
     reason?: string,
+    adjustmentType?: string,
   ) => {
     adjustStock.mutate({
       id: itemId,
-      data: { adjustment, reason },
+      data: { adjustment, reason, adjustment_type: adjustmentType },
     });
     setIsAdjustDialogOpen(false);
     setSelectedItem(null);

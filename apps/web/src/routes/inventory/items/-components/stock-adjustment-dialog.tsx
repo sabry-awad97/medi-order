@@ -1,6 +1,18 @@
 import { useState } from "react";
-import { motion } from "motion/react";
-import { TrendingUp, TrendingDown, Package, AlertCircle } from "lucide-react";
+import {
+  TrendingUp,
+  TrendingDown,
+  Package,
+  AlertCircle,
+  Truck,
+  ShoppingCart,
+  AlertTriangle,
+  Calendar,
+  RotateCcw,
+  ArrowRightLeft,
+  PlusCircle,
+  Edit3,
+} from "lucide-react";
 import { useTranslation } from "@meditrack/i18n";
 
 import { Button } from "@/components/ui/button";
@@ -10,13 +22,30 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
-import type { InventoryItemWithStockResponse } from "@/api/inventory.api";
+import type {
+  InventoryItemWithStockResponse,
+  StockAdjustmentType,
+} from "@/api/inventory.api";
+
+interface AdjustmentTypeOption {
+  value: StockAdjustmentType;
+  label: string;
+  icon: React.ComponentType<{ className?: string }>;
+  color: string;
+  category: "add" | "subtract";
+  description: string;
+}
 
 interface StockAdjustmentDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   item: InventoryItemWithStockResponse | null;
-  onAdjust: (itemId: string, adjustment: number, reason?: string) => void;
+  onAdjust: (
+    itemId: string,
+    adjustment: number,
+    reason?: string,
+    adjustmentType?: string,
+  ) => void;
 }
 
 export function StockAdjustmentDialog({
@@ -29,9 +58,84 @@ export function StockAdjustmentDialog({
   const [adjustmentType, setAdjustmentType] = useState<"add" | "subtract">(
     "add",
   );
+  const [selectedType, setSelectedType] =
+    useState<StockAdjustmentType>("manual_adjustment");
   const [quantity, setQuantity] = useState("");
   const [reason, setReason] = useState("");
   const [error, setError] = useState("");
+
+  // Define adjustment type options with icons and colors
+  const adjustmentTypes: AdjustmentTypeOption[] = [
+    {
+      value: "manual_adjustment",
+      label: t("stockHistory.adjustmentTypes.manual_adjustment"),
+      icon: Edit3,
+      color: "text-blue-600",
+      category: "add",
+      description: t("stockHistory.adjustmentDescriptions.manual_adjustment"),
+    },
+    {
+      value: "order_arrival",
+      label: t("stockHistory.adjustmentTypes.order_arrival"),
+      icon: Truck,
+      color: "text-green-600",
+      category: "add",
+      description: t("stockHistory.adjustmentDescriptions.order_arrival"),
+    },
+    {
+      value: "return",
+      label: t("stockHistory.adjustmentTypes.return"),
+      icon: RotateCcw,
+      color: "text-purple-600",
+      category: "add",
+      description: t("stockHistory.adjustmentDescriptions.return"),
+    },
+    {
+      value: "initial_stock",
+      label: t("stockHistory.adjustmentTypes.initial_stock"),
+      icon: PlusCircle,
+      color: "text-indigo-600",
+      category: "add",
+      description: t("stockHistory.adjustmentDescriptions.initial_stock"),
+    },
+    {
+      value: "sale",
+      label: t("stockHistory.adjustmentTypes.sale"),
+      icon: ShoppingCart,
+      color: "text-emerald-600",
+      category: "subtract",
+      description: t("stockHistory.adjustmentDescriptions.sale"),
+    },
+    {
+      value: "damage",
+      label: t("stockHistory.adjustmentTypes.damage"),
+      icon: AlertTriangle,
+      color: "text-orange-600",
+      category: "subtract",
+      description: t("stockHistory.adjustmentDescriptions.damage"),
+    },
+    {
+      value: "expiry",
+      label: t("stockHistory.adjustmentTypes.expiry"),
+      icon: Calendar,
+      color: "text-red-600",
+      category: "subtract",
+      description: t("stockHistory.adjustmentDescriptions.expiry"),
+    },
+    {
+      value: "transfer",
+      label: t("stockHistory.adjustmentTypes.transfer"),
+      icon: ArrowRightLeft,
+      color: "text-amber-600",
+      category: "subtract",
+      description: t("stockHistory.adjustmentDescriptions.transfer"),
+    },
+  ];
+
+  const addTypes = adjustmentTypes.filter((t) => t.category === "add");
+  const subtractTypes = adjustmentTypes.filter(
+    (t) => t.category === "subtract",
+  );
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -52,7 +156,7 @@ export function StockAdjustmentDialog({
     }
 
     const adjustment = adjustmentType === "add" ? qty : -qty;
-    onAdjust(item!.id, adjustment, reason.trim() || undefined);
+    onAdjust(item!.id, adjustment, reason.trim() || undefined, selectedType);
     handleClose();
   };
 
@@ -61,6 +165,7 @@ export function StockAdjustmentDialog({
     setReason("");
     setError("");
     setAdjustmentType("add");
+    setSelectedType("manual_adjustment");
     onOpenChange(false);
   };
 
@@ -91,7 +196,7 @@ export function StockAdjustmentDialog({
       title={t("stockAdjustment.title")}
       description={t("stockAdjustment.description", { name: item.name })}
       icon={Package}
-      size="lg"
+      size="xl"
       onSubmit={handleSubmit}
       onCancel={handleClose}
       submitLabel={t("stockAdjustment.confirmAdjustment")}
@@ -115,7 +220,7 @@ export function StockAdjustmentDialog({
           </div>
         </div>
 
-        {/* Adjustment Type */}
+        {/* Adjustment Type Selection */}
         <div className="space-y-3">
           <Label>{t("stockAdjustment.adjustmentType")}</Label>
           <div className="grid grid-cols-2 gap-3">
@@ -128,6 +233,7 @@ export function StockAdjustmentDialog({
               )}
               onClick={() => {
                 setAdjustmentType("add");
+                setSelectedType("manual_adjustment");
                 setError("");
               }}
             >
@@ -144,12 +250,50 @@ export function StockAdjustmentDialog({
               )}
               onClick={() => {
                 setAdjustmentType("subtract");
+                setSelectedType("sale");
                 setError("");
               }}
             >
               <TrendingDown className="h-4 w-4" />
               {t("stockAdjustment.removeStock")}
             </Button>
+          </div>
+        </div>
+
+        {/* Adjustment Reason Type */}
+        <div className="space-y-3">
+          <Label>{t("stockAdjustment.reasonType")}</Label>
+          <div className="grid grid-cols-2 gap-2">
+            {(adjustmentType === "add" ? addTypes : subtractTypes).map(
+              (type) => {
+                const Icon = type.icon;
+                const isSelected = selectedType === type.value;
+                return (
+                  <button
+                    key={type.value}
+                    type="button"
+                    onClick={() => setSelectedType(type.value)}
+                    className={cn(
+                      "p-3 rounded-lg border transition-colors text-left",
+                      "hover:border-primary/50 hover:bg-accent/50",
+                      isSelected
+                        ? "border-primary bg-accent"
+                        : "border-border bg-background",
+                    )}
+                  >
+                    <div className="flex items-start gap-2">
+                      <Icon className={cn("h-4 w-4 mt-0.5", type.color)} />
+                      <div className="flex-1 min-w-0">
+                        <div className="font-medium text-sm">{type.label}</div>
+                        <div className="text-xs text-muted-foreground mt-0.5">
+                          {type.description}
+                        </div>
+                      </div>
+                    </div>
+                  </button>
+                );
+              },
+            )}
           </div>
         </div>
 
@@ -172,14 +316,10 @@ export function StockAdjustmentDialog({
             className={cn(error && "border-destructive")}
           />
           {error && (
-            <motion.p
-              initial={{ opacity: 0, y: -10 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="text-sm text-destructive flex items-center gap-1"
-            >
+            <p className="text-sm text-destructive flex items-center gap-1">
               <AlertCircle className="h-3 w-3" />
               {error}
-            </motion.p>
+            </p>
           )}
         </div>
 
@@ -198,11 +338,7 @@ export function StockAdjustmentDialog({
 
         {/* Preview */}
         {quantity && parseInt(quantity) > 0 && (
-          <motion.div
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            className="p-4 rounded-lg border bg-muted/30 space-y-3"
-          >
+          <div className="p-4 rounded-lg border bg-muted/30 space-y-3">
             <h4 className="font-medium text-sm">
               {t("stockAdjustment.preview")}
             </h4>
@@ -239,7 +375,7 @@ export function StockAdjustmentDialog({
                 {quantity}
               </span>
             </div>
-          </motion.div>
+          </div>
         )}
       </div>
     </FormDialog>

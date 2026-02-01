@@ -24,6 +24,7 @@ pub struct UpdateInventoryStock {
 pub struct AdjustStock {
     pub adjustment: i32, // Positive for add, negative for subtract
     pub reason: Option<String>,
+    pub adjustment_type: Option<super::super::inventory_stock_history::StockAdjustmentType>,
 }
 
 /// DTO for inventory stock response

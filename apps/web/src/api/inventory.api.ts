@@ -180,15 +180,6 @@ export const UpdateInventoryStockSchema = z.object({
 export type UpdateInventoryStock = z.infer<typeof UpdateInventoryStockSchema>;
 
 /**
- * Adjust stock DTO schema (matches backend AdjustStock)
- */
-export const AdjustStockSchema = z.object({
-  adjustment: z.number().int(), // Positive for add, negative for subtract
-  reason: z.string().optional(),
-});
-export type AdjustStock = z.infer<typeof AdjustStockSchema>;
-
-/**
  * Mutation result schema
  */
 export const MutationResultSchema = z.object({
@@ -247,6 +238,16 @@ export const StockAdjustmentTypeSchema = z.enum([
   "initial_stock",
 ]);
 export type StockAdjustmentType = z.infer<typeof StockAdjustmentTypeSchema>;
+
+/**
+ * Adjust stock DTO schema (matches backend AdjustStock)
+ */
+export const AdjustStockSchema = z.object({
+  adjustment: z.number().int(), // Positive for add, negative for subtract
+  reason: z.string().optional(),
+  adjustment_type: StockAdjustmentTypeSchema.optional(), // Stock adjustment type
+});
+export type AdjustStock = z.infer<typeof AdjustStockSchema>;
 
 /**
  * Stock history entry schema (matches backend StockHistoryResponse)

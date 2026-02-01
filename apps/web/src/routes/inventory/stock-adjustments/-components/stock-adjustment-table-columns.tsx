@@ -102,7 +102,10 @@ export function useStockAdjustmentColumns({
             );
           }
           return (
-            <Badge variant="default" className="font-mono">
+            <Badge
+              variant="default"
+              className="font-mono bg-green-500/10 text-green-700 dark:text-green-400"
+            >
               {quantity} {t("table.units")}
             </Badge>
           );
@@ -112,7 +115,7 @@ export function useStockAdjustmentColumns({
           <div className="flex flex-col gap-1">
             {getStockBadge()}
             <span className="text-xs text-muted-foreground">
-              Min: {minLevel}
+              {t("table.minLevel")}: {minLevel}
             </span>
           </div>
         );
@@ -152,7 +155,14 @@ export function useStockAdjustmentColumns({
             </Badge>
           );
         }
-        return <Badge variant="default">{t("stockStatus.inStock")}</Badge>;
+        return (
+          <Badge
+            variant="default"
+            className="bg-green-500/10 text-green-700 dark:text-green-400"
+          >
+            {t("stockStatus.inStock")}
+          </Badge>
+        );
       },
     },
     {
@@ -170,7 +180,7 @@ export function useStockAdjustmentColumns({
               className="gap-2"
             >
               <TrendingUp className="h-4 w-4" />
-              Adjust Stock
+              {t("actions.adjustStock")}
             </Button>
           </div>
         );

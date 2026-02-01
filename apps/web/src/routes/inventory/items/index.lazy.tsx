@@ -150,10 +150,11 @@ function InventoryComponent() {
     itemId: string,
     adjustment: number,
     reason?: string,
+    adjustmentType?: string,
   ) => {
     adjustStock.mutate({
       id: itemId,
-      data: { adjustment, reason },
+      data: { adjustment, reason, adjustment_type: adjustmentType },
     });
     setIsStockAdjustOpen(false);
     setSelectedItem(null);

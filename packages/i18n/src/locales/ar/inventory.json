@@ -152,6 +152,7 @@
     "currentStock": "المخزون الحالي",
     "minLevel": "الحد الأدنى",
     "adjustmentType": "نوع التعديل",
+    "reasonType": "نوع السبب",
     "addStock": "إضافة مخزون",
     "removeStock": "إزالة مخزون",
     "quantity": "الكمية",
@@ -234,6 +235,16 @@
       "return": "إرجاع",
       "transfer": "نقل",
       "initial_stock": "مخزون أولي"
+    },
+    "adjustmentDescriptions": {
+      "manual_adjustment": "تصحيح المخزون يدوياً",
+      "order_arrival": "مخزون جديد من المورد",
+      "sale": "تم البيع للعميل",
+      "damage": "أصناف تالفة أو مكسورة",
+      "expiry": "أصناف منتهية الصلاحية",
+      "return": "إرجاع من العميل",
+      "transfer": "تم النقل إلى موقع آخر",
+      "initial_stock": "إعداد المخزون الأولي"
     }
   },
   "stockStatus": {

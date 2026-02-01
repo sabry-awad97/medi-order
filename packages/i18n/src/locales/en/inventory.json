@@ -152,6 +152,7 @@
     "currentStock": "Current Stock",
     "minLevel": "Min Level",
     "adjustmentType": "Adjustment Type",
+    "reasonType": "Reason Type",
     "addStock": "Add Stock",
     "removeStock": "Remove Stock",
     "quantity": "Quantity",
@@ -234,6 +235,16 @@
       "return": "Return",
       "transfer": "Transfer",
       "initial_stock": "Initial Stock"
+    },
+    "adjustmentDescriptions": {
+      "manual_adjustment": "Manual stock correction",
+      "order_arrival": "New stock from supplier",
+      "sale": "Sold to customer",
+      "damage": "Damaged or broken items",
+      "expiry": "Expired items",
+      "return": "Customer return",
+      "transfer": "Transferred to another location",
+      "initial_stock": "Initial inventory setup"
     }
   },
   "stockStatus": {
