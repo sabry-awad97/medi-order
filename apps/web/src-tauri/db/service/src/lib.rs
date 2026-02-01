@@ -9,6 +9,7 @@ use db_migration::run_migrations;
 mod inventory;
 mod manufacturer;
 mod onboarding;
+mod role;
 mod session;
 mod settings;
 mod staff;
@@ -52,6 +53,9 @@ pub use inventory::price_history::PriceHistoryService;
 
 // Export Stock History service
 pub use inventory::stock_history::StockHistoryService;
+
+// Export Role service
+pub use role::RoleService;
 
 /// Database connection configuration
 pub struct DatabaseConfig {
@@ -116,6 +120,10 @@ pub struct ServiceManager {
     /// Stock history service
     #[builder(setter(into))]
     stock_history: Arc<StockHistoryService>,
+
+    /// Role service
+    #[builder(setter(into))]
+    role: Arc<RoleService>,
 }
 
 impl ServiceManager {
@@ -173,6 +181,7 @@ impl ServiceManager {
         let medicine_forms = Arc::new(MedicineFormsService::new(db.clone()));
         let price_history = Arc::new(PriceHistoryService::new(db.clone()));
         let stock_history = Arc::new(StockHistoryService::new(db.clone()));
+        let role = Arc::new(RoleService::new(db.clone()));
 
         Ok(Self::builder()
             .db(db.clone())
@@ -186,6 +195,7 @@ impl ServiceManager {
             .medicine_forms(medicine_forms)
             .price_history(price_history)
             .stock_history(stock_history)
+            .role(role)
             .build())
     }
 }

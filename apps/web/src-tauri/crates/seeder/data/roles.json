@@ -1,0 +1,58 @@
+[
+  {
+    "name": "admin",
+    "display_name": "Administrator",
+    "description": "Full system access with all permissions",
+    "level": 100,
+    "is_system": true,
+    "permissions": ["*"]
+  },
+  {
+    "name": "manager",
+    "display_name": "Manager",
+    "description": "Management access with staff and reporting permissions",
+    "level": 75,
+    "is_system": true,
+    "permissions": [
+      "orders:*",
+      "inventory:*",
+      "reports:*",
+      "staff:read",
+      "staff:update"
+    ]
+  },
+  {
+    "name": "pharmacist",
+    "display_name": "Pharmacist",
+    "description": "Pharmacist access with order and inventory management",
+    "level": 50,
+    "is_system": true,
+    "permissions": [
+      "orders:*",
+      "inventory:read",
+      "inventory:update",
+      "reports:read"
+    ]
+  },
+  {
+    "name": "technician",
+    "display_name": "Pharmacy Technician",
+    "description": "Technician access with order entry and basic inventory",
+    "level": 30,
+    "is_system": true,
+    "permissions": [
+      "orders:create",
+      "orders:read",
+      "orders:update",
+      "inventory:read"
+    ]
+  },
+  {
+    "name": "viewer",
+    "display_name": "Viewer",
+    "description": "Read-only access to orders and reports",
+    "level": 10,
+    "is_system": true,
+    "permissions": ["orders:read", "reports:read"]
+  }
+]

@@ -107,62 +107,6 @@ impl MigrationTrait for Migration {
             )
             .await?;
 
-        // ========================================
-        // Populate medicine_forms with data
-        // ========================================
-        manager
-            .get_connection()
-            .execute_unprepared(
-                r#"
-                INSERT INTO medicine_forms (id, code, name_en, name_ar, display_order) VALUES
-                (gen_random_uuid(), 'CAPLET', 'Caplet', 'أقراص عادي مكسوة', 1),
-                (gen_random_uuid(), 'ORAL_INGESTA_TABLET', 'Oral Ingesta Tablet', 'أقراص تحت اللسان', 2),
-                (gen_random_uuid(), 'COATED_TABLET', 'Coated Tablet', 'أقراص مغلفة', 3),
-                (gen_random_uuid(), 'EFFERVESCENT_TABLET', 'Effervescent Tablet', 'أقراص فوارة', 4),
-                (gen_random_uuid(), 'CHEWABLE_TABLET', 'Chewable Tablet', 'أقراص مضغ', 5),
-                (gen_random_uuid(), 'LOZENGES', 'Lozenges', 'أقراص استحلاب', 6),
-                (gen_random_uuid(), 'CAPSULE', 'Capsule', 'كبسولات', 7),
-                (gen_random_uuid(), 'SPANSULE', 'Spansule', 'كبسولة ممتد المفعول', 8),
-                (gen_random_uuid(), 'SYRUP', 'Syrup', 'شراب', 9),
-                (gen_random_uuid(), 'SUSPENSION', 'Suspension', 'معلق', 10),
-                (gen_random_uuid(), 'EMULSION', 'Emulsion', 'مستحلب', 11),
-                (gen_random_uuid(), 'SOLUTION', 'Solution', 'محلول', 12),
-                (gen_random_uuid(), 'AQUEOUS_SOLUTION', 'Aqueous Solution', 'محلول مائي', 13),
-                (gen_random_uuid(), 'OILY_SOLUTION', 'Oily Solution', 'محلول زيتي', 14),
-                (gen_random_uuid(), 'FOAMING_SOLUTION', 'Foaming Solution', 'محلول رغوي', 15),
-                (gen_random_uuid(), 'BRUSHUPS', 'Brushups', 'محاليل', 16),
-                (gen_random_uuid(), 'LIQUID', 'Liquid', 'سائل', 17),
-                (gen_random_uuid(), 'OINT', 'Ointment', 'قطرة', 18),
-                (gen_random_uuid(), 'GEL', 'Gel', 'جل', 19),
-                (gen_random_uuid(), 'EYE_DROPS', 'Eye Drops', 'نقط عين', 20),
-                (gen_random_uuid(), 'EAR_DROPS', 'Ear Drops', 'نقط أذن', 21),
-                (gen_random_uuid(), 'NASAL_DROPS', 'Nasal Drops', 'نقط أنف', 22),
-                (gen_random_uuid(), 'ORAL_DROPS', 'Oral Drops', 'نقط فموية', 23),
-                (gen_random_uuid(), 'EYE_EAR_DROPS', 'Eye/Ear Drops', 'نقط عين وأذن', 24),
-                (gen_random_uuid(), 'EYE_NOSE_DROPS', 'Eye/Nose Drops', 'نقط عين وأنف', 25),
-                (gen_random_uuid(), 'SPRAY', 'Spray', 'بخاخ', 26),
-                (gen_random_uuid(), 'VITAMIN_OIL', 'Vitamin Oil', 'زيت فيتامين', 27),
-                (gen_random_uuid(), 'FIXED_OIL', 'Fixed Oil', 'زيت ثابت', 28),
-                (gen_random_uuid(), 'HAIR_OIL', 'Hair Oil', 'زيت شعر', 29),
-                (gen_random_uuid(), 'EXTRACT', 'Extract', 'مستخلص', 30),
-                (gen_random_uuid(), 'INJECTABLE', 'Injectable', 'أمبولات', 31),
-                (gen_random_uuid(), 'AMPOULE', 'Ampoule', 'أمبول', 32),
-                (gen_random_uuid(), 'ENEMA', 'Enema', 'حقنة شرجية', 33),
-                (gen_random_uuid(), 'SYRINGE', 'Syringe', 'سرنجات', 34),
-                (gen_random_uuid(), 'READY_FILLED_SYRINGE', 'Ready Filled Syringe', 'سرنجة جاهزة للحقن', 35),
-                (gen_random_uuid(), 'PARENTERAL_CATHETER', 'Parenteral/Catheter', 'قسطرة', 36),
-                (gen_random_uuid(), 'CREAM', 'Cream', 'كريم', 37),
-                (gen_random_uuid(), 'SUPPOSITORY', 'Suppository', 'لبوس', 38),
-                (gen_random_uuid(), 'INHALER', 'Inhaler', 'بخاخ استنشاق', 39),
-                (gen_random_uuid(), 'POWDER', 'Powder', 'بودرة', 40),
-                (gen_random_uuid(), 'PATCH', 'Patch', 'لاصقة', 41),
-                (gen_random_uuid(), 'LOTION', 'Lotion', 'لوشن', 42),
-                (gen_random_uuid(), 'FOAM', 'Foam', 'رغوة', 43),
-                (gen_random_uuid(), 'OTHER', 'Other', 'أخرى', 44);
-                "#,
-            )
-            .await?;
-
         Ok(())
     }
 

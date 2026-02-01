@@ -1,0 +1,25 @@
+[package]
+name = "app_seeder"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+chrono = { workspace = true, features = ["serde"] }
+rand = { workspace = true }
+rust_decimal = { workspace = true }
+sea-orm = { workspace = true, features = [
+    "sqlx-sqlite",
+    "runtime-tokio-rustls",
+] }
+serde = { workspace = true, features = ["derive"] }
+serde_json = { workspace = true }
+thiserror = { workspace = true }
+tokio = { workspace = true, features = ["full"] }
+tracing = { workspace = true }
+uuid = { workspace = true, features = ["v7"] }
+
+db_entity = { workspace = true }
+db_service = { workspace = true }
+
+[dev-dependencies]
+tracing-subscriber = { workspace = true }

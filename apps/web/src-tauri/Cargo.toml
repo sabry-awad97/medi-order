@@ -37,6 +37,7 @@ tracing-subscriber = { workspace = true, features = ["env-filter"] }
 typed-builder = { workspace = true }
 
 app_config = { workspace = true }
+app_seeder = { workspace = true }
 db_entity = { workspace = true }
 db_migration = { workspace = true }
 db_service = { workspace = true }
@@ -79,6 +80,7 @@ url = "2.5.8"
 uuid = "1.20.0"
 
 app_config = { path = "crates/config" }
+app_seeder = { path = "crates/seeder" }
 db_entity = { path = "db/entity" }
 db_migration = { path = "db/migration" }
 db_service = { path = "db/service" }
