@@ -5,6 +5,9 @@ export { InventoryForm } from "./inventory-form";
 export { ItemDetailsDialog } from "./item-details-dialog";
 export { StockAdjustmentDialog } from "./stock-adjustment-dialog";
 export { StockHistoryDialog } from "./stock-history-dialog";
+export { UpdateMinLevelDialog } from "./update-min-level-dialog";
+export { PriceHistoryDialog } from "./price-history-dialog";
+export { QuickOrderDialog } from "./quick-order-dialog";
 
 // Display Components
 export { InventoryItemCard } from "./inventory-item-card";

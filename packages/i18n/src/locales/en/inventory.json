@@ -252,6 +252,42 @@
     "lowStock": "Low Stock",
     "outOfStock": "Out of Stock"
   },
+  "minLevelDialog": {
+    "title": "Update Minimum Stock Level",
+    "description": "Set the minimum stock level for {{name}}",
+    "currentStock": "Current Stock",
+    "currentMinLevel": "Current Min Level",
+    "newMinLevel": "New Minimum Level",
+    "placeholder": "Enter minimum level",
+    "preview": "Preview",
+    "change": "Change",
+    "warning": "This will mark the item as low stock since current stock is below the new minimum level",
+    "update": "Update",
+    "cancel": "Cancel",
+    "validation": {
+      "validLevel": "Please enter a valid minimum level"
+    }
+  },
+  "quickOrderDialog": {
+    "title": "Quick Reorder",
+    "description": "Create a purchase order for {{name}}",
+    "currentStock": "Current Stock",
+    "minLevel": "Min Level",
+    "unitPrice": "Unit Price",
+    "orderQuantity": "Order Quantity",
+    "quantityPlaceholder": "Enter quantity to order",
+    "notes": "Order Notes (Optional)",
+    "notesPlaceholder": "e.g., Urgent order, preferred supplier, etc.",
+    "preview": "Order Preview",
+    "newStockLevel": "New Stock Level",
+    "estimatedCost": "Estimated Cost",
+    "info": "This will create a draft purchase order. You can review and modify it in the Orders module.",
+    "createOrder": "Create Order",
+    "cancel": "Cancel",
+    "validation": {
+      "validQuantity": "Please enter a valid quantity"
+    }
+  },
   "messages": {
     "itemCreated": "Item \"{{name}}\" created successfully",
     "itemUpdated": "Item updated successfully",

@@ -252,6 +252,42 @@
     "lowStock": "مخزون منخفض",
     "outOfStock": "نفذ من المخزون"
   },
+  "minLevelDialog": {
+    "title": "تحديث الحد الأدنى للمخزون",
+    "description": "تعيين الحد الأدنى للمخزون لـ {{name}}",
+    "currentStock": "المخزون الحالي",
+    "currentMinLevel": "الحد الأدنى الحالي",
+    "newMinLevel": "الحد الأدنى الجديد",
+    "placeholder": "أدخل الحد الأدنى",
+    "preview": "معاينة",
+    "change": "التغيير",
+    "warning": "سيتم وضع علامة على الصنف كمخزون منخفض لأن المخزون الحالي أقل من الحد الأدنى الجديد",
+    "update": "تحديث",
+    "cancel": "إلغاء",
+    "validation": {
+      "validLevel": "يرجى إدخال حد أدنى صحيح"
+    }
+  },
+  "quickOrderDialog": {
+    "title": "إعادة طلب سريع",
+    "description": "إنشاء طلب شراء لـ {{name}}",
+    "currentStock": "المخزون الحالي",
+    "minLevel": "الحد الأدنى",
+    "unitPrice": "سعر الوحدة",
+    "orderQuantity": "كمية الطلب",
+    "quantityPlaceholder": "أدخل الكمية المطلوبة",
+    "notes": "ملاحظات الطلب (اختياري)",
+    "notesPlaceholder": "مثال: طلب عاجل، مورد مفضل، إلخ.",
+    "preview": "معاينة الطلب",
+    "newStockLevel": "مستوى المخزون الجديد",
+    "estimatedCost": "التكلفة المقدرة",
+    "info": "سيتم إنشاء مسودة طلب شراء. يمكنك مراجعته وتعديله في وحدة الطلبات.",
+    "createOrder": "إنشاء طلب",
+    "cancel": "إلغاء",
+    "validation": {
+      "validQuantity": "يرجى إدخال كمية صحيحة"
+    }
+  },
   "messages": {
     "itemCreated": "تم إنشاء الصنف \"{{name}}\" بنجاح",
     "itemUpdated": "تم تحديث الصنف بنجاح",

@@ -3,6 +3,7 @@ import { createLazyFileRoute } from "@tanstack/react-router";
 import { TrendingDown, Package, History } from "lucide-react";
 import { useDirection, useTranslation } from "@meditrack/i18n";
 import type { SortingState } from "@tanstack/react-table";
+import { toast } from "sonner";
 
 import { Loading } from "@/components/ui/loading";
 import {
@@ -18,6 +19,7 @@ import {
 import {
   useInventoryItems,
   useAdjustInventoryStock,
+  useUpdateInventoryStock,
   usePriceHistory,
 } from "@/hooks";
 import type { InventoryItemWithStockResponse } from "@/api/inventory.api";
@@ -25,6 +27,9 @@ import {
   StockAdjustmentDialog,
   ItemDetailsDialog,
   StockHistoryDialog,
+  UpdateMinLevelDialog,
+  PriceHistoryDialog,
+  QuickOrderDialog,
 } from "@/routes/inventory/items/-components";
 import {
   useStockAdjustmentColumns,
@@ -47,6 +52,7 @@ function StockAdjustmentsComponent() {
   // Fetch data
   const { data: items = [], isLoading } = useInventoryItems();
   const adjustStock = useAdjustInventoryStock();
+  const updateStock = useUpdateInventoryStock();
 
   // Local state
   const [searchQuery, setSearchQuery] = useState("");
@@ -59,6 +65,7 @@ function StockAdjustmentsComponent() {
   const [isStockHistoryOpen, setIsStockHistoryOpen] = useState(false);
   const [isPriceHistoryOpen, setIsPriceHistoryOpen] = useState(false);
   const [isMinLevelDialogOpen, setIsMinLevelDialogOpen] = useState(false);
+  const [isQuickOrderOpen, setIsQuickOrderOpen] = useState(false);
   const [selectedItem, setSelectedItem] =
     useState<InventoryItemWithStockResponse | null>(null);
 
@@ -89,9 +96,8 @@ function StockAdjustmentsComponent() {
   };
 
   const handleQuickReorder = (item: InventoryItemWithStockResponse) => {
-    // TODO: Implement quick reorder functionality
-    // This would create a purchase order for the item
-    console.log("Quick reorder for:", item.name);
+    setSelectedItem(item);
+    setIsQuickOrderOpen(true);
   };
 
   const handleStockAdjust = (
@@ -118,6 +124,31 @@ function StockAdjustmentsComponent() {
       },
     });
     setIsAdjustDialogOpen(false);
+    setSelectedItem(null);
+  };
+
+  const handleMinLevelUpdate = (itemId: string, minLevel: number) => {
+    updateStock.mutate({
+      id: itemId,
+      data: {
+        min_stock_level: minLevel,
+      },
+    });
+    setIsMinLevelDialogOpen(false);
+    setSelectedItem(null);
+  };
+
+  const handleQuickOrder = (
+    itemId: string,
+    quantity: number,
+    notes?: string,
+  ) => {
+    // TODO: Integrate with orders module when available
+    toast.info(
+      `Quick purchase order will be created in the future: ${quantity} units${notes ? ` - ${notes}` : ""}`,
+    );
+    // For now, just close the dialog
+    setIsQuickOrderOpen(false);
     setSelectedItem(null);
   };
 
@@ -323,8 +354,26 @@ function StockAdjustmentsComponent() {
         item={selectedItem}
       />
 
-      {/* TODO: Add PriceHistoryDialog */}
-      {/* TODO: Add MinLevelDialog */}
+      <UpdateMinLevelDialog
+        open={isMinLevelDialogOpen}
+        onOpenChange={setIsMinLevelDialogOpen}
+        item={selectedItem}
+        onUpdate={handleMinLevelUpdate}
+      />
+
+      <PriceHistoryDialog
+        open={isPriceHistoryOpen}
+        onOpenChange={setIsPriceHistoryOpen}
+        item={selectedItem}
+        priceHistory={priceHistory}
+      />
+
+      <QuickOrderDialog
+        open={isQuickOrderOpen}
+        onOpenChange={setIsQuickOrderOpen}
+        item={selectedItem}
+        onOrder={handleQuickOrder}
+      />
     </Page>
   );
 }
