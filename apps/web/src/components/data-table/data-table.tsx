@@ -1,4 +1,3 @@
-import { useMemo } from "react";
 import {
   useReactTable,
   getCoreRowModel,
@@ -8,9 +7,10 @@ import {
   flexRender,
   type ColumnDef,
   type SortingState,
+  type TableOptions,
   type OnChangeFn,
 } from "@tanstack/react-table";
-import { useDirection, useTranslation } from "@meditrack/i18n";
+import { useDirection } from "@meditrack/i18n";
 import {
   Table,
   TableBody,
@@ -20,22 +20,35 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { cn } from "@/lib/utils";
-import type { InventoryItemWithStockResponse } from "@/api/inventory.api";
-import { InventoryTablePagination } from "./inventory-table-pagination";
+import { DataTablePagination } from "./data-table-pagination";
 
-interface InventoryTableProps {
-  data: InventoryItemWithStockResponse[];
-  columns: ColumnDef<InventoryItemWithStockResponse>[];
-  sorting: SortingState;
-  onSortingChange: OnChangeFn<SortingState>;
+interface DataTableProps<TData> {
+  data: TData[];
+  columns: ColumnDef<TData>[];
+  sorting?: SortingState;
+  onSortingChange?: OnChangeFn<SortingState>;
+  pageSize?: number;
+  pageSizeOptions?: number[];
+  enablePagination?: boolean;
+  paginationLabels?: Parameters<typeof DataTablePagination>[0]["labels"];
+  emptyMessage?: string;
+  className?: string;
+  tableOptions?: Partial<TableOptions<TData>>;
 }
 
-export function InventoryTable({
+export function DataTable<TData>({
   data,
   columns,
   sorting,
   onSortingChange,
-}: InventoryTableProps) {
+  pageSize = 20,
+  pageSizeOptions,
+  enablePagination = true,
+  paginationLabels,
+  emptyMessage = "No results.",
+  className,
+  tableOptions,
+}: DataTableProps<TData>) {
   const { isRTL } = useDirection();
 
   const table = useReactTable({
@@ -48,16 +61,26 @@ export function InventoryTable({
     getCoreRowModel: getCoreRowModel(),
     getSortedRowModel: getSortedRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
-    getPaginationRowModel: getPaginationRowModel(),
+    getPaginationRowModel: enablePagination
+      ? getPaginationRowModel()
+      : undefined,
     initialState: {
-      pagination: {
-        pageSize: 20,
-      },
+      pagination: enablePagination
+        ? {
+            pageSize,
+          }
+        : undefined,
     },
+    ...tableOptions,
   });
 
   return (
-    <div className="h-full flex flex-col animate-in fade-in-0 slide-in-from-bottom-2 duration-300">
+    <div
+      className={cn(
+        "h-full flex flex-col animate-in fade-in-0 slide-in-from-bottom-2 duration-300",
+        className,
+      )}
+    >
       <div className="flex-1 overflow-auto border rounded-lg">
         <Table>
           <TableHeader>
@@ -106,14 +129,21 @@ export function InventoryTable({
                   colSpan={columns.length}
                   className="h-24 text-center"
                 >
-                  No results.
+                  {emptyMessage}
                 </TableCell>
               </TableRow>
             )}
           </TableBody>
         </Table>
       </div>
-      <InventoryTablePagination table={table} totalItems={data.length} />
+      {enablePagination && (
+        <DataTablePagination
+          table={table}
+          totalItems={data.length}
+          pageSizeOptions={pageSizeOptions}
+          labels={paginationLabels}
+        />
+      )}
     </div>
   );
 }

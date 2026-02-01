@@ -1,4 +1,4 @@
-import { useTranslation, useDirection } from "@meditrack/i18n";
+import { useDirection } from "@meditrack/i18n";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -9,47 +9,62 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import type { InventoryItemWithStockResponse } from "@/api/inventory.api";
 import { cn } from "@/lib/utils";
 
-interface InventoryDeleteDialogProps {
+interface ConfirmationDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  item: InventoryItemWithStockResponse | null;
+  title: string;
+  description: string;
+  confirmLabel?: string;
+  cancelLabel?: string;
   onConfirm: () => void;
-  onCancel: () => void;
+  onCancel?: () => void;
+  variant?: "default" | "destructive";
 }
 
-export function InventoryDeleteDialog({
+export function ConfirmationDialog({
   open,
   onOpenChange,
-  item,
+  title,
+  description,
+  confirmLabel = "Confirm",
+  cancelLabel = "Cancel",
   onConfirm,
   onCancel,
-}: InventoryDeleteDialogProps) {
-  const { t } = useTranslation("inventory");
+  variant = "default",
+}: ConfirmationDialogProps) {
   const { isRTL } = useDirection();
+
+  const handleCancel = () => {
+    if (onCancel) {
+      onCancel();
+    }
+  };
 
   return (
     <AlertDialog open={open} onOpenChange={onOpenChange}>
       <AlertDialogContent>
         <AlertDialogHeader>
           <AlertDialogTitle className={cn(isRTL && "text-right")}>
-            {t("messages.confirmDelete", { name: item?.name || "" })}
+            {title}
           </AlertDialogTitle>
           <AlertDialogDescription className={cn(isRTL && "text-right")}>
-            {t("messages.deleteDescription")}
+            {description}
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter className={cn(isRTL && "flex-row-reverse")}>
-          <AlertDialogCancel onClick={onCancel}>
-            {t("messages.cancel")}
+          <AlertDialogCancel onClick={handleCancel}>
+            {cancelLabel}
           </AlertDialogCancel>
           <AlertDialogAction
             onClick={onConfirm}
-            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            className={cn(
+              variant === "destructive" &&
+                "bg-destructive text-destructive-foreground hover:bg-destructive/90",
+            )}
           >
-            {t("messages.archive")}
+            {confirmLabel}
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>

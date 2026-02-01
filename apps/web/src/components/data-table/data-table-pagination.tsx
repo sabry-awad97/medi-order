@@ -5,7 +5,7 @@ import {
   ChevronLeft,
   ChevronRight,
 } from "lucide-react";
-import { useDirection, useTranslation } from "@meditrack/i18n";
+import { useDirection } from "@meditrack/i18n";
 import { Button } from "@/components/ui/button";
 import {
   Pagination,
@@ -21,19 +21,88 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { generatePaginationItems } from "./utils";
 
-interface InventoryTablePaginationProps<T> {
+interface DataTablePaginationProps<T> {
   table: Table<T>;
   totalItems: number;
+  pageSizeOptions?: number[];
+  labels?: {
+    showing?: string;
+    to?: string;
+    of?: string;
+    items?: string;
+    rowsPerPage?: string;
+    previous?: string;
+    next?: string;
+    firstPage?: string;
+    lastPage?: string;
+    previousPage?: string;
+    nextPage?: string;
+  };
+  generatePaginationItems?: (
+    currentPage: number,
+    totalPages: number,
+  ) => (number | "ellipsis")[];
 }
 
-export function InventoryTablePagination<T>({
+const defaultGeneratePaginationItems = (
+  currentPage: number,
+  totalPages: number,
+): (number | "ellipsis")[] => {
+  const delta = 2;
+  const range: number[] = [];
+  const rangeWithDots: (number | "ellipsis")[] = [];
+  let l: number | undefined;
+
+  for (let i = 0; i < totalPages; i++) {
+    if (
+      i === 0 ||
+      i === totalPages - 1 ||
+      (i >= currentPage - delta && i <= currentPage + delta)
+    ) {
+      range.push(i);
+    }
+  }
+
+  for (const i of range) {
+    if (l !== undefined) {
+      if (i - l === 2) {
+        rangeWithDots.push(l + 1);
+      } else if (i - l !== 1) {
+        rangeWithDots.push("ellipsis");
+      }
+    }
+    rangeWithDots.push(i);
+    l = i;
+  }
+
+  return rangeWithDots;
+};
+
+export function DataTablePagination<T>({
   table,
   totalItems,
-}: InventoryTablePaginationProps<T>) {
+  pageSizeOptions = [10, 20, 30, 50, 100],
+  labels = {},
+  generatePaginationItems = defaultGeneratePaginationItems,
+}: DataTablePaginationProps<T>) {
   const { isRTL } = useDirection();
-  const { t } = useTranslation("inventory");
+
+  const defaultLabels = {
+    showing: "Showing",
+    to: "to",
+    of: "of",
+    items: "items",
+    rowsPerPage: "Rows per page",
+    previous: "Previous",
+    next: "Next",
+    firstPage: "First page",
+    lastPage: "Last page",
+    previousPage: "Previous page",
+    nextPage: "Next page",
+  };
+
+  const t = { ...defaultLabels, ...labels };
 
   return (
     <div className="flex flex-col gap-4 py-4 shrink-0 border-t bg-muted/20">
@@ -48,13 +117,13 @@ export function InventoryTablePagination<T>({
         >
           {isRTL ? (
             <>
-              <span>Previous</span>
+              <span>{t.previous}</span>
               <ChevronRight className="h-4 w-4" />
             </>
           ) : (
             <>
               <ChevronLeft className="h-4 w-4" />
-              <span>Previous</span>
+              <span>{t.previous}</span>
             </>
           )}
         </Button>
@@ -72,11 +141,11 @@ export function InventoryTablePagination<T>({
           {isRTL ? (
             <>
               <ChevronLeft className="h-4 w-4" />
-              <span>Next</span>
+              <span>{t.next}</span>
             </>
           ) : (
             <>
-              <span>Next</span>
+              <span>{t.next}</span>
               <ChevronRight className="h-4 w-4" />
             </>
           )}
@@ -88,13 +157,13 @@ export function InventoryTablePagination<T>({
         {/* Items info and page size selector */}
         <div className="flex flex-col sm:flex-row items-center gap-4">
           <div className="text-sm text-muted-foreground">
-            {t("pagination.showing")}{" "}
+            {t.showing}{" "}
             <span className="font-medium text-foreground">
               {table.getState().pagination.pageIndex *
                 table.getState().pagination.pageSize +
                 1}
             </span>{" "}
-            {t("pagination.to")}{" "}
+            {t.to}{" "}
             <span className="font-medium text-foreground">
               {Math.min(
                 (table.getState().pagination.pageIndex + 1) *
@@ -102,13 +171,13 @@ export function InventoryTablePagination<T>({
                 totalItems,
               )}
             </span>{" "}
-            {t("pagination.of")}{" "}
+            {t.of}{" "}
             <span className="font-medium text-foreground">{totalItems}</span>{" "}
-            {t("pagination.items")}
+            {t.items}
           </div>
           <div className="flex items-center gap-2">
             <span className="text-sm text-muted-foreground whitespace-nowrap">
-              {t("pagination.rowsPerPage")}
+              {t.rowsPerPage}
             </span>
             <Select
               value={table.getState().pagination.pageSize.toString()}
@@ -120,7 +189,7 @@ export function InventoryTablePagination<T>({
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                {[10, 20, 30, 50, 100].map((pageSize) => (
+                {pageSizeOptions.map((pageSize) => (
                   <SelectItem key={pageSize} value={pageSize.toString()}>
                     {pageSize}
                   </SelectItem>
@@ -148,7 +217,7 @@ export function InventoryTablePagination<T>({
                   ) : (
                     <ChevronsLeft className="h-4 w-4" />
                   )}
-                  <span className="sr-only">First page</span>
+                  <span className="sr-only">{t.firstPage}</span>
                 </Button>
               </PaginationItem>
 
@@ -166,7 +235,7 @@ export function InventoryTablePagination<T>({
                   ) : (
                     <ChevronLeft className="h-4 w-4" />
                   )}
-                  <span className="sr-only">Previous page</span>
+                  <span className="sr-only">{t.previousPage}</span>
                 </Button>
               </PaginationItem>
 
@@ -208,7 +277,7 @@ export function InventoryTablePagination<T>({
                   ) : (
                     <ChevronRight className="h-4 w-4" />
                   )}
-                  <span className="sr-only">Next page</span>
+                  <span className="sr-only">{t.nextPage}</span>
                 </Button>
               </PaginationItem>
 
@@ -226,7 +295,7 @@ export function InventoryTablePagination<T>({
                   ) : (
                     <ChevronsRight className="h-4 w-4" />
                   )}
-                  <span className="sr-only">Last page</span>
+                  <span className="sr-only">{t.lastPage}</span>
                 </Button>
               </PaginationItem>
             </PaginationContent>

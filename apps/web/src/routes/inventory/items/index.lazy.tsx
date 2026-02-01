@@ -1,6 +1,12 @@
 import { useMemo, useState } from "react";
 import { createLazyFileRoute } from "@tanstack/react-router";
-import { Plus, Package, LayoutGrid } from "lucide-react";
+import {
+  Plus,
+  Package,
+  LayoutGrid,
+  AlertTriangle,
+  XCircle,
+} from "lucide-react";
 import { useDirection, useTranslation } from "@meditrack/i18n";
 import type { SortingState } from "@tanstack/react-table";
 
@@ -36,15 +42,17 @@ import {
   InventoryForm,
   StockAdjustmentDialog,
   ItemDetailsDialog,
-  InventoryStats,
   InventoryFilters,
-  InventoryTable,
   InventoryGrid,
-  InventoryEmptyState,
-  InventoryDeleteDialog,
   useInventoryColumns,
   getStockStatus,
 } from "./-components";
+
+// Generic components
+import { DataTable } from "@/components/data-table";
+import { EmptyState } from "@/components/empty-state";
+import { ConfirmationDialog } from "@/components/confirmation-dialog";
+import { StatsGrid, type StatItem } from "@/components/stats-grid";
 
 export const Route = createLazyFileRoute("/inventory/items/")({
   component: InventoryComponent,
@@ -197,6 +205,51 @@ function InventoryComponent() {
     return count;
   }, [formFilter, stockFilter, prescriptionFilter]);
 
+  // Check if filters are active
+  const hasActiveFilters = Boolean(
+    searchQuery ||
+    (formFilter && formFilter !== "all") ||
+    (stockFilter && stockFilter !== "all") ||
+    (prescriptionFilter && prescriptionFilter !== "all"),
+  );
+
+  // Prepare stats for StatsGrid
+  const statsItems: StatItem[] = useMemo(() => {
+    if (!stats) return [];
+    return [
+      {
+        title: t("stats.totalItems"),
+        value: stats.total_items,
+        icon: Package,
+        color: "bg-blue-500",
+      },
+      {
+        title: t("stats.inStock"),
+        value: stats.active_items,
+        icon: Package,
+        color: "bg-green-500",
+      },
+      {
+        title: t("stats.lowStock"),
+        value: stats.low_stock_count,
+        icon: AlertTriangle,
+        color: "bg-yellow-500",
+      },
+      {
+        title: t("stats.outOfStock"),
+        value: stats.out_of_stock_count,
+        icon: XCircle,
+        color: "bg-red-500",
+      },
+      {
+        title: t("stats.totalValue"),
+        value: `${stats.total_inventory_value.toFixed(2)}`,
+        icon: Package,
+        color: "bg-purple-500",
+      },
+    ];
+  }, [stats, t]);
+
   // Table columns
   const columns = useInventoryColumns({
     t,
@@ -205,14 +258,6 @@ function InventoryComponent() {
     onAdjustStock: handleOpenStockAdjust,
     onDelete: handleDelete,
   });
-
-  // Check if filters are active
-  const hasActiveFilters = Boolean(
-    searchQuery ||
-    (formFilter && formFilter !== "all") ||
-    (stockFilter && stockFilter !== "all") ||
-    (prescriptionFilter && prescriptionFilter !== "all"),
-  );
 
   // Loading state
   if (isLoading) {
@@ -253,8 +298,13 @@ function InventoryComponent() {
 
       <PageContent>
         <PageContentInner className="flex-1 flex flex-col min-h-0">
-          {/* Statistics */}
-          <InventoryStats stats={stats} />
+          {/* Statistics - Using Generic StatsGrid */}
+          {statsItems.length > 0 && (
+            <StatsGrid
+              stats={statsItems}
+              columns={{ default: 2, md: 3, lg: 5 }}
+            />
+          )}
 
           {/* Filters */}
           {items.length > 0 && (
@@ -277,16 +327,47 @@ function InventoryComponent() {
           {/* Items Display */}
           <div className="flex-1 min-h-0">
             {filteredItems.length === 0 ? (
-              <InventoryEmptyState
-                hasFilters={hasActiveFilters}
-                onAddItem={() => setIsFormOpen(true)}
+              <EmptyState
+                icon={Package}
+                title={
+                  hasActiveFilters ? t("page.noItemsFound") : t("page.noItems")
+                }
+                description={
+                  hasActiveFilters
+                    ? t("page.tryDifferentSearch")
+                    : t("page.startAdding")
+                }
+                action={
+                  !hasActiveFilters
+                    ? {
+                        label: t("page.addItem"),
+                        onClick: () => setIsFormOpen(true),
+                        icon: Plus,
+                      }
+                    : undefined
+                }
               />
             ) : viewMode === "table" ? (
-              <InventoryTable
+              <DataTable
                 data={filteredItems}
                 columns={columns}
                 sorting={sorting}
                 onSortingChange={setSorting}
+                pageSize={20}
+                pageSizeOptions={[10, 20, 30, 50, 100]}
+                paginationLabels={{
+                  showing: t("pagination.showing"),
+                  to: t("pagination.to"),
+                  of: t("pagination.of"),
+                  items: t("pagination.items"),
+                  rowsPerPage: t("pagination.rowsPerPage"),
+                  previous: "Previous",
+                  next: "Next",
+                  firstPage: "First page",
+                  lastPage: "Last page",
+                  previousPage: "Previous page",
+                  nextPage: "Next page",
+                }}
               />
             ) : (
               <InventoryGrid
@@ -322,12 +403,16 @@ function InventoryComponent() {
         onAdjust={handleStockAdjust}
       />
 
-      <InventoryDeleteDialog
+      <ConfirmationDialog
         open={isDeleteDialogOpen}
         onOpenChange={setIsDeleteDialogOpen}
-        item={itemToDelete}
+        title={t("messages.confirmDelete", { name: itemToDelete?.name || "" })}
+        description={t("messages.deleteDescription")}
+        confirmLabel={t("messages.archive")}
+        cancelLabel={t("messages.cancel")}
         onConfirm={confirmDelete}
         onCancel={cancelDelete}
+        variant="destructive"
       />
     </Page>
   );
